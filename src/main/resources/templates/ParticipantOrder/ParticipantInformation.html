@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-nav-layout="horizontal">
+<head>
+    <th:block th:replace="~{fragments/public/head :: head}"></th:block>
+
+    <title>Participant Information</title>
+
+    <style>
+        :root {
+            --primary-blue: #0162e8;
+            --primary-blue-light: #4a8bff;
+            --success-color: #10b981;
+            --bg-light: #f8fafc;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+        }
+.app-sidebar {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 80px;
+           background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+           z-index: 1000;
+           padding: 0;
+       }
+
+       .container.p-0 {
+           padding: 0 !important;
+           max-width: 100%;
+           width: 100%;
+       }
+
+       .main-sidebar {
+           height: 100%;
+           display: flex;
+           align-items: center;
+       }
+
+       .main-menu-container {
+           width: 100%;
+           height: 100%;
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           padding: 0 2rem;
+       }
+
+       .landing-logo-container {
+           flex-shrink: 0;
+       }
+
+       .horizontal-logo .header-logo {
+           display: flex;
+           align-items: center;
+           text-decoration: none;
+       }
+
+       .horizontal-logo img {
+           height: 40px;
+           width: auto;
+       }
+
+       .main-menu {
+           display: flex;
+           list-style: none;
+           margin: 0;
+           padding: 0;
+           align-items: center;
+           gap: 2rem;
+       }
+
+       .main-menu li {
+           margin: 0;
+       }
+
+       .side-menu__item {
+           color: rgba(255, 255, 255, 0.9);
+           text-decoration: none;
+           padding: 0.5rem 1rem;
+           border-radius: 8px;
+           transition: all 0.3s ease;
+           font-weight: 500;
+       }
+
+       .side-menu__item:hover {
+           background: rgba(255, 255, 255, 0.1);
+           color: white;
+       }
+
+       .slide-left, .slide-right {
+           display: none;
+       }
+
+       /* Profile Dropdown */
+       .header-element {
+           margin-left: 2rem;
+       }
+
+       .header-link {
+           display: flex;
+           align-items: center;
+           padding: 0.5rem;
+           border-radius: 50%;
+           transition: all 0.3s ease;
+           text-decoration: none;
+       }
+
+       .header-link:hover {
+           background: rgba(255, 255, 255, 0.1);
+       }
+
+       .header-link img {
+           border: 2px solid rgba(255, 255, 255, 0.3);
+       }
+
+       .dropdown-menu {
+           border: none;
+           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+           border-radius: 12px;
+           padding: 0;
+           min-width: 220px;
+           margin-top: 0.5rem;
+       }
+
+       .main-header-profile {
+           padding: 1rem;
+           border-radius: 12px 12px 0 0;
+       }
+
+       .main-header-profile h6 {
+           margin: 0;
+           font-size: 1rem;
+       }
+
+       .dropdown-item {
+           padding: 0.75rem 1rem;
+           border: none;
+           color: var(--text-primary);
+           transition: all 0.3s ease;
+       }
+
+       .dropdown-item:hover {
+           background: var(--bg-light);
+           color: var(--primary-blue);
+       }
+
+       .dropdown-item i {
+           margin-right: 0.5rem;
+           width: 20px;
+           text-align: center;
+       }
+
+       .border-block-end {
+           border-bottom: 1px solid var(--border-color);
+       }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 110px;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(1, 98, 232, 0.2);
+        }
+
+        .header-section h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            border-radius: 25px;
+            background: var(--bg-light);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .step.completed {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .step.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .form-section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .required-indicator {
+            color: #ef4444;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            background: #fafbfc;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(1, 98, 232, 0.1);
+        }
+
+        .btn-submit, .btn-next {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .success-container {
+            background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
+            border: 2px solid var(--success-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+    </style>
+</head>
+<body class="landing-body">
+<div class="landing-page-wrapper">
+
+<aside th:replace="~{fragments/user/profile-header :: profile-header}"></aside>
+
+<div class="main-content">
+    <div class="main-container">
+        <div class="header-section">
+            <h1><i class="fas fa-users"></i> Participant Information</h1>
+            <div class="header-subtitle">Fill in personal information to complete test registration</div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step completed"><i class="fas fa-check"></i> Booking Information</div>
+            <div class="step active"><i class="fas fa-users"></i> Participant Information</div>
+            <div class="step"><i class="fas fa-check-circle"></i> Complete</div>
+        </div>
+
+        <div class="form-container" th:if="${message == null}">
+            <div class="form-section-title"><i class="fas fa-id-card"></i> Personal Information</div>
+            <form th:action="@{/user/participant-information}" method="post">
+                <input type="hidden" name="orderId" th:value="${orderId}" />
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">First Name <span class="required-indicator">*</span></label>
+                        <input type="text" class="form-control" name="firstName" required th:value="${participantRequest.firstName}" placeholder="Enter first name"/>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Last Name <span class="required-indicator">*</span></label>
+                        <input type="text" class="form-control" name="lastName" required th:value="${participantRequest.lastName}" placeholder="Enter last name"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Gender <span class="required-indicator">*</span></label>
+                        <select class="form-select" name="gender" required>
+                            <option value="">-- Select Gender --</option>
+                            <option value="Nam" th:selected="${participantRequest.gender == 'Nam'}">Male</option>
+                            <option value="Nữ" th:selected="${participantRequest.gender == 'Nữ'}">Female</option>
+                            <option value="Khác" th:selected="${participantRequest.gender == 'Khác'}">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="form-label">Date of Birth <span class="required-indicator">*</span></label>
+                        <input type="date" class="form-control" name="birthDate" th:value="${participantRequest.birthDate}" th:max="${today}" required/>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-submit d-block mx-auto"><i class="fas fa-save"></i> Save Information</button>
+                </form>
+        </div>
+
+        <div th:if="${message != null}" class="success-container">
+            <div class="success-icon mb-3" style="font-size: 2.5rem; width: 80px; height: 80px; background: var(--success-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: auto;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <h2 class="success-title">Information Saved!</h2>
+            <p class="fs-5 text-secondary">You have successfully completed participant information entry.</p>
+            <p class="fs-5 text-secondary" th:text="'you have '+${count}+' participant(s) on '+${medicalServiceResponse.participants}+' participant(s) for medical'"></p>
+            <p class="lead" th:text="${message}"></p>
+            <a th:if="${medicalServiceResponse.participants > count }"
+               th:href="@{'/user/participant-information'(orderId=${orderId})}" class="btn btn-next mt-3"><i class="fas fa-arrow-right"></i> Continue - Participant</a>
+            <a th:if="${medicalServiceResponse.participants == count }"
+               th:href="@{'/user/list-kit'(orderId=${orderId})}" class="btn btn-next mt-3"><i class="fas fa-arrow-right"></i> Continue - View Kit List</a>
+        </div>
+    </div>
+</div>
+    <div th:replace="~{fragments/public/last-footer :: last-footer}"></div>
+</div>
+
+
+<div th:replace="~{fragments/public/script :: scripts}"></div>
+</body>
+</html>

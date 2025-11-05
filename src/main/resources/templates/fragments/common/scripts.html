@@ -1,11 +1,11 @@
 <!-- Common Scripts Fragment -->
-<div th:fragment="scripts" xmlns:th="http://www.thymeleaf.org">
 
+<th:block th:fragment="scripts">
     <!-- Popper JS -->
     <script th:src="@{/assets/libs/@popperjs/core/umd/popper.min.js}"></script>
 
-    <!-- Bootstrap JS -->
-    <script th:src="@{/assets/libs/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!--    &lt;!&ndash; Bootstrap JS &ndash;&gt;-->
+<!--    <script th:src="@{/assets/libs/bootstrap/js/bootstrap.bundle.min.js}"></script>-->
 
     <!-- Defaultmenu JS -->
     <script th:src="@{/assets/js/defaultmenu.min.js}"></script>
@@ -36,12 +36,10 @@
     <!-- Chartjs Chart JS -->
     <script th:src="@{/assets/js/index.js}"></script>
 
-    <!-- Custom-Switcher JS -->
     <script th:src="@{/assets/js/custom-switcher.min.js}" defer></script>
 
-    <!-- Custom JS -->
     <script th:src="@{/assets/js/custom.js}" defer></script>
-    <!-- Sweetalerts JS -->
     <script src="/assets/libs/sweetalert2/sweetalert2.min.js"></script>
     <script src="/assets/js/sweet-alerts.js"></script>
-</div>>
+
+</th:block>>

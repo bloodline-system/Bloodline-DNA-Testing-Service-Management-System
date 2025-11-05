@@ -6,81 +6,78 @@
             <nav class="main-menu-container nav nav-pills sub-open">
                 <div class="landing-logo-container">
                     <div class="horizontal-logo">
-                        <a href="index.html" class="header-logo">
-                            <img src="../assets/images/brand-logos/bloodline-logo-white.png" alt="logo"
-                                 class="desktop-logo">
-                            <img src="../assets/images/brand-logos/bloodline-logo-white.png" alt="logo"
-                                 class="desktop-white">
+                        <a th:href="@{/user/home}" class="header-logo">
+                            <img src="../assets/images/brand-logos/toggle-logo.png" alt="logo"
+                                class="desktop-logo">
+                            <img src="../assets/images/brand-logos/toggle-logo.png" alt="logo"
+                                class="desktop-white">
                         </a>
                     </div>
                 </div>
                 <div class="slide-left" id="slide-left"><svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191"
-                                                             width="24" height="24" viewBox="0 0 24 24">
-                    <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"></path>
-                </svg></div>
+                        width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"></path>
+                    </svg></div>
                 <ul class="main-menu">
                     <li class="slide">
-                        <a class="side-menu__item" href="#home">
+                        <a class="side-menu__item" th:href="@{/user/home}">
                             <span class="side-menu__label">Home</span>
                         </a>
                     </li>
                     <li class="slide">
-                        <a href="#services" class="side-menu__item">
+                        <a th:href="@{/user/home#services}" class="side-menu__item">
                             <span class="side-menu__label">Services</span>
                         </a>
                     </li>
                     <li class="slide">
-                        <a href="#about" class="side-menu__item">
+                        <a th:href="@{/user/home#about}" class="side-menu__item">
                             <span class="side-menu__label">About</span>
                         </a>
                     </li>
                     <li class="slide">
-                        <a href="#pricing" class="side-menu__item">
+                        <a th:href="@{/user/home#pricing}" class="side-menu__item">
                             <span class="side-menu__label">Pricing</span>
                         </a>
                     </li>
                     <li class="slide">
-                        <a href="#faq" class="side-menu__item">
+                        <a th:href="@{/user/home#faq}" class="side-menu__item">
                             <span class="side-menu__label">Faq's</span>
                         </a>
                     </li>
                     <li class="slide">
-                        <a href="#howitworks" class="side-menu__item">
+                        <a th:href="@{/user/home#howitworks}" class="side-menu__item">
                             <span class="side-menu__label">How It Works</span>
                         </a>
                     </li>
                     <li class="slide">
-                        <a href="#contact" class="side-menu__item">
+                        <a th:href="@{/user/home#contact}" class="side-menu__item">
                             <span class="side-menu__label">Contact</span>
                         </a>
                     </li>
                 </ul>
                 <div class="slide-right" id="slide-right"><svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191"
-                                                               width="24" height="24" viewBox="0 0 24 24">
-                    <path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z">
-                    </path>
-                </svg></div>
+                        width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z">
+                        </path>
+                    </svg></div>
                 <div class="d-lg-flex d-none">
                     <div class="header-element headerProfile-dropdown">
-                        <a href="javascript:void(0);" class="header-link dropdown-toggle" id="mainHeaderProfile" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                        <a href="javascript:void(0);" class="header-link dropdown-toggle" id="mainHeaderProfile"
+                            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                             <img th:if="${userProfile != null and userProfile.profileImageUrl != null and !#strings.isEmpty(userProfile.profileImageUrl)}"
-                                 th:src="@{${userProfile.profileImageUrl}}"
-                                 alt="Profile Image"
-                                 width="37"
-                                 height="37"
-                                 class="rounded-circle">
+                                th:src="@{${userProfile.profileImageUrl}}" alt="Profile Image" width="37" height="37"
+                                class="rounded-circle">
                             <img th:if="${userProfile == null or userProfile.profileImageUrl == null or #strings.isEmpty(userProfile.profileImageUrl)}"
-                                 th:src="@{/images/default-avatar.png}"
-                                 alt="Default Avatar"
-                                 width="37"
-                                 height="37"
-                                 class="rounded-circle">
+                                th:src="@{/images/default-avatar.png}" alt="Default Avatar" width="37" height="37"
+                                class="rounded-circle">
                         </a>
-                        <ul class="main-header-dropdown dropdown-menu pt-0 header-profile-dropdown dropdown-menu-end main-profile-menu" aria-labelledby="mainHeaderProfile">
+                        <ul class="main-header-dropdown dropdown-menu pt-0 header-profile-dropdown dropdown-menu-end main-profile-menu"
+                            aria-labelledby="mainHeaderProfile">
                             <li>
                                 <div class="main-header-profile bg-primary menu-header-content text-fixed-white">
                                     <div class="my-auto">
-                                        <h6 class="mb-0 lh-1 text-fixed-white" th:text="${userProfile.fullName}">Petey Cruiser</h6>
+                                        <h6 class="mb-0 lh-1 text-fixed-white" th:text="${userProfile.fullName}">Petey
+                                            Cruiser</h6>
                                     </div>
                                 </div>
                             </li>
@@ -94,9 +91,14 @@
                                     <i class="bx bx-cog fs-18 me-2 op-7"></i>Edit Profile
                                 </a>
                             </li>
-                            <li><a class="dropdown-item d-flex border-block-end" th:href="@{/user/dashboard}"><i class="bx bx-tachometer fs-18 me-2 op-7"></i>Dashboard</a></li>                            <li><a class="dropdown-item d-flex" href="chat.html"><i class="bx bx-envelope fs-18 me-2 op-7"></i>Messages</a></li>
-                            <li><a class="dropdown-item d-flex border-block-end" href="editprofile.html"><i class="bx bx-slider-alt fs-18 me-2 op-7"></i>Account Settings</a></li>
-                            <li><a class="dropdown-item d-flex" href="signin.html"><i class="bx bx-log-out fs-18 me-2 op-7"></i>Sign Out</a></li>
+                            <li><a class="dropdown-item d-flex border-block-end" th:href="@{/user/dashboard}"><i
+                                        class="bx bx-tachometer fs-18 me-2 op-7"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item d-flex" href="chat.html"><i
+                                        class="bx bx-bell fs-18 me-2 op-7"></i>Notifications</a></li>
+                            <li><a class="dropdown-item d-flex border-block-end" href="editprofile.html"><i
+                                        class="bx bx-slider-alt fs-18 me-2 op-7"></i>Account Settings</a></li>
+                            <li><a class="dropdown-item d-flex" href="signin.html"><i
+                                        class="bx bx-log-out fs-18 me-2 op-7"></i>Sign Out</a></li>
                         </ul>
                     </div>
                 </div>

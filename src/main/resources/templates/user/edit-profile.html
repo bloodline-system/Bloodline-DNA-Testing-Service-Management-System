@@ -36,7 +36,10 @@
             <div class="form-body">
                 <form th:action="@{/user/profile/update}" th:object="${userEditProfile}" method="post"
                       enctype="multipart/form-data" id="profileForm">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <th:block th:if="${_csrf != null}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    </th:block>
+
 
                     <div class="row-form">
                         <!-- First Name -->
@@ -161,6 +164,26 @@
     <span class="arrow"><i class="ri-arrow-up-s-fill fs-20"></i></span>
 </div>
 <div id="responsive-overlay"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById('file');
+        const avatarPreview = document.getElementById('avatarPreview');
+
+        if (fileInput && avatarPreview) {
+            fileInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file && file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        avatarPreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
 <div th:replace="fragments/public/script :: scripts"></div>
 
 </body>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Test Result Details', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-test-tube-line me-2"></i>Test Result Details
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light" style="width: 200px;">
+                                        <i class="ri-hashtag-line me-2"></i>Result ID
+                                    </th>
+                                    <td>
+                                        <span class="badge bg-info" th:text="${testResult.testResultId}"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">
+                                        <i class="ri-calendar-line me-2"></i>Test Date
+                                    </th>
+                                    <td>
+                                        <span class="text-primary fw-semibold" th:text="${#temporals.format(testResult.testDate, 'MMM dd, yyyy HH:mm')}"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">
+                                        <i class="ri-file-list-line me-2"></i>Result Summary
+                                    </th>
+                                    <td>
+                                        <div class="text-body" th:text="${testResult.resultSummary}"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">
+                                        <i class="ri-file-text-line me-2"></i>Detailed Results
+                                    </th>
+                                    <td>
+                                        <div class="bg-light p-3 border-start border-4 border-primary rounded">
+                                            <pre class="mb-0" style="white-space: pre-wrap;" th:text="${testResult.detailedResults}"></pre>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">
+                                        <i class="ri-flag-line me-2"></i>Status
+                                    </th>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${testResult.resultStatus == 'COMPLETED'} ? 'bg-success' :
+                                                              (${testResult.resultStatus == 'PROCESSING'} ? 'bg-primary' :
+                                                              (${testResult.resultStatus == 'FAILED'} ? 'bg-danger' : 'bg-warning'))"
+                                              th:text="${testResult.resultStatus}">Status</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">
+                                        <i class="ri-file-pdf-line me-2"></i>Report
+                                    </th>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a th:if="${testResult.reportFile != null and !#strings.isEmpty(testResult.reportFile)}"
+                                               th:href="@{/files/download(filename=${#strings.substring(testResult.reportFile, testResult.reportFile.lastIndexOf('/')+1)})}"
+                                               target="_blank"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="ri-download-line me-2"></i>Download Report
+                                            </a>
+                                            <span th:if="${testResult.reportFile == null or #strings.isEmpty(testResult.reportFile)}"
+                                                  class="text-muted fst-italic">
+                                                <i class="ri-information-line me-2"></i>No report available
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Raw Data Section -->
+                    <div class="mt-4">
+                        <h5 class="fw-bold text-primary mb-3">
+                            <i class="ri-database-2-line me-2"></i>Raw Test Data
+                        </h5>
+                        <div class="card border">
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <label class="text-muted mb-2">Data Format</label>
+                                    <div class="bg-light p-3 rounded">
+                                        <code th:text="${rawData.dataFormat}"></code>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="text-muted mb-2">Raw Data Content</label>
+                                    <div class="bg-light p-3 rounded">
+                                        <pre class="mb-0" style="white-space: pre-wrap;" th:text="${rawData.rawDataContent}"></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-muted mb-2">Raw Data File</label>
+                                    <div class="d-flex gap-2">
+                                        <a th:if="${rawData.filePath != null and !#strings.isEmpty(rawData.filePath)}"
+                                           th:href="@{/files/download(filename=${#strings.substring(rawData.filePath, rawData.filePath.lastIndexOf('/')+1)})}"
+                                           target="_blank"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="ri-download-line me-2"></i>Download Raw Data
+                                        </a>
+                                        <span th:if="${rawData.filePath == null or #strings.isEmpty(rawData.filePath)}"
+                                              class="text-muted fst-italic">
+                                            <i class="ri-information-line me-2"></i>No file available
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a th:href="@{/staff/list-test-results}" class="btn btn-outline-secondary">
+                            <i class="ri-arrow-left-line me-2"></i>Back to List
+                        </a>
+                        <div>
+                            <a th:href="@{/staff/update-test-result(testResultId=${testResult.testResultId})}"
+                               class="btn btn-primary">
+                                <i class="ri-edit-line me-2"></i>Update Result
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+</th:block>
+</html>

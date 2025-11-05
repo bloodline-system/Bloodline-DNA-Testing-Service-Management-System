@@ -2,10 +2,9 @@ package com.dna_testing_system.dev.service.impl;
 
 import com.dna_testing_system.dev.dto.request.AuthenticationRequest;
 import com.dna_testing_system.dev.dto.request.RegisterRequest;
-import com.dna_testing_system.dev.entity.Role;
-import com.dna_testing_system.dev.entity.User;
-import com.dna_testing_system.dev.entity.UserProfile;
-import com.dna_testing_system.dev.entity.UserRole;
+import com.dna_testing_system.dev.entity.*;
+import com.dna_testing_system.dev.enums.NotificationCategory;
+import com.dna_testing_system.dev.enums.NotificationType;
 import com.dna_testing_system.dev.enums.RoleType;
 import com.dna_testing_system.dev.exception.AuthenticationException;
 import com.dna_testing_system.dev.exception.ErrorCode;
@@ -15,6 +14,7 @@ import com.dna_testing_system.dev.repository.UserProfileRepository;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.dna_testing_system.dev.repository.UserRoleRepository;
 import com.dna_testing_system.dev.service.AuthenticationService;
+import com.dna_testing_system.dev.service.NotificationService;
 import com.dna_testing_system.dev.utils.PasswordUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     UserProfileRepository userProfileRepository;
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
+    NotificationService notificationService;
 
     @Override
     @Transactional
@@ -85,18 +87,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
         
         userProfileRepository.save(userProfile);
-        
         // Set the profile in the user entity
         user.setUserProfile(userProfile);
-        
+
+        notifyManagersOfNewUser(user);
         return user;
     }
     @Override
     @Transactional
     public User activateUser(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AuthenticationException(ErrorCode.USER_NOT_EXISTS, 
-                    "User not found with id: " + userId));
+                .orElseThrow(() -> new AuthenticationException(ErrorCode.USER_NOT_EXISTS));
         
         // If user is already active, no need to update
         if (user.getIsActive()) {
@@ -109,17 +110,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public User authenticate(AuthenticationRequest request) {
         if (request == null) {
-            throw new AuthenticationException(ErrorCode.UNKNOWN_ERROR, "Authentication request cannot be null");
+            throw new AuthenticationException(ErrorCode.UNKNOWN_ERROR);
         }
         
         // Validate username
         if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
-            throw new AuthenticationException(ErrorCode.USERNAME_INVALID, "Username is required");
+            throw new AuthenticationException(ErrorCode.USERNAME_INVALID);
         }
         
         // Validate password
         if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
-            throw new AuthenticationException(ErrorCode.PASSWORD_INVALID, "Password is required");
+            throw new AuthenticationException(ErrorCode.PASSWORD_INVALID);
         }
         
         // Find user by username
@@ -145,4 +146,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public boolean isUsernameAvailable(String username) {
         return !userRepository.existsByUsername(username);
     }
+
+    private void notifyManagersOfNewUser(User newUser) {
+        List<User> managers = userRepository.findUsersByRoleName(RoleType.MANAGER.name());
+
+        for (User manager : managers) {
+            Notification notification = Notification.builder()
+                    .recipientUser(manager)
+                    .subject("Người dùng mới đăng ký")
+                    .messageContent("Người dùng mới vừa đăng ký: " + newUser.getUsername())
+                    .notificationCategory(NotificationCategory.IN_APP)
+                    .notificationType(NotificationType.ACCOUNT_ACTIVITY)
+                    .build();
+
+            notificationService.save(notification);
+            notificationService.sendNotification(notification);
+        }
+    }
+
 }

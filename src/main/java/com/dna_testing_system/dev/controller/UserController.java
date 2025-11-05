@@ -2,8 +2,11 @@ package com.dna_testing_system.dev.controller;
 
 
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
-import com.dna_testing_system.dev.dto.response.UserProfileResponse;
+import com.dna_testing_system.dev.dto.response.*;
+import com.dna_testing_system.dev.entity.TestResult;
+import com.dna_testing_system.dev.service.ContentPostService;
 import com.dna_testing_system.dev.service.UserProfileService;
+import com.dna_testing_system.dev.service.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -26,6 +30,13 @@ import java.util.List;
 public class UserController {
 
     UserProfileService userProfileService;
+    OrderService orderService;
+    OrderKitService orderKitService;
+    OrderParticipantService orderParticipantService;
+    UserService userService;
+    StaffService staffService;
+    MedicalServiceManageService medicalService;
+    TestKitService testKitService;
 
     @GetMapping("/profile")  // URL sẽ là /user/profile
     public String getProfile(Model model) {
@@ -57,13 +68,15 @@ public class UserController {
         String currentPrincipalName = authentication.getName();
         UserProfileResponse existingProfile = userProfileService.getUserProfile(currentPrincipalName);
 
-        // Xử lý file upload
+
+
         if (file != null && !file.getOriginalFilename().equals("")) {
             String uploadsDir = "uploads/";
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path path = Paths.get(uploadsDir + fileName);
 
             try {
+
                 Files.createDirectories(Paths.get(uploadsDir));
                 file.transferTo(path);
             } catch (Exception e) {
@@ -72,6 +85,19 @@ public class UserController {
 
             String imageUrl = "/uploads/" + fileName;
             userProfile.setProfileImageUrl(imageUrl);
+            // Nếu imageUrl là /uploads/abcxyz.jpg
+            String oldImageUrl = existingProfile.getProfileImageUrl();
+            if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
+                // Chuyển về đường dẫn vật lý
+                String fileSystemPath = oldImageUrl.replaceFirst("/", ""); // "uploads/abcxyz.jpg"
+                Path oldImagePath = Paths.get(fileSystemPath);
+                try {
+                    Files.deleteIfExists(oldImagePath);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
         } else {
             // Giữ nguyên ảnh cũ nếu không upload ảnh mới
             userProfile.setProfileImageUrl(existingProfile.getProfileImageUrl());
@@ -81,6 +107,7 @@ public class UserController {
         if (userProfile.getDateOfBirth() == null) {
             userProfile.setDateOfBirth(existingProfile.getDateOfBirth());
         }
+
 
         userProfileService.updateUserProfile(currentPrincipalName, userProfile);
 
@@ -98,4 +125,22 @@ public class UserController {
         return "user/dashboard"; // Trả về template dashboard.html
     }
 
+    @GetMapping("/view-results")
+    public String viewResults(Model model, @RequestParam("orderId") Long orderId) {
+        TestResult testResult = userService.getTestResult(orderId);
+        TestResultsResponse testResultsResponse = staffService.getTestResultById(testResult.getId());
+        RawDataResponse rawDataResponse = staffService.getRawDataById(testResult.getRawData().getId());
+        model.addAttribute("rawData", rawDataResponse);
+        model.addAttribute("testResult", testResultsResponse);
+        // Lấy thông tin kết quả xét nghiệm từ service
+        return "user/view-results"; // Trả về template view-results.html
+    }
+    // Blog for user
+    ContentPostService contentPostService;
+    // Hien thi danh sach bai viet dang co
+    @GetMapping(value = "/posts")
+    public String showPostList(Model model) {
+        model.addAttribute("posts", contentPostService.getAllPosts());
+        return "/user/blog";
+    }
 }

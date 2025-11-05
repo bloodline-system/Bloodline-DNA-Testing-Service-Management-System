@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html
+    th:replace="~{layouts/admin-layout :: layout(~{::#content}, ~{::page-script}, 'System Logs', ~{::breadcrumbs}, ~{::actionButtons})}"
+    xmlns:th="http://www.thymeleaf.org" data-nav-layout="vertical" data-theme-mode="light" data-header-styles="light"
+    data-menu-styles="light" loader="disable" data-vertical-style="overlay" class="mdl-js"
+    data-toggled="icon-overlay-close">
+
+    <!-- Breadcrumbs -->
+    <div id="breadcrumbs">
+        <li class="breadcrumb-item"><a th:href="@{/admin/logs}">System Logs</a></li>
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="actionButtons">
+        <button class="btn btn-danger me-2" onclick="refreshLogs()">
+            <i class="ri-refresh-line me-1"></i>Refresh
+        </button>
+        <button class="btn btn-outline-warning me-2" onclick="clearLogs()">
+            <i class="ri-delete-bin-line me-1"></i>Clear Logs
+        </button>
+        <div class="dropdown">
+            <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="ri-download-line me-1"></i>Export
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" th:href="@{/admin/logs/export/txt}">Export as TXT</a></li>
+                <li><a class="dropdown-item" th:href="@{/admin/logs/export/csv}">Export as CSV</a></li>
+                <li><a class="dropdown-item" th:href="@{/admin/logs/export/json}">Export as JSON</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="content">
+        <!-- Log Statistics -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card border-start border-danger border-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <i class="ri-error-warning-line fs-30 text-danger me-3"></i>
+                            <div>
+                                <h5 class="mb-0" th:text="${logStats.errorLogs ?: 0}">0</h5>
+                                <p class="mb-0 text-muted">Errors (24h)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <i class="ri-alert-line fs-30 text-warning me-3"></i>
+                            <div>
+                                <h5 class="mb-0" th:text="${logStats.warningLogs ?: 0}">0</h5>
+                                <p class="mb-0 text-muted">Warnings (24h)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <i class="ri-information-line fs-30 text-info me-3"></i>
+                            <div>
+                                <h5 class="mb-0" th:text="${logStats.infoLogs ?: 0}">0</h5>
+                                <p class="mb-0 text-muted">Info (24h)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card border-start border-secondary border-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <i class="ri-bug-line fs-30 text-secondary me-3"></i>
+                            <div>
+                                <h5 class="mb-0" th:text="${logStats.criticalLogs ?: 0}">0</h5>
+                                <p class="mb-0 text-muted">Debug (24h)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Filters and Search -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="logLevel" class="form-label">Log Level</label>
+                        <select class="form-select" id="logLevel" name="logLevel">
+                            <option value="">All Levels</option>
+                            <option value="ERROR">Error</option>
+                            <option value="WARN">Warning</option>
+                            <option value="INFO">Info</option>
+                            <option value="DEBUG">Debug</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="logDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="logDate" name="logDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="searchLogs" class="form-label">Search Logs</label>
+                        <input type="text" class="form-control" id="searchLogs" placeholder="Search in log messages...">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary w-100" onclick="filterLogs()">
+                            <i class="ri-filter-line me-1"></i>Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Log Viewer -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">System Logs</h5>
+                <div class="d-flex align-items-center">
+                    <div class="form-check form-switch me-3">
+                        <input class="form-check-input" type="checkbox" id="autoRefresh" checked>
+                        <label class="form-check-label" for="autoRefresh">
+                            Auto Refresh
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="followLogs">
+                        <label class="form-check-label" for="followLogs">
+                            Follow Logs
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="log-container" id="logContainer"
+                    style="height: 600px; overflow-y: auto; background-color: #1a1a1a; color: #fff; font-family: 'Courier New', monospace;">
+                    <div class="p-3">
+                        <!-- Sample log entries - in real app, these would come from server -->
+                        <div class="log-entry mb-2" data-level="INFO">
+                            <span class="text-muted">[2025-07-04 10:30:15.123]</span>
+                            <span class="badge bg-info ms-2">INFO</span>
+                            <span class="ms-2">com.dna_testing_system.service.UserService</span>
+                            <span class="ms-2">- User login successful: user@example.com</span>
+                        </div>
+
+                        <div class="log-entry mb-2" data-level="ERROR">
+                            <span class="text-muted">[2025-07-04 10:29:45.456]</span>
+                            <span class="badge bg-danger ms-2">ERROR</span>
+                            <span class="ms-2">com.dna_testing_system.controller.OrderController</span>
+                            <span class="ms-2">- Failed to process order: Order ID 12345 not found</span>
+                        </div>
+
+                        <div class="log-entry mb-2" data-level="WARN">
+                            <span class="text-muted">[2025-07-04 10:29:30.789]</span>
+                            <span class="badge bg-warning ms-2">WARN</span>
+                            <span class="ms-2">com.dna_testing_system.service.DatabaseService</span>
+                            <span class="ms-2">- Database connection pool reaching maximum capacity: 85%</span>
+                        </div>
+
+                        <div class="log-entry mb-2" data-level="INFO">
+                            <span class="text-muted">[2025-07-04 10:29:00.012]</span>
+                            <span class="badge bg-info ms-2">INFO</span>
+                            <span class="ms-2">com.dna_testing_system.service.EmailService</span>
+                            <span class="ms-2">- Email sent successfully to customer@example.com</span>
+                        </div>
+
+                        <div class="log-entry mb-2" data-level="DEBUG">
+                            <span class="text-muted">[2025-07-04 10:28:45.345]</span>
+                            <span class="badge bg-secondary ms-2">DEBUG</span>
+                            <span class="ms-2">com.dna_testing_system.config.SecurityConfig</span>
+                            <span class="ms-2">- Authentication filter processing request for /admin/dashboard</span>
+                        </div>
+
+                        <div class="log-entry mb-2" data-level="INFO">
+                            <span class="text-muted">[2025-07-04 10:28:30.678]</span>
+                            <span class="badge bg-info ms-2">INFO</span>
+                            <span class="ms-2">com.dna_testing_system.service.BackupService</span>
+                            <span class="ms-2">- Daily backup completed successfully. Size: 245.7 MB</span>
+                        </div>
+
+                        <div class="log-entry mb-2" data-level="ERROR">
+                            <span class="text-muted">[2025-07-04 10:28:00.901]</span>
+                            <span class="badge bg-danger ms-2">ERROR</span>
+                            <span class="ms-2">com.dna_testing_system.external.PaymentGateway</span>
+                            <span class="ms-2">- Payment processing failed: Connection timeout to gateway</span>
+                        </div>
+
+                        <div class="log-entry mb-2" data-level="INFO">
+                            <span class="text-muted">[2025-07-04 10:27:30.234]</span>
+                            <span class="badge bg-info ms-2">INFO</span>
+                            <span class="ms-2">com.dna_testing_system.service.TestKitService</span>
+                            <span class="ms-2">- New test kit created: TK-2025-001234</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        Showing latest 1000 entries | Last updated: <span id="lastUpdated">04/07/2025 10:30:15</span>
+                    </small>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary" onclick="scrollToTop()">
+                            <i class="ri-arrow-up-line"></i> Top
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="scrollToBottom()">
+                            <i class="ri-arrow-down-line"></i> Bottom
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Analysis -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Top Error Sources (24h)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>PaymentGateway</span>
+                                <span class="badge bg-danger rounded-pill">15</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>DatabaseService</span>
+                                <span class="badge bg-danger rounded-pill">8</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>OrderController</span>
+                                <span class="badge bg-danger rounded-pill">5</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>EmailService</span>
+                                <span class="badge bg-danger rounded-pill">3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Log Volume Trend</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="logVolumeChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-script">
+        <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+        <script>
+            let autoRefreshInterval;
+            let logContainer;
+
+            document.addEventListener('DOMContentLoaded', function () {
+                logContainer = document.getElementById('logContainer');
+                initializeLogViewer();
+                setupAutoRefresh();
+                // Initialize log volume chart
+                createLogVolumeChart();
+            });
+
+            function initializeLogViewer() {
+                // Setup follow logs functionality
+                const followCheckbox = document.getElementById('followLogs');
+                followCheckbox.addEventListener('change', function () {
+                    if (this.checked) {
+                        scrollToBottom();
+                    }
+                });
+
+                // Setup auto refresh
+                const autoRefreshCheckbox = document.getElementById('autoRefresh');
+                autoRefreshCheckbox.addEventListener('change', function () {
+                    if (this.checked) {
+                        setupAutoRefresh();
+                    } else {
+                        clearInterval(autoRefreshInterval);
+                    }
+                });
+            }
+
+            function setupAutoRefresh() {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = setInterval(function () {
+                    const autoRefresh = document.getElementById('autoRefresh');
+                    if (autoRefresh && autoRefresh.checked) {
+                        refreshLogs();
+                    }
+                }, 5000); // Refresh every 5 seconds
+            }
+
+            function refreshLogs() {
+                // In a real application, this would fetch new logs from the server
+                console.log('Refreshing logs...');
+
+                // Update last updated timestamp
+                const now = new Date();
+                const timestamp = now.toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                document.getElementById('lastUpdated').textContent = timestamp;
+
+                // Simulate adding new log entry
+                addNewLogEntry();
+            }
+
+            function addNewLogEntry() {
+                const logTypes = ['INFO', 'WARN', 'ERROR', 'DEBUG'];
+                const randomType = logTypes[Math.floor(Math.random() * logTypes.length)];
+                const now = new Date();
+                const timestamp = now.toISOString().replace('T', ' ').substring(0, 23);
+
+                const messages = {
+                    'INFO': 'System operation completed successfully',
+                    'WARN': 'Resource usage approaching threshold',
+                    'ERROR': 'Operation failed with exception',
+                    'DEBUG': 'Debug trace information'
+                };
+
+                const badgeColors = {
+                    'INFO': 'bg-info',
+                    'WARN': 'bg-warning',
+                    'ERROR': 'bg-danger',
+                    'DEBUG': 'bg-secondary'
+                };
+
+                const newLogEntry = document.createElement('div');
+                newLogEntry.className = 'log-entry mb-2';
+                newLogEntry.setAttribute('data-level', randomType);
+                newLogEntry.innerHTML = `
+                <span class="text-muted">[${timestamp}]</span>
+                <span class="badge ${badgeColors[randomType]} ms-2">${randomType}</span>
+                <span class="ms-2">com.dna_testing_system.service.TestService</span>
+                <span class="ms-2">- ${messages[randomType]}</span>
+            `;
+
+                const logContent = logContainer.querySelector('.p-3');
+                logContent.insertBefore(newLogEntry, logContent.firstChild);
+
+                // Follow logs if enabled
+                const followLogs = document.getElementById('followLogs');
+                if (followLogs && followLogs.checked) {
+                    scrollToBottom();
+                }
+
+                // Limit number of log entries to prevent memory issues
+                const logEntries = logContent.querySelectorAll('.log-entry');
+                if (logEntries.length > 1000) {
+                    for (let i = 1000; i < logEntries.length; i++) {
+                        logEntries[i].remove();
+                    }
+                }
+            }
+
+            function filterLogs() {
+                const level = document.getElementById('logLevel').value;
+                const searchTerm = document.getElementById('searchLogs').value.toLowerCase();
+                const logEntries = document.querySelectorAll('.log-entry');
+
+                logEntries.forEach(entry => {
+                    const entryLevel = entry.getAttribute('data-level');
+                    const entryText = entry.textContent.toLowerCase();
+
+                    let showEntry = true;
+
+                    // Filter by level
+                    if (level && entryLevel !== level) {
+                        showEntry = false;
+                    }
+
+                    // Filter by search term
+                    if (searchTerm && !entryText.includes(searchTerm)) {
+                        showEntry = false;
+                    }
+
+                    entry.style.display = showEntry ? 'block' : 'none';
+                });
+            }
+
+            function clearLogs() {
+                if (confirm('Are you sure you want to clear all log entries? This action cannot be undone.')) {
+                    const logContent = logContainer.querySelector('.p-3');
+                    logContent.innerHTML = '<div class="text-center text-muted py-5">Logs cleared</div>';
+                }
+            }
+
+            function scrollToTop() {
+                logContainer.scrollTop = 0;
+            }
+
+            function scrollToBottom() {
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            // Initialize search functionality
+            document.getElementById('searchLogs').addEventListener('input', function () {
+                filterLogs();
+            });
+
+            document.getElementById('logLevel').addEventListener('change', function () {
+                filterLogs();
+            });
+
+            // Initialize log volume chart
+            function createLogVolumeChart() {
+                const ctx = document.getElementById('logVolumeChart').getContext('2d');
+                const chartData = {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [
+                        {
+                            label: 'Info',
+                            data: [45, 29, 68, 78, 93, 56],
+                            backgroundColor: 'rgba(23, 162, 184, 0.5)',
+                            borderColor: 'rgba(23, 162, 184, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Warning',
+                            data: [12, 9, 15, 19, 22, 17],
+                            backgroundColor: 'rgba(255, 193, 7, 0.5)',
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Error',
+                            data: [3, 2, 5, 4, 6, 3],
+                            backgroundColor: 'rgba(220, 53, 69, 0.5)',
+                            borderColor: 'rgba(220, 53, 69, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                };
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: true
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+
+        <style>
+            .log-entry {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 5px 0;
+                font-size: 13px;
+                line-height: 1.4;
+            }
+
+            .log-entry:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .log-container {
+                font-family: 'Courier New', Consolas, monospace;
+            }
+
+            .log-container .badge {
+                font-size: 10px;
+                min-width: 50px;
+            }
+
+            .log-container::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .log-container::-webkit-scrollbar-track {
+                background: #2a2a2a;
+            }
+
+            .log-container::-webkit-scrollbar-thumb {
+                background: #555;
+                border-radius: 4px;
+            }
+
+            .log-container::-webkit-scrollbar-thumb:hover {
+                background: #777;
+            }
+        </style>
+    </div>
+
+
+</html>

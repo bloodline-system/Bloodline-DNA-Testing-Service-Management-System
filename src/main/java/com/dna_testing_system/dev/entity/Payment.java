@@ -2,16 +2,15 @@ package com.dna_testing_system.dev.entity;
 
 import com.dna_testing_system.dev.enums.PaymentMethod;
 import com.dna_testing_system.dev.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -29,19 +28,19 @@ public class Payment {
     Long id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "order_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JsonIgnore
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
     ServiceOrder order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "promotion_id")
-    Promotion promotion;
+    Promotion promotion = null;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    @Size(max = 50)
     @NotNull
-    @Column(name = "payment_method", nullable = false, length = 50)
+    @Column(name = "payment_method", nullable = false)
     PaymentMethod paymentMethod = PaymentMethod.CASH;
 
     @NotNull
@@ -51,7 +50,7 @@ public class Payment {
     @NotNull
     @ColumnDefault("0.00")
     @Column(name = "discount_amount", nullable = false, precision = 10, scale = 2)
-    BigDecimal discountAmount;
+    BigDecimal discountAmount = BigDecimal.ZERO;
 
     @NotNull
     @Column(name = "net_amount", nullable = false, precision = 10, scale = 2)
@@ -59,9 +58,8 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    @Size(max = 50)
     @NotNull
-    @Column(name = "payment_status", nullable = false, length = 50)
+    @Column(name = "payment_status", nullable = false)
     PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @Column(name = "payment_date")

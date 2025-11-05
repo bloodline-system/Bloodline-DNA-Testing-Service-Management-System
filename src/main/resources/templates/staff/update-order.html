@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Update Order', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <!-- Order Update Form -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-edit-line me-2"></i>Update Order Status
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Order Information -->
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-primary mb-3">Order Information</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th class="bg-light" style="width: 35%;">Order ID</th>
+                                            <td><strong th:text="${serviceOrderByCustomerResponse.idServiceOrder}"></strong></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Customer</th>
+                                            <td>
+                                                <div th:text="${serviceOrderByCustomerResponse.userName}"></div>
+                                                <small class="text-muted" th:text="${serviceOrderByCustomerResponse.userEmail}"></small>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Phone</th>
+                                            <td th:text="${serviceOrderByCustomerResponse.userPhoneNumber}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Service</th>
+                                            <td th:text="${serviceOrderByCustomerResponse.medicalServiceName}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Total Amount</th>
+                                            <td class="text-success fw-bold" th:text="${serviceOrderByCustomerResponse.finalAmount}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Current Status</th>
+                                            <td>
+                                                <span class="badge"
+                                                      th:classappend="${serviceOrderByCustomerResponse.orderStatus.name() == 'PENDING'} ? 'bg-warning' :
+                                                                  (${serviceOrderByCustomerResponse.orderStatus.name() == 'CONFIRMED'} ? 'bg-info' :
+                                                                  (${serviceOrderByCustomerResponse.orderStatus.name() == 'IN_PROGRESS'} ? 'bg-primary' :
+                                                                  (${serviceOrderByCustomerResponse.orderStatus.name() == 'IN_REVIEW'} ? 'bg-secondary' :
+                                                                  (${serviceOrderByCustomerResponse.orderStatus.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger'))))"
+                                                      th:text="${serviceOrderByCustomerResponse.orderStatus}">Status</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Update Form -->
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-primary mb-3">Update Status</h5>
+                                <form th:action="@{/staff/update-order}" method="post">
+                                    <input type="hidden" name="orderId" th:value="${serviceOrderByCustomerResponse.idServiceOrder}" />
+                                    <div class="mb-3">
+                                        <label for="status" class="form-label">New Status</label>
+                                        <select id="status" name="status" class="form-select" required>
+                                            <option value="">Select Status</option>
+                                            <option th:each="orderStatus : ${T(com.dna_testing_system.dev.enums.ServiceOrderStatus).values()}"
+                                                    th:value="${orderStatus}"
+                                                    th:text="${orderStatus}"
+                                                    th:selected="${orderStatus == serviceOrderByCustomerResponse.orderStatus}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a th:href="@{/staff/list-orders}" class="btn btn-outline-secondary">
+                                            <i class="ri-arrow-left-line me-1"></i>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="ri-save-line me-1"></i>Update Status
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Kits Table -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-primary mb-3">Test Kits</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th>Kit Name</th>
+                                    <th>Kit Type</th>
+                                    <th>Sample Type</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total Price</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="kit : ${orderTestKits}">
+                                    <td th:text="${kit.kitName}"></td>
+                                    <td th:text="${kit.kitType}"></td>
+                                    <td th:text="${kit.sampleType}"></td>
+                                    <td th:text="${kit.quantityOrdered}"></td>
+                                    <td class="text-end" th:text="${kit.unitPrice}"></td>
+                                    <td class="text-end text-success fw-bold" th:text="${kit.totalPrice}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Participants Table -->
+                    <div>
+                        <h5 class="fw-bold text-primary mb-3">Participants</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Gender</th>
+                                    <th>Date of Birth</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="participant : ${orderParticipants}">
+                                    <td th:text="${participant.firstName}"></td>
+                                    <td th:text="${participant.lastName}"></td>
+                                    <td th:text="${participant.gender}"></td>
+                                    <td th:text="${#temporals.format(participant.dateBirth, 'MMM dd, yyyy')}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+</th:block>
+</html>

@@ -42,13 +42,11 @@ public class Notification {
     ServiceOrder order;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 50)
     @NotNull
     @Column(name = "notification_type", nullable = false, length = 50)
     NotificationType notificationType;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 50)
     @NotNull
     @Column(name = "notification_category", nullable = false, length = 50)
     NotificationCategory notificationCategory;

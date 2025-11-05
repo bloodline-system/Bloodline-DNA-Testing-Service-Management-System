@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blog</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/libs/bootstrap/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/assets/icon-fonts/fontawesome/css/all.css}"/>
+    <style>
+        .clamp-5 {
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-align: justify;
+        }
+        .img-fit {
+            width: 150px; height: 150px; object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!--  Blog section  -->
+    <div class="main-content landing-main">
+        <section class="section section-bg" id="blog" th:fragment="blog">
+            <div class="container pt-5">
+                <div class="row d-flex justify-content-between align-items-center">
+                    <div class="mt-3 col-1">
+                        <a class="" th:href="@{/index}">
+                            <img class="rounded w-100" th:src="@{/assets/images/brand-logos/desktop-logo.png}" alt="Logo DNABlog"/>
+                        </a>
+                    </div>
+                    <a class="btn btn-primary col-2 me-3" th:href="@{/user/home}">
+                        <i class="fa-solid fa-house me-2" style="color: #ffffff;"></i>
+                        Back to home</a>
+                </div>
+
+                <!-- Header start-->
+                <header class="main-header pb-5 border-bottom">
+                    <div class="container">
+                        <div class="row align-items-center gx-md-5">
+                            <!-- Left box -->
+                            <div class="col-md-6">
+                                <h1 class="fw-normal">
+                                    Discover Your DNA Story with Bloodline Testing!
+                                </h1>
+                                <p class="fs-5 fw-light text-secondary">
+                                    Bloodline - Advanced DNA testing and family heritage analysis platform that helps you uncover your genetic history, connect with relatives, and understand your ancestry. Our comprehensive DNA testing service provides detailed insights into your genetic makeup, health predispositions, and family connections through cutting-edge genomic technology and secure data management.
+                                </p>
+                                <a href="#main-blog" class="btn btn-primary shadow">
+                                    <i class="fa-solid fa-hourglass-start me-1" style="color: #ffffff;"></i>
+                                    Welcome to Blog
+                                </a>
+                            </div>
+
+                            <!-- Right box -->
+                            <div class="col-md-6 mt-2 mt-md-0">
+                                <div>
+                                    <img class="rounded w-100" th:src="@{/assets/images/blogs/dna-blog-header.png}" alt="Brand image"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <!-- Header end -->
+
+                <div class="text-center my-5">
+                    <h2 class="text-primary fw-bold mb-3">BLOGS</h2>
+                    <div class="d-flex justify-content-center">
+                        <p class="text-secondary small col-12 col-md-6 col-lg-4 p-3 rounded shadow-lg">
+                            <i class="bi bi-journal-text me-2 text-primary"></i>
+                            <strong>Explore insights, updates,</strong> and scientific knowledge from our DNA Testing System. Our blog shares practical applications, research findings, and the latest trends in genetic testing and personalized healthcare.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Row Blog -->
+                <div id="main-blog" class="row mt-3">
+                    <div class="col-3">
+                        <div class="list-group small">
+                            <div class="list-group-item text-bg-light fw-bold">
+                                Categories
+                            </div>
+                            <a class="list-group-item" href="#!">
+                                DNA Knowledge
+                            </a>
+
+                            <a class="list-group-item" href="#!">
+                                Testing Guide
+                            </a>
+                            <a class="list-group-item" href="#!">
+                                Case Studies
+                            </a>
+                            <a class="list-group-item" href="#!">
+                                Announcements
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-9">
+                        <div class="list-group small">
+                            <div class="list-group-item text-bg-light fw-bold">
+                                List of all posts
+                            </div>
+                                <!-- Item-->
+                                <div class="list-group">
+                                        <div th:each="i : ${#numbers.sequence(0, posts.size() - 1, 2)}" class="row mb-4">
+                                            <div class="col-md-6 mb-3" th:each="j : ${#numbers.sequence(i, i + 1)}"
+                                                 th:if="${j < posts.size()}" th:with="post=${posts[j]}">
+
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action h-100"
+                                                data-bs-toggle="modal" data-bs-target="#postDetailModal"
+                                                   th:data-title="${post.postTitle}"
+                                                   th:data-content="${post.postContent}"
+                                                   th:data-date="${#temporals.format(post.createdAt, 'dd/MM/yyyy')}"
+                                                   th:data-image="${post.featuredImageUrl}"
+                                                >
+                                                    <div class="row align-items-center">
+                                                        <div class="col-4 d-flex justify-content-center">
+                                                            <img th:src="${post.featuredImageUrl}" alt="Image" class="rounded img-fluid img-fit"/>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <h5 th:text="${post.postTitle}"></h5>
+                                                            <p class="text-secondary small clamp-5" th:text="${post.postContent}"></p>
+                                                            <div class="rounded-pill text-center text-bg-primary p-1 mt-2" style="width: 90px;">
+                                                                <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy')}"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal: Post Detail -->
+                <div class="modal fade" id="postDetailModal" tabindex="-1" aria-labelledby="postDetailModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content border-0 shadow-lg rounded-4">
+                            <div class="modal-header bg-primary text-white rounded-top-4">
+                                <h5 class="modal-title fw-bold" id="postDetailModalLabel">Chi tiết bài viết</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body px-4 py-4">
+                                <!-- Ngày đăng -->
+                                <p class="text-muted small mb-2 text-start">
+                                    <strong class="text-dark">Ngày đăng:</strong>
+                                    <span id="modalDate"></span>
+                                </p>
+
+                                <!-- Tiêu đề -->
+                                <h3 id="modalTitle" class="fw-semibold mb-3 text-primary"></h3>
+
+                                <!-- Ảnh đại diện -->
+                                <img id="modalImage" src="" alt="Post image"
+                                     class="img-fluid rounded-3 border border-2 border-light mb-4 w-100"
+                                     style="max-height: 400px; object-fit: cover;">
+
+                                <!-- Nội dung -->
+                                <p id="modalContent" class="text-secondary lh-lg fs-6"></p>
+                            </div>
+
+                            <div class="modal-footer border-0 px-4 pb-4">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle me-1"></i> Đóng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('postDetailModal');
+
+            modal.addEventListener('show.bs.modal', function (event) {
+                const trigger = event.relatedTarget;
+
+                const title = trigger.getAttribute('data-title');
+                const content = trigger.getAttribute('data-content');
+                const date = trigger.getAttribute('data-date');
+                const image = trigger.getAttribute('data-image');
+
+                document.getElementById('modalTitle').textContent = title || "Không có tiêu đề";
+                document.getElementById('modalContent').textContent = content || "Không có nội dung";
+                document.getElementById('modalDate').textContent = date || "";
+                document.getElementById('modalImage').src = image || "";
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle (gồm cả Popper) -->
+    <script th:src="@{/assets/libs/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+</body>
+</html>

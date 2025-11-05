@@ -1,10 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<!-- Admin Footer Fragment -->
+<footer th:fragment="footer" class="footer py-3 mt-auto bg-dark">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <span class="text-white">&copy; 2025 Bloodline DNA Testing Service - Admin Panel. All rights reserved.</span>
+            </div>
+            <div class="col-md-6 text-end">
+                <span class="text-white">Admin Version 1.0 | System Status: 
+                    <span class="badge bg-success ms-1">Online</span>
+                </span>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12 text-center">
+                <small class="text-muted">
+                    Last System Backup: <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}">04/07/2025 10:30</span>
+                    | Server Uptime: <span id="uptime">00:00:00</span>
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simple uptime counter (mock)
+        document.addEventListener('DOMContentLoaded', function() {
+            let startTime = Date.now();
+            
+            function updateUptime() {
+                const now = Date.now();
+                const uptime = now - startTime;
+                const hours = Math.floor(uptime / (1000 * 60 * 60));
+                const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
+                
+                const uptimeElement = document.getElementById('uptime');
+                if (uptimeElement) {
+                    uptimeElement.textContent = 
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0');
+                }
+            }
+            
+            // Update every second
+            setInterval(updateUptime, 1000);
+            updateUptime(); // Initial call
+        });
+    </script>
+</footer>

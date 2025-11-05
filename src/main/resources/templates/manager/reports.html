@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layouts/manager-layout :: layout(~{::#main-content}, ~{::#page-scripts}, ${pageTitle}, ${breadcrumbs}, ~{::#action-buttons})}">
+
+<div id="main-content">
+    <!-- Alert for errors -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Report Statistics Cards -->
+    <div class="row mb-4" th:if="${reportStats}">
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Total Reports</span>
+                                <h4 class="fw-semibold mb-0" th:text="${reportStats.totalReports}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-primary-transparent">
+                                <i class="ri-file-list-3-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Generated</span>
+                                <h4 class="fw-semibold mb-0" th:text="${reportStats.generatedReports}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-warning-transparent">
+                                <i class="ri-file-add-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Approved</span>
+                                <h4 class="fw-semibold mb-0" th:text="${reportStats.approvedReports}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-success-transparent">
+                                <i class="ri-check-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Rejected</span>
+                                <h4 class="fw-semibold mb-0" th:text="${reportStats.rejectedReports}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-danger-transparent">
+                                <i class="ri-close-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card custom-card">
+        <div class="card-header">
+            <div class="card-title">Reports Management</div>
+        </div>
+        <div class="card-body">
+            <!-- Filter Form -->
+            <form method="get" class="row g-3 mb-4 filter-form">
+                <div class="col-md-3">
+                    <label for="searchInput" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchInput" name="search" th:value="${searchQuery}"
+                        placeholder="Search by report name, category, or user...">
+                </div>
+                <div class="col-md-2">
+                    <label for="statusFilter" class="form-label">Report Status</label>
+                    <select class="form-select" id="statusFilter" name="status">
+                        <option value="all" th:selected="${selectedStatus == 'all'}">All Status</option>
+                        <option value="generated" th:selected="${selectedStatus == 'generated'}">Generated</option>
+                        <option value="approved" th:selected="${selectedStatus == 'approved'}">Approved</option>
+                        <option value="rejected" th:selected="${selectedStatus == 'rejected'}">Rejected</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="roleFilter" class="form-label">Generated By Role</label>
+                    <select class="form-select" id="roleFilter" name="generatedByRole">
+                        <option value="all" th:selected="${selectedGeneratedByRole == 'all'}">All Roles</option>
+                        <option th:each="role : ${allRoles}" th:value="${role.name()}" th:text="${role.name()}"
+                            th:selected="${selectedGeneratedByRole == role.name()}">Role Name</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortByFilter" class="form-label">Sort By</label>
+                    <select class="form-select" id="sortByFilter" name="sortBy">
+                        <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Date Created</option>
+                        <option value="reportName" th:selected="${sortBy == 'reportName'}">Report Name</option>
+                        <option value="reportCategory" th:selected="${sortBy == 'reportCategory'}">Category</option>
+                        <option value="generatedByUserRole" th:selected="${sortBy == 'generatedByUserRole'}">Generated
+                            By Role</option>
+                        <option value="reportStatus" th:selected="${sortBy == 'reportStatus'}">Status</option>
+                        <option value="reportType" th:selected="${sortBy == 'reportType'}">Report Type</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortDirFilter" class="form-label">Sort Direction</label>
+                    <select class="form-select" id="sortDirFilter" name="sortDir">
+                        <option value="desc" th:selected="${sortDir == 'desc'}">Descending</option>
+                        <option value="asc" th:selected="${sortDir == 'asc'}">Ascending</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="ri-search-line me-1"></i>Filter
+                    </button>
+                </div>
+            </form>
+
+            <!-- Reports Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Report ID</th>
+                            <th>Report Name</th>
+                            <th class="d-none-sm">Type</th>
+                            <th class="d-none-md">Category</th>
+                            <th class="d-none-lg">Generated By</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(reports)}">
+                            <td colspan="7" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="ri-inbox-line fs-48 d-block mb-2"></i>
+                                    No reports found matching your criteria.
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:each="report : ${reports}">
+                            <td>
+                                <span class="fw-semibold text-primary" th:text="'#' + ${report.reportId}">#12345</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold" th:text="${report.reportName}">Report Name</div>
+                                <small class="text-muted" th:text="${#strings.abbreviate(report.reportData, 50)}">Report
+                                    data preview...</small>
+                            </td>
+                            <td class="d-none-sm">
+                                <span class="badge bg-info-transparent text-info"
+                                    th:text="${report.reportType.description}">Report Type</span>
+                            </td>
+                            <td class="d-none-md">
+                                <div class="fw-semibold" th:text="${report.reportCategory}">Category</div>
+                            </td>
+                            <td class="d-none-lg">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm me-2">
+                                        <img th:if="${report.generatedByUserImageUrl != null and !#strings.isEmpty(report.generatedByUserImageUrl)}"
+                                            th:src="@{${report.generatedByUserImageUrl}}" alt="Profile"
+                                            class="avatar-img rounded-circle">
+                                        <span
+                                            th:unless="${report.generatedByUserImageUrl != null and !#strings.isEmpty(report.generatedByUserImageUrl)}"
+                                            class="avatar-initials rounded-circle bg-primary text-white"
+                                            th:text="${#strings.isEmpty(report.generatedByUserName) ? '-' : #strings.substring(report.generatedByUserName, 0, 1)}">U</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold" th:text="${report.generatedByUserName}">User Name</div>
+                                        <small class="text-muted" th:text="${report.generatedByUserRole}">Role</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <!-- Status Toggle Switch -->
+                                <div class="form-check form-switch d-flex align-items-center">
+                                    <input class="form-check-input status-toggle" type="checkbox" role="switch"
+                                        th:id="'statusToggle' + ${report.reportId}"
+                                        th:checked="${report.reportStatus.name() == 'APPROVED'}"
+                                        th:data-report-id="${report.reportId}"
+                                        th:data-current-status="${report.reportStatus.name()}">
+                                    <label class="form-check-label ms-2" th:for="'statusToggle' + ${report.reportId}">
+                                        <span class="badge" th:classappend="${report.reportStatus.name() == 'GENERATED' ? 'bg-warning-transparent text-warning' :
+                                                              (report.reportStatus.name() == 'APPROVED' ? 'bg-success-transparent text-success' :
+                                                              (report.reportStatus.name() == 'REJECTED' ? 'bg-danger-transparent text-danger' :
+                                                              'bg-secondary-transparent text-secondary'))}"
+                                            th:text="${#strings.toLowerCase(report.reportStatus.name())}">Status</span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-light" title="View Details"
+                                        th:onclick="'viewReportDetails(' + ${report.reportId} + ')'">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="dropdown"
+                                        title="More Actions">
+                                        <i class="ri-more-2-line"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#"
+                                                th:onclick="'updateReportStatus(' + ${report.reportId} + ', \'APPROVED\')'">
+                                                <i class="ri-check-line me-2"></i>Approve Report</a></li>
+                                        <li><a class="dropdown-item" href="#"
+                                                th:onclick="'updateReportStatus(' + ${report.reportId} + ', \'REJECTED\')'">
+                                                <i class="ri-close-line me-2"></i>Reject Report</a></li>
+                                        <li><a class="dropdown-item" href="#"
+                                                th:onclick="'updateReportStatus(' + ${report.reportId} + ', \'GENERATED\')'">
+                                                <i class="ri-refresh-line me-2"></i>Reset to Generated</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="#"
+                                                th:onclick="'downloadReport(' + ${report.reportId} + ')'">
+                                                <i class="ri-download-line me-2"></i>Download</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
+                <div class="text-muted">
+                    Showing <span th:text="${(currentPage * pageSize) + 1}">1</span> to
+                    <span th:text="${#numbers.min((currentPage + 1) * pageSize, totalReports)}">20</span> of
+                    <span th:text="${totalReports}">100</span> reports
+                </div>
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                            th:href="@{/manager/reports(page=${currentPage - 1}, size=${pageSize}, status=${selectedStatus}, generatedByRole=${selectedGeneratedByRole}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                            <i class="ri-arrow-left-line"></i>
+                        </a>
+                    </li>
+                    <th:block
+                        th:each="pageNum : ${#numbers.sequence(#numbers.max(0, currentPage - 2), #numbers.min(totalPages - 1, currentPage + 2))}">
+                        <li class="page-item" th:classappend="${pageNum == currentPage} ? 'active'">
+                            <a class="page-link"
+                                th:href="@{/manager/reports(page=${pageNum}, size=${pageSize}, status=${selectedStatus}, generatedByRole=${selectedGeneratedByRole}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                                th:text="${pageNum + 1}">1</a>
+                        </li>
+                    </th:block>
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                        <a class="page-link"
+                            th:href="@{/manager/reports(page=${currentPage + 1}, size=${pageSize}, status=${selectedStatus}, generatedByRole=${selectedGeneratedByRole}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                            <i class="ri-arrow-right-line"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div id="action-buttons">
+    <div class="d-flex gap-2">
+        <a href="/manager/reports/new" class="btn btn-success">
+            <i class="ri-add-line me-1"></i>Create New Report
+        </a>
+        <button type="button" class="btn btn-primary" onclick="window.location.reload()">
+            <i class="ri-refresh-line me-1"></i>Refresh
+        </button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="ri-download-line me-1"></i>Export
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportReports('csv')">
+                        <i class="ri-file-text-line me-2"></i>Export as CSV</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportReports('excel')">
+                        <i class="ri-file-excel-line me-2"></i>Export as Excel</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportReports('pdf')">
+                        <i class="ri-file-pdf-line me-2"></i>Export as PDF</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <style>
+        /* Responsive table improvements */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Make table more compact on smaller screens */
+        @media (max-width: 1200px) {
+            .table-responsive table {
+                font-size: 0.875rem;
+            }
+
+            .table-responsive td,
+            .table-responsive th {
+                padding: 0.5rem 0.25rem;
+                white-space: nowrap;
+            }
+
+            /* Hide less important columns on smaller screens */
+            .table-responsive .d-none-lg {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .table-responsive .d-none-md {
+                display: none !important;
+            }
+
+            /* Adjust filter form layout */
+            .filter-form .col-md-3,
+            .filter-form .col-md-2,
+            .filter-form .col-md-1 {
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive .d-none-sm {
+                display: none !important;
+            }
+
+            /* Stack cards vertically on mobile */
+            .row.mb-4 .col-xl-3 {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Sidebar toggle improvements */
+        @media (max-width: 991.98px) {
+            .app-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .app-sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                transition: margin-left 0.3s ease;
+            }
+        }
+
+        /* Better button spacing in table */
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Improve status toggle alignment */
+        .form-check.form-switch {
+            min-height: auto;
+            padding-left: 2.5em;
+        }
+
+        .form-check.form-switch .form-check-input {
+            width: 2em;
+            margin-left: -2.5em;
+        }
+    </style>
+    <script>
+        function updateReportStatus(reportId, status) {
+            if (confirm('Are you sure you want to update this report status to ' + status.toLowerCase() + '?')) {
+                fetch('/manager/reports/' + reportId + '/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'status=' + encodeURIComponent(status) + '&notes=' + encodeURIComponent('Status updated by manager')
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showAlert('success', data.message);
+                            // Reload page after short delay
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'An error occurred while updating the report status.');
+                    });
+            }
+        }
+
+        function viewReportDetails(reportId) {
+            // Navigate to the report details page
+            window.location.href = '/manager/reports/' + reportId + '/details';
+        }
+
+        function downloadReport(reportId) {
+            // Implement download functionality
+            alert('Download report functionality will be implemented for report ID: ' + reportId);
+        }
+
+        function exportReports(format) {
+            // Implement export functionality
+            alert('Export functionality will be implemented for ' + format + ' format.');
+        }
+
+        function showAlert(type, message) {
+            const alertContainer = document.querySelector('.container-fluid');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.insertBefore(alert, alertContainer.firstChild);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert && alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Auto-submit form when filters change
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterInputs = document.querySelectorAll('#statusFilter, #roleFilter, #sortByFilter, #sortDirFilter');
+            filterInputs.forEach(input => {
+                input.addEventListener('change', function () {
+                    this.form.submit();
+                });
+            });
+
+            // Submit form on Enter key in search input
+            document.getElementById('searchInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    this.form.submit();
+                }
+            });
+
+            // Handle status toggle switches
+            document.querySelectorAll('.status-toggle').forEach(toggle => {
+                toggle.addEventListener('change', function () {
+                    const reportId = this.dataset.reportId;
+                    const currentStatus = this.dataset.currentStatus;
+                    const newStatus = this.checked ? 'APPROVED' : 'REJECTED';
+
+                    // Don't update if it's already in the target status
+                    if ((newStatus === 'APPROVED' && currentStatus === 'APPROVED') ||
+                        (newStatus === 'REJECTED' && currentStatus === 'REJECTED')) {
+                        return;
+                    }
+
+                    updateReportStatus(reportId, newStatus);
+                });
+            });
+        });
+    </script>
+</div>
+
+</html>

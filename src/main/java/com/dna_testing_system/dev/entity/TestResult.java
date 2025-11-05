@@ -39,13 +39,11 @@ public class TestResult {
     @JoinColumn(name = "analyzed_by_staff_id", nullable = false)
     User analyzedByStaff;
 
-    @NotNull
-    @Column(name = "test_date", nullable = false)
+    @Column(name = "test_date", nullable = true)
     LocalDateTime testDate;
 
-    @NotNull
     @Lob
-    @Column(name = "result_summary", nullable = false)
+    @Column(name = "result_summary", nullable = true)
     String resultSummary;
 
     @Lob

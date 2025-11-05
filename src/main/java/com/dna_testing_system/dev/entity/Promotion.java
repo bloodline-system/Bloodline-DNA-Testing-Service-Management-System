@@ -1,6 +1,7 @@
 package com.dna_testing_system.dev.entity;
 
 import com.dna_testing_system.dev.enums.PromotionType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -46,7 +47,6 @@ public class Promotion {
     String promotionDescription;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 50)
     @NotNull
     @Column(name = "promotion_type", nullable = false, length = 50)
     PromotionType promotionType;
@@ -92,6 +92,7 @@ public class Promotion {
     @Column(name = "updated_at")
     LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
     Set<Payment> payments = new HashSet<>();
 }

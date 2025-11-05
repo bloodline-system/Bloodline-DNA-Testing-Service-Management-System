@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Sample Collection Details', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <!-- Sample Collection Details -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-test-tube-line me-2"></i>Collection Information
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-details">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light" style="width: 30%;">Collection ID</th>
+                                    <td><strong class="text-primary" th:text="${sampleCollection.collectionId}"></strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Order ID</th>
+                                    <td><strong class="text-primary" th:text="${sampleCollection.order.id}"></strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Collection Date</th>
+                                    <td th:text="${#temporals.format(sampleCollection.collectionDate, 'MMM dd, yyyy HH:mm')}"></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Status</th>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${sampleCollection.collectionStatus.name() == 'PENDING'} ? 'bg-warning' :
+                                                          (${sampleCollection.collectionStatus.name() == 'COLLECTED'} ? 'bg-info' :
+                                                          (${sampleCollection.collectionStatus.name() == 'PROCESSING'} ? 'bg-primary' :
+                                                          (${sampleCollection.collectionStatus.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger')))"
+                                              th:text="${sampleCollection.collectionStatus}">Status</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Sample Quality</th>
+                                    <td th:text="${sampleCollection.sampleQuality}"></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Sample Type</th>
+                                    <td th:text="${sampleCollection.sampleType}"></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Created At</th>
+                                    <td th:text="${#temporals.format(sampleCollection.createdAt, 'MMM dd, yyyy HH:mm')}"></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Updated At</th>
+                                    <td th:text="${#temporals.format(sampleCollection.updatedAt, 'MMM dd, yyyy HH:mm')}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="col-lg-4">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-settings-4-line me-2"></i>Quick Actions
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/staff/update-sample-collection(sampleCollectionId=${sampleCollection.collectionId})}"
+                           class="btn btn-primary">
+                            <i class="ri-edit-line me-2"></i>Update Status
+                        </a>
+                        <a th:href="@{/staff/list-sample-collection}"
+                           class="btn btn-outline-secondary">
+                            <i class="ri-arrow-left-line me-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+</th:block>
+</html>

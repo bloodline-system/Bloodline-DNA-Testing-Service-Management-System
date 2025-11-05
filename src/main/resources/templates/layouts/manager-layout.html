@@ -1,10 +1,296 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+    th:fragment="layout(content, scripts, pageTitle, breadcrumbs, actionButtons)" dir="ltr" data-nav-layout="vertical"
+    data-theme-mode="light" data-header-styles="light" data-menu-styles="light  " loader="disable"
+    data-vertical-style="overlay" class="mdl-js" data-toggled="icon-overlay-close" style="">
 
+<head th:replace="~{fragments/common/meta :: common-meta}"></head>
+<body class="app sidebar-mini ltr">
+    <!--    &lt;!&ndash; Loader &ndash;&gt;-->
+    <!--    <div id="global-loader">-->
+    <!--        <div class="loader"></div>-->
+    <!--    </div>-->
+    <!--    &lt;!&ndash; /Loader &ndash;&gt;-->
+
+    <!-- Main Wrapper -->
+    <div class="page">
+        <!-- Header -->
+        <div th:replace="~{fragments/manager/header :: header}"></div>
+        <!-- End Header -->
+
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/manager/sidebar :: sidebar}"></div>
+        <!-- End Sidebar -->
+
+        <!-- Main Content -->
+        <div class="main-content app-content">
+            <div class="container-fluid">
+                <!-- Page Header -->
+                <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+                    <div class="my-auto">
+                        <h5 class="page-title fs-21 mb-1" th:text="${pageTitle} ?: 'Dashboard'">Dashboard</h5>
+                        <nav th:if="${breadcrumbs}">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a th:href="@{/manager/dashboard}">Dashboard</a></li>
+                                <th:block th:each="crumb, iterStat : ${breadcrumbs}">
+                                    <li th:if="${!iterStat.last}" class="breadcrumb-item">
+                                        <a th:href="${crumb.url}" th:text="${crumb.label}">Item</a>
+                                    </li>
+                                    <li th:if="${iterStat.last}" class="breadcrumb-item active"
+                                        th:text="${crumb.label}">Current Page
+                                    </li>
+                                </th:block>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <div th:if="${actionButtons}" class="d-flex my-xl-auto right-content align-items-center">
+                        <th:block th:replace="${actionButtons}"></th:block>
+                    </div>
+                </div>
+                <!-- End Page Header -->
+
+                <!-- Main Content -->
+                <div th:replace="${content}"></div>
+                <!-- End Main Content -->
+            </div>
+        </div>
+        <!-- End Main Content -->
+
+        <!-- Footer -->
+        <div th:replace="~{fragments/manager/footer :: footer}"></div>
+        <!-- End Footer -->
+    </div>
+    <!-- End Main Wrapper -->
+    <!-- Back-to-top -->
+    <a href="#top" id="back-to-top"><i class="ri-arrow-up-line"></i></a><!-- jQuery -->
+    <!-- <script src="/assets/js/main.js"></script> -->
+
+    <!-- Bootstrap Bundle with Popper -->
+    <!-- <script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script> -->
+
+    <!-- Simplebar JS -->
+    <!-- <script src="/assets/libs/simplebar/simplebar.min.js"></script> -->
+
+    <!-- Perfect Scrollbar JS -->
+    <!-- <script src="/assets/js/sidemenu.js"></script> -->
+
+    <!-- Main JS -->
+    <!-- <script src="/assets/js/custom.js"></script> -->
+
+    <!-- Custom Script for Loader -->
+    <!--    <script>-->
+    <!--        $(window).on('load', function() {-->
+    <!--            // Hide loader when page is fully loaded-->
+    <!--            setTimeout(function() {-->
+    <!--                $("#global-loader").fadeOut("slow");-->
+    <!--            }, 300);-->
+    <!--            -->
+    <!--            // Initialize tooltips and popovers-->
+    <!--            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))-->
+    <!--            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {-->
+    <!--                return new bootstrap.Tooltip(tooltipTriggerEl)-->
+    <!--            });-->
+    <!--            -->
+    <!--            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))-->
+    <!--            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {-->
+    <!--                return new bootstrap.Popover(popoverTriggerEl)-->
+    <!--            });-->
+    <!--        });-->
+    <!--        -->
+    <!--        // Toggle sidebar-->
+    <!--        $(document).on('click', '#sidebar-toggle', function(e) {-->
+    <!--            e.preventDefault();-->
+    <!--            $('body').toggleClass('sidenav-toggled');-->
+    <!--        });-->
+    <!--    </script>-->
+
+    <!--    Additional Scripts-->
+    <!--    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>-->
+
+    <!--    <script>-->
+    <!--        document.addEventListener('DOMContentLoaded', function () {-->
+    <!--            // Tìm nút chuyển đổi theme (điều chỉnh selector nếu cần)-->
+
+    <!--            /* header theme toggle */-->
+    <!--            function toggleTheme() {-->
+    <!--                let html = document.querySelector("html");-->
+    <!--                if (html.getAttribute("data-theme-mode") === "dark") {-->
+    <!--                    html.setAttribute("data-theme-mode", "light");-->
+    <!--                    html.setAttribute("data-header-styles", "light");-->
+    <!--                    html.setAttribute("data-menu-styles", "light");-->
+    <!--                    if (!localStorage.getItem("primaryRGB")) {-->
+    <!--                        html.setAttribute("style", "");-->
+    <!--                    }-->
+    <!--                    html.removeAttribute("data-bg-theme");-->
+    <!--                    document.querySelector("#switcher-light-theme").checked = true;-->
+    <!--                    document.querySelector("#switcher-menu-light").checked = true;-->
+    <!--                    document-->
+    <!--                        .querySelector("html")-->
+    <!--                        .style.removeProperty("&#45;&#45;body-bg-rgb", localStorage.bodyBgRGB);-->
+    <!--                    checkOptions();-->
+    <!--                    html.style.removeProperty("&#45;&#45;light-rgb");-->
+    <!--                    html.style.removeProperty("&#45;&#45;form-control-bg");-->
+    <!--                    html.style.removeProperty("&#45;&#45;input-border");-->
+    <!--                    document.querySelector("#switcher-header-light").checked = true;-->
+    <!--                    document.querySelector("#switcher-menu-light").checked = true;-->
+    <!--                    document.querySelector("#switcher-light-theme").checked = true;-->
+    <!--                    document.querySelector("#switcher-background4").checked = false;-->
+    <!--                    document.querySelector("#switcher-background3").checked = false;-->
+    <!--                    document.querySelector("#switcher-background2").checked = false;-->
+    <!--                    document.querySelector("#switcher-background1").checked = false;-->
+    <!--                    document.querySelector("#switcher-background").checked = false;-->
+    <!--                    localStorage.removeItem("valexdarktheme");-->
+    <!--                    localStorage.removeItem("valexMenu");-->
+    <!--                    localStorage.removeItem("valexHeader");-->
+    <!--                    localStorage.removeItem("bodylightRGB");-->
+    <!--                    localStorage.removeItem("bodyBgRGB");-->
+    <!--                    if (localStorage.getItem("valexlayout") != "horizontal") {-->
+    <!--                        html.setAttribute("data-menu-styles", "light  ");-->
+    <!--                    }-->
+    <!--                    html.setAttribute("data-header-styles", "light");-->
+    <!--                } else {-->
+    <!--                    html.setAttribute("data-theme-mode", "dark");-->
+    <!--                    html.setAttribute("data-header-styles", "dark");-->
+    <!--                    if (!localStorage.getItem("primaryRGB")) {-->
+    <!--                        html.setAttribute("style", "");-->
+    <!--                    }-->
+    <!--                    html.setAttribute("data-menu-styles", "dark");-->
+    <!--                    document.querySelector("#switcher-dark-theme").checked = true;-->
+    <!--                    document.querySelector("#switcher-menu-dark").checked = true;-->
+    <!--                    document.querySelector("#switcher-header-dark").checked = true;-->
+    <!--                    checkOptions();-->
+    <!--                    document.querySelector("#switcher-menu-dark").checked = true;-->
+    <!--                    document.querySelector("#switcher-header-dark").checked = true;-->
+    <!--                    document.querySelector("#switcher-dark-theme").checked = true;-->
+    <!--                    document.querySelector("#switcher-background4").checked = false;-->
+    <!--                    document.querySelector("#switcher-background3").checked = false;-->
+    <!--                    document.querySelector("#switcher-background2").checked = false;-->
+    <!--                    document.querySelector("#switcher-background1").checked = false;-->
+    <!--                    document.querySelector("#switcher-background").checked = false;-->
+    <!--                    localStorage.setItem("valexdarktheme", "true");-->
+    <!--                    localStorage.setItem("valexMenu", "dark");-->
+    <!--                    localStorage.setItem("valexHeader", "dark");-->
+    <!--                    localStorage.removeItem("bodylightRGB");-->
+    <!--                    localStorage.removeItem("bodyBgRGB");-->
+    <!--                }-->
+    <!--            }-->
+    <!--            let layoutSetting = document.querySelector(".layout-setting");-->
+    <!--            layoutSetting.addEventListener("click", toggleTheme);-->
+    <!--            /* header theme toggle */-->
+    <!--        });-->
+    <!--    </script>-->
+
+    <th:block th:replace="${scripts} ?: _"></th:block>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Khởi tạo SimpleBar cho sidebar
+            const sidebarElement = document.getElementById('sidebar-scroll');
+            if (sidebarElement) {
+                try {
+                    new SimpleBar(sidebarElement);
+                } catch (error) {
+                    console.warn('Không thể khởi tạo SimpleBar cho sidebar:', error);
+                }
+            }
+
+            // Khởi tạo SimpleBar cho các phần tử có thuộc tính data-simplebar
+            const elements = document.querySelectorAll('[data-simplebar]');
+            if (elements && elements.length > 0) {
+                elements.forEach(function (element) {
+                    try {
+                        new SimpleBar(element);
+                    } catch (error) {
+                        console.warn('Không thể khởi tạo SimpleBar:', error);
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Xử lý sự kiện click cho các mục menu
+            const menuItems = document.querySelectorAll('.side-menu__item');
+
+            menuItems.forEach(function (item) {
+                item.addEventListener('click', function (e) {
+                    // Loại bỏ lớp active khỏi tất cả các slide
+                    document.querySelectorAll('.slide').forEach(function (slide) {
+                        slide.classList.remove('active');
+                    });
+
+                    // Loại bỏ lớp active khỏi tất cả các side-menu__item
+                    document.querySelectorAll('.side-menu__item').forEach(function (menuItem) {
+                        menuItem.classList.remove('active');
+                    });
+
+                    // Thêm lớp active vào slide chứa mục được nhấp
+                    const parentSlide = this.closest('.slide');
+                    if (parentSlide) {
+                        parentSlide.classList.add('active');
+                    }
+
+                    // Thêm lớp active vào side-menu__item được nhấp
+                    this.classList.add('active');
+
+
+                    // Lưu trạng thái active vào localStorage để duy trì qua các lần tải trang
+                    localStorage.setItem('activeMenuItem', this.getAttribute('href'));
+                });
+            });
+
+            // Kiểm tra và đặt lại mục menu hoạt động khi tải trang
+            const activeMenuItem = localStorage.getItem('activeMenuItem');
+            if (activeMenuItem) {
+                const activeLink = document.querySelector(`.side-menu__item[href="${activeMenuItem}"]`);
+                if (activeLink) {
+                    // Loại bỏ lớp active khỏi tất cả các slide
+                    document.querySelectorAll('.slide').forEach(function (slide) {
+                        slide.classList.remove('active');
+                    });
+
+                    // Loại bỏ lớp active khỏi tất cả các side-menu__item
+                    document.querySelectorAll('.side-menu__item').forEach(function (menuItem) {
+                        menuItem.classList.remove('active');
+                    });
+
+                    // Thêm lớp active vào slide chứa mục được nhấp
+                    const parentSlide = activeLink.closest('.slide');
+                    if (parentSlide) {
+                        parentSlide.classList.add('active');
+                    }
+
+                    // Thêm lớp active vào side-menu__item được nhấp
+                    activeLink.classList.add('active');
+                }
+            }
+
+            // Xử lý các nút trượt trái/phải
+            const slideLeft = document.getElementById('slide-left');
+            const slideRight = document.getElementById('slide-right');
+
+            if (slideLeft) {
+                slideLeft.addEventListener('click', function () {
+                    const menu = document.querySelector('.main-menu');
+                    if (menu) {
+                        menu.scrollLeft -= 100;
+                    }
+                });
+            }
+
+            if (slideRight) {
+                slideRight.addEventListener('click', function () {
+                    const menu = document.querySelector('.main-menu');
+                    if (menu) {
+                        menu.scrollLeft += 100;
+                    }
+                });
+            }
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.2/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

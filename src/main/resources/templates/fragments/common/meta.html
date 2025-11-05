@@ -8,7 +8,9 @@
     <meta name="Description" content="Bloodline DNA Testing Service Management System">
     <meta name="Author" content="Bloodline DNA Testing">
     <meta name="keywords"
-          content="dna testing, paternity test, relationship testing, ancestry, genetic testing, bloodline">
+
+        content="dna testing, paternity test, relationship testing, ancestry, genetic testing, bloodline">
+
 
     <!-- Favicon -->
     <link rel="icon" th:href="@{/assets/images/brand-logos/favicon.ico}" type="image/x-icon">
@@ -33,6 +35,8 @@
 
     <!-- Simplebar Css -->
     <link th:href="@{/assets/libs/simplebar/simplebar.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/simplebar@latest/dist/simplebar.css" />
+
 
     <!-- Color Picker Css -->
     <link rel="stylesheet" th:href="@{/assets/libs/flatpickr/flatpickr.min.css}">
@@ -43,4 +47,88 @@
 
     <!-- Jsvector Maps -->
     <link rel="stylesheet" th:href="@{/assets/libs/jsvectormap/css/jsvectormap.min.css}">
+
+
+    <style>
+        .new-notification {
+            background-color: #f8f9fa;
+            border-left: 3px solid #007bff;
+        }
+
+        .pulse-animation {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Fix notification scroll */
+        .notification-scroll {
+            max-height: 350px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar for notifications */
+        .notification-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .notification-scroll::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .notification-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Ensure dropdown has proper height constraints */
+        .main-header-message {
+            max-height: 450px;
+            min-width: 320px;
+        }
+
+        /* Notification item styling */
+        .notification-scroll .dropdown-item {
+            white-space: normal;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .notification-scroll .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Notification content */
+        .notification-label {
+            font-size: 0.875rem;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-subtext {
+            font-size: 0.75rem;
+            color: #6c757d;
+            line-height: 1.3;
+        }
+    </style>
+
 </head>

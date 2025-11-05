@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chi tiết kết quả xét nghiệm</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f6fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background: #fff;
+            margin: 40px auto;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(60,72,88,0.09);
+            max-width: 800px;
+        }
+        h1, h3 {
+            color: #324358;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0 30px 0;
+            background: #fafbfc;
+        }
+        table th, table td {
+            border: 1px solid #e1e4e8;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        table th {
+            background: #e7f0fd;
+            width: 200px;
+        }
+        a {
+            color: #1976d2;
+            text-decoration: none;
+        }
+        a.btn, button.btn {
+            display: inline-block;
+            background: #1976d2;
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 4px;
+            margin: 8px 4px 0 0;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+        a.btn.cancel, button.btn.cancel {
+            background: #ccc;
+            color: #333;
+        }
+        a.btn:hover, button.btn:hover {
+            background: #135ba1;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
+            table, thead, tbody, th, td, tr {
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Chi tiết kết quả xét nghiệm</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <td th:text="${testResult.testResultId}"></td>
+        </tr>
+        <tr>
+            <th>Ngày xét nghiệm</th>
+            <td th:text="${#temporals.format(testResult.testDate, 'dd/MM/yyyy HH:mm')}"></td>
+        </tr>
+        <tr>
+            <th>Tóm tắt kết quả</th>
+            <td th:text="${testResult.resultSummary}"></td>
+        </tr>
+        <tr>
+            <th>Kết quả chi tiết</th>
+            <td th:text="${testResult.detailedResults}"></td>
+        </tr>
+        <tr>
+            <th>Trạng thái</th>
+            <td th:text="${testResult.resultStatus}"></td>
+        </tr>
+        <tr>
+            <th>Báo cáo</th>
+            <td>
+                <a th:if="${testResult.reportFile != null and !#strings.isEmpty(testResult.reportFile)}"
+                   th:href="@{/files/download(filename=${#strings.substring(testResult.reportFile, testResult.reportFile.lastIndexOf('/')+1)})}"
+                   target="_blank">Tải báo cáo</a>
+                <span th:if="${testResult.reportFile == null or #strings.isEmpty(testResult.reportFile)}">Chưa có</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Dữ liệu thô</th>
+            <td>
+                <div>
+                    <b>Định dạng:</b> <span th:text="${rawData.dataFormat}"></span><br>
+                    <b>Nội dung:</b> <span th:text="${rawData.rawDataContent}"></span><br>
+                    <b>File dữ liệu thô:</b>
+                    <a th:if="${rawData.filePath != null and !#strings.isEmpty(rawData.filePath)}"
+                       th:href="@{/files/download(filename=${#strings.substring(rawData.filePath, rawData.filePath.lastIndexOf('/')+1)})}"
+                       target="_blank">Tải file</a>
+                    <span th:if="${rawData.filePath == null or #strings.isEmpty(rawData.filePath)}">Chưa có</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <a th:href="@{/user/order-history}" class="btn">Quay lại danh sách</a>
+</div>
+</body>
+</html>

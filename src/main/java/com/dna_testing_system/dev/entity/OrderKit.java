@@ -55,7 +55,7 @@ public class OrderKit {
     BigDecimal totalPrice;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 50)
+    //@Size(max = 50)
     @Column(name = "kit_status", nullable = false, length = 50)
     KitStatus kitStatus = KitStatus.ORDERED;
 

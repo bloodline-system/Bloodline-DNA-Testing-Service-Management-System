@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layouts/admin-layout :: layout(~{::#main-content}, ~{::#page-scripts}, ${pageTitle}, ${breadcrumbs}, ~{::#action-buttons})}">
+
+<div id="main-content">
+    <!-- Alert for errors -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Feedback Statistics Cards -->
+    <div class="row mb-4" th:if="${feedbackStats}">
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Total Feedback</span>
+                                <h4 class="fw-semibold mb-0" th:text="${feedbackStats.totalFeedback}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-primary-transparent">
+                                <i class="ri-message-3-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Response Required</span>
+                                <h4 class="fw-semibold mb-0" th:text="${feedbackStats.responseRequiredCount}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-warning-transparent">
+                                <i class="ri-question-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Responded</span>
+                                <h4 class="fw-semibold mb-0" th:text="${feedbackStats.respondedCount}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-success-transparent">
+                                <i class="ri-check-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Avg Overall Rating</span>
+                                <h4 class="fw-semibold mb-0"
+                                    th:text="|${#numbers.formatDecimal(feedbackStats.averageOverallRating, 1, 1)}/5|">
+                                    0.0/5</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-info-transparent">
+                                <i class="ri-star-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card custom-card mb-4">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="ri-filter-2-line me-2"></i>Search & Filter Customer Feedback
+            </div>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/feedback}" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="searchInput" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchInput" name="search"
+                        placeholder="Search feedback title or content..." th:value="${searchQuery}">
+                </div>
+                <div class="col-md-2">
+                    <label for="customerNameFilter" class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="customerNameFilter" name="customerName"
+                        placeholder="Customer name..." th:value="${selectedCustomerName}">
+                </div>
+                <div class="col-md-2">
+                    <label for="serviceNameFilter" class="form-label">Service Name</label>
+                    <input type="text" class="form-control" id="serviceNameFilter" name="serviceName"
+                        placeholder="Service name..." th:value="${selectedServiceName}">
+                </div>
+                <div class="col-md-2">
+                    <label for="responseStatusFilter" class="form-label">Response Status</label>
+                    <select class="form-select" id="responseStatusFilter" name="responseStatus">
+                        <option value="all" th:selected="${selectedResponseStatus == 'all'}">All Feedback</option>
+                        <option value="unresponded" th:selected="${selectedResponseStatus == 'unresponded'}">Needs
+                            Response</option>
+                        <option value="responded" th:selected="${selectedResponseStatus == 'responded'}">Responded
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortByFilter" class="form-label">Sort By</label>
+                    <select class="form-select" id="sortByFilter" name="sortBy">
+                        <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Date Created</option>
+                        <option value="customerName" th:selected="${sortBy == 'customerName'}">Customer Name</option>
+                        <option value="serviceName" th:selected="${sortBy == 'serviceName'}">Service Name</option>
+                        <option value="overallRating" th:selected="${sortBy == 'overallRating'}">Overall Rating</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="ri-search-line me-1"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback Table -->
+    <div class="card custom-card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="ri-message-2-line me-2"></i>Customer Feedback List
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Feedback ID</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Feedback Title</th>
+                            <th>Ratings</th>
+                            <th>Response Required</th>
+                            <th>Response Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(feedbackList)}">
+                            <td colspan="9" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="ri-inbox-line fs-48 d-block mb-2"></i>
+                                    No feedback found matching your criteria.
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:each="feedback : ${feedbackList}">
+                            <td>
+                                <a th:href="@{/admin/feedback/{id}(id=${feedback.id})}" class="fw-semibold text-primary"
+                                    th:text="'#' + ${feedback.id}">#12345</a>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm me-2">
+                                        <span class="avatar-initials rounded-circle bg-primary text-white"
+                                            th:text="${feedback.customerName != null ? #strings.substring(feedback.customerName, 0, 1) : 'N'}">C</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold"
+                                            th:text="${feedback.customerName != null ? feedback.customerName : 'Unknown'}">
+                                            Customer Name</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold"
+                                    th:text="${feedback.serviceName != null ? feedback.serviceName : 'Unknown Service'}">
+                                    Service Name</div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold"
+                                    th:text="${feedback.feedbackTitle != null ? feedback.feedbackTitle : 'No Title'}">
+                                    Feedback Title</div>
+                                <small class="text-muted"
+                                    th:text="${#strings.abbreviate((feedback.feedbackContent != null ? feedback.feedbackContent : ''), 50)}">Content
+                                    preview...</small>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary-transparent me-1">Overall:</span>
+                                        <div class="rating-stars" th:if="${feedback.overallRating != null}">
+                                            <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                                <i class="ri-star-fill text-warning"
+                                                    th:if="${i <= feedback.overallRating}"></i>
+                                                <i class="ri-star-line text-muted"
+                                                    th:unless="${i <= feedback.overallRating}"></i>
+                                            </th:block>
+                                            <span class="ms-1 small" th:text="${feedback.overallRating}">4.5</span>
+                                        </div>
+                                        <span class="text-muted small"
+                                            th:unless="${feedback.overallRating != null}">N/A</span>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-info-transparent"
+                                            th:if="${feedback.serviceQualityRating != null}"
+                                            th:text="'Quality: ' + ${feedback.serviceQualityRating}">Quality: 5</span>
+                                        <span class="badge bg-success-transparent"
+                                            th:if="${feedback.staffBehaviorRating != null}"
+                                            th:text="'Staff: ' + ${feedback.staffBehaviorRating}">Staff: 4</span>
+                                        <span class="badge bg-warning-transparent"
+                                            th:if="${feedback.timelinessRating != null}"
+                                            th:text="'Time: ' + ${feedback.timelinessRating}">Time: 5</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning" th:if="${feedback.responseRequired}">
+                                    <i class="ri-question-line me-1"></i>Yes
+                                </span>
+                                <span class="badge bg-secondary" th:unless="${feedback.responseRequired}">
+                                    <i class="ri-close-line me-1"></i>No
+                                </span>
+                            </td>
+                            <td>
+                                <div th:if="${feedback.respondedAt != null}">
+                                    <span class="badge bg-success">
+                                        <i class="ri-check-line me-1"></i>Responded
+                                    </span>
+                                    <small class="d-block text-muted mt-1">
+                                        By: <span
+                                            th:text="${feedback.respondedByName != null ? feedback.respondedByName : 'Unknown'}">Admin</span><br>
+                                        <span
+                                            th:text="${feedback.respondedAt != null ? #temporals.format(feedback.respondedAt, 'MMM dd, yyyy') : 'N/A'}">Date</span>
+                                    </small>
+                                </div>
+                                <div th:unless="${feedback.respondedAt != null}">
+                                    <span class="badge bg-warning" th:if="${feedback.responseRequired}">
+                                        <i class="ri-time-line me-1"></i>Pending
+                                    </span>
+                                    <span class="badge bg-secondary" th:unless="${feedback.responseRequired}">
+                                        <i class="ri-minus-line me-1"></i>Not Required
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div
+                                    th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'MMM dd, yyyy') : 'N/A'}">
+                                    Date</div>
+                                <small class="text-muted"
+                                    th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'HH:mm') : 'N/A'}">Time</small>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a th:href="@{/admin/feedback/{id}(id=${feedback.id})}" class="btn btn-sm btn-light"
+                                        title="View Details">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="dropdown"
+                                        title="More Actions">
+                                        <i class="ri-more-2-line"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item"
+                                                th:href="@{/admin/feedback/{id}(id=${feedback.id})}">
+                                                <i class="ri-eye-line me-2"></i>View Full Details</a></li>
+                                        <li th:if="${feedback.responseRequired and feedback.respondedAt == null}">
+                                            <a class="dropdown-item response-trigger" href="#"
+                                                th:data-feedback-id="${feedback.id}"
+                                                th:data-feedback-title="${feedback.feedbackTitle != null ? feedback.feedbackTitle : 'No Title'}">
+                                                <i class="ri-reply-line me-2"></i>Respond to Feedback</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3" th:if="${totalPages > 1}">
+                <div class="text-muted">
+                    Showing
+                    <span th:text="${(currentPage * pageSize) + 1}">1</span> to
+                    <span th:text="${T(java.lang.Math).min((currentPage + 1) * pageSize, totalFeedback)}">20</span> of
+                    <span th:text="${totalFeedback}">100</span> feedback entries
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/admin/feedback(page=${currentPage - 1}, size=${pageSize}, responseStatus=${selectedResponseStatus}, customerName=${selectedCustomerName}, serviceName=${selectedServiceName}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                                <i class="ri-arrow-left-line"></i>
+                            </a>
+                        </li>
+                        <th:block
+                            th:each="pageNum : ${#numbers.sequence(#numbers.max(0, currentPage - 2), #numbers.min(totalPages - 1, currentPage + 2))}">
+                            <li class="page-item" th:classappend="${pageNum == currentPage} ? 'active'">
+                                <a class="page-link"
+                                    th:href="@{/admin/feedback(page=${pageNum}, size=${pageSize}, responseStatus=${selectedResponseStatus}, customerName=${selectedCustomerName}, serviceName=${selectedServiceName}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                                    th:text="${pageNum + 1}">1</a>
+                            </li>
+                        </th:block>
+                        <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/admin/feedback(page=${currentPage + 1}, size=${pageSize}, responseStatus=${selectedResponseStatus}, customerName=${selectedCustomerName}, serviceName=${selectedServiceName}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                                <i class="ri-arrow-right-line"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Modal -->
+    <div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="responseForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="responseModalLabel">
+                            <i class="ri-reply-line me-2"></i>Respond to Feedback
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Feedback Title</label>
+                            <div class="alert alert-info" id="feedbackTitle">
+                                <!-- Feedback title will be populated here -->
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="responseContent" class="form-label fw-semibold">
+                                Your Response <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="responseContent" name="responseContent" rows="5"
+                                placeholder="Type your response to the customer..." required></textarea>
+                            <div class="form-text">Provide a helpful and professional response to address the customer's
+                                feedback.</div>
+                            <div class="invalid-feedback">Please provide a response</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="ri-close-line me-1"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-send-plane-line me-1"></i>Submit Response
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="action-buttons">
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-success" onclick="window.location.reload()">
+            <i class="ri-refresh-line me-1"></i>Refresh
+        </button>
+        <a th:href="@{/admin/feedback}" class="btn btn-info">
+            <i class="ri-filter-off-line me-1"></i>Clear Filters
+        </a>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        function showResponseModal(feedbackId, feedbackTitle) {
+            document.getElementById('feedbackTitle').textContent = feedbackTitle;
+            document.getElementById('responseForm').action = '/admin/feedback/' + feedbackId + '/respond';
+            document.getElementById('responseContent').value = '';
+
+            const modal = new bootstrap.Modal(document.getElementById('responseModal'));
+            modal.show();
+        }
+
+        // Form validation
+        document.addEventListener('DOMContentLoaded', function () {
+            // Handle response modal triggers
+            document.querySelectorAll('.response-trigger').forEach(function (trigger) {
+                trigger.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const feedbackId = this.getAttribute('data-feedback-id');
+                    const feedbackTitle = this.getAttribute('data-feedback-title');
+                    showResponseModal(feedbackId, feedbackTitle);
+                });
+            });
+
+            const responseForm = document.getElementById('responseForm');
+            if (responseForm) {
+                responseForm.addEventListener('submit', function (e) {
+                    const responseContent = document.getElementById('responseContent').value.trim();
+                    if (!responseContent) {
+                        e.preventDefault();
+                        document.getElementById('responseContent').classList.add('is-invalid');
+                        return false;
+                    }
+                    document.getElementById('responseContent').classList.remove('is-invalid');
+                });
+            }
+
+            // Auto-hide flash messages after 5 seconds
+            setTimeout(function () {
+                const alerts = document.querySelectorAll('.alert-dismissible');
+                alerts.forEach(alert => {
+                    const alertInstance = new bootstrap.Alert(alert);
+                    alertInstance.close();
+                });
+            }, 5000);
+        });
+    </script>
+</div>
+
+</html>

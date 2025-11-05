@@ -20,14 +20,12 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="pricing-monthly" data-bs-toggle="tab"
                             data-bs-target="#pricing-monthly-pane" type="button" role="tab"
-                            aria-controls="pricing-monthly-pane" aria-selected="true">Individual
-                        Consumers</button>
+                            aria-controls="pricing-monthly-pane" aria-selected="true">Civil</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="pricing-yearly" data-bs-toggle="tab"
                             data-bs-target="#pricing-yearly-pane" type="button" role="tab"
-                            aria-controls="pricing-yearly-pane" aria-selected="false">Healthcare
-                        Providers</button>
+                            aria-controls="pricing-yearly-pane" aria-selected="false">Administrative</button>
                 </li>
             </ul>
         </div>
@@ -37,140 +35,85 @@
                     <div class="tab-pane border-0 show active p-0" id="pricing-monthly-pane" role="tabpanel"
                          aria-labelledby="pricing-monthly" tabindex="0">
                         <div class="row justify-content-center">
-                            <div class="col-lg-4 col-xl-4 col-md-8 col-sm-12">
-                                <div class="card p-3 pricing-card shadow-none">
-                                    <div class="card-header d-block text-justified pt-2">
-                                        <p class="fs-18 fw-semibold mb-1">Starter</p>
-                                        <p class="text-justify fw-semibold mb-1"> <span
-                                                class="fs-15 me-2">$</span><span
-                                                class="fs-22 me-1">69</span><span class="fs-13">/test</span>
+                            <!-- Dynamic Individual Consumer Services -->
+                            <div th:each="service, iterStat : ${individualServices}" class="col-lg-4 col-xl-4 col-md-8 col-sm-12">
+                                <div class="card p-3 pricing-card shadow-none" 
+                                     th:classappend="${iterStat.index == 1} ? 'border-primary advanced' : ''">
+                                    <!-- Service Header -->
+                                    <div th:if="${iterStat.index == 1}" 
+                                         class="p-4 bg-primary rounded-3 d-block text-justified pt-2 text-fixed-white">
+                                        <p class="fs-18 fw-semibold mb-1 pe-0" th:text="${service.serviceName}">Service Name
+                                            <span class="badge bg-white text-primary float-end font-weight-normal fs-11">Best Value</span>
                                         </p>
-                                        <p class="fs-13 mb-1">Perfect for individuals beginning their
-                                            genetic journey.</p>
-                                        <p class="fs-13 mb-1 text-secondary">One-time payment per test.</p>
+                                        <p class="text-justify fw-semibold mb-1">
+                                            <span class="fs-15 me-2">$</span>
+                                            <span class="fs-22 me-1" th:text="${service.currentPrice}">0</span>
+                                            <span class="fs-13">/test</span>
+                                        </p>
+                                        <p class="fs-13 mb-2" th:text="${service.serviceDescription}">Service description</p>
+                                        <p class="fs-13 mb-1 text-fixed-white op-7">One-time payment per test.</p>
                                     </div>
+                                    
+                                    <!-- Regular Service Header -->
+                                    <div th:unless="${iterStat.index == 1}" class="card-header d-block text-justified pt-2">
+                                        <p class="fs-18 fw-semibold mb-1" th:text="${service.serviceName}">Service Name</p>
+                                        <p class="text-justify fw-semibold mb-1">
+                                            <span class="fs-15 me-2">$</span>
+                                            <span class="fs-22 me-1" th:text="${service.currentPrice}">0</span>
+                                            <span class="fs-13">/test</span>
+                                        </p>
+                                        <p class="fs-13 mb-1" th:text="${service.serviceDescription}">Service description</p>
+                                        <p class="fs-13 mb-1" th:classappend="${iterStat.index == 2} ? 'text-danger' : 'text-secondary'">
+                                            One-time payment per test.
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- Service Features -->
                                     <div class="card-body pt-2">
                                         <ul class="text-justify pricing-body ps-0 mt-3 list-unstyled">
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary"></i>
-                                                Single DNA test kit
+                                            <li th:each="feature : ${service.features}" th:if="${feature.isAvailable}">
+                                                <i th:class="${iterStat.index == 1 ? 'mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2' :
+            (iterStat.index == 2 ? 'mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16' :
+                                   'mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary')}"></i>
+                                                <span th:text="${feature.featureName}">Feature name</span>
                                             </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary"></i>
-                                                Basic ancestry report
+                                            <!-- Default features if no features exist -->
+                                            <li th:if="${#lists.isEmpty(service.features)}">
+                                                <i th:class="${iterStat.index == 1 ? 'mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2' :
+            (iterStat.index == 2 ? 'mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16' :
+                                   'mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary')}"></i>
+                                                DNA analysis included
                                             </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary"></i>
-                                                3-5 business day results
+                                            <li th:if="${#lists.isEmpty(service.features)}">
+                                                <i th:class="${iterStat.index == 1 ? 'mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2' :
+            (iterStat.index == 2 ? 'mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16' :
+                                   'mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary')}"></i>
+                                                Professional reporting
                                             </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary"></i>
-                                                Email support
+                                            <li th:if="${#lists.isEmpty(service.features)}">
+                                                <i th:class="${iterStat.index == 1 ? 'mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2' :
+            (iterStat.index == 2 ? 'mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16' :
+                                   'mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary')}"></i>
+                                                Expert support
                                             </li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-close-circle-outline me-2 fs-16 text-gray"></i>Phone
-                                                Support</li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-close-circle-outline me-2 fs-16 text-gray"></i>Clinical-grade
-                                                Accuracy</li>
                                         </ul>
                                     </div>
+                                    
+                                    <!-- Select Button -->
                                     <div class="card-footer text-center border-top-0 py-0">
-                                        <button class="btn btn-outline-info w-100">
+                                        <a th:href="@{/user/order-service(medicalServiceId=${service.id})}" class="btn btn-primary w-100">
                                             <span class="ms-4 me-4">Select</span>
-                                        </button>
+                                        </a>
                                     </div>
+
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-xl-4 col-md-8 col-sm-12">
-                                <div class="card p-3 border-primary pricing-card advanced shadow-none">
-                                    <div
-                                            class="p-4 bg-primary rounded-3 d-block text-justified pt-2 text-fixed-white">
-                                        <p class="fs-18 fw-semibold mb-1 pe-0">Complete<span
-                                                class="badge bg-white text-primary float-end font-weight-normal fs-11">Best
-                                                            Value</span></p>
-                                        <p class="text-justify fw-semibold mb-1"> <span
-                                                class="fs-15 me-2">$</span><span
-                                                class="fs-22 me-1">129</span><span
-                                                class="fs-13">/test</span></p>
-                                        <p class="fs-13 mb-2">Unlock deeper insights into your genetic
-                                            blueprint.</p>
-                                        <p class="fs-13 mb-1 text-fixed-white op-7">One-time payment per
-                                            test.</p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <ul class="text-justify pricing-body ps-0 list-unstyled mt-3">
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                Comprehensive DNA analysis
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                Ancestry + health reports
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                Trait analysis included
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                Phone support
-                                            </li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-close-circle-outline me-2 fs-16 text-gray"></i>Counselor
-                                                Consultation</li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-close-circle-outline me-2 fs-16 text-gray"></i>Priority
-                                                Processing</li>
-                                        </ul>
-                                    </div>
-                                    <div class="card-footer text-center border-top-0 py-0">
-                                        <button class="btn btn-primary w-100">
-                                            <span class="ms-4 me-4">Select</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-xl-4 col-md-8 col-sm-12">
-                                <div class="card p-3 pricing-card shadow-none">
-                                    <div class="card-header d-block text-justified pt-2">
-                                        <p class="fs-18 fw-semibold mb-1">Premium</p>
-                                        <p class="text-justify fw-semibold mb-1"> <span
-                                                class="fs-15 me-2">$</span><span
-                                                class="fs-22 me-1">199</span><span
-                                                class="fs-13">/test</span></p>
-                                        <p class="fs-13 mb-1">For those seeking the deepest genetic
-                                            insights.</p>
-                                        <p class="fs-13 mb-1 text-danger">One-time payment per test.</p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <ul class="text-justify pricing-body ps-0 mt-3 list-unstyled">
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>
-                                                Advanced genetic screening
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>
-                                                Clinical-grade accuracy
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>
-                                                Counselor consultation
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>
-                                                Priority processing
-                                            </li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>All
-                                                Complete Plan Features</li>
-                                        </ul>
-                                    </div>
-                                    <div class="card-footer text-center border-top-0 py-0">
-                                        <button class="btn btn-outline-info w-100">
-                                            <span class="ms-4 me-4">Select</span>
-                                        </button>
-                                    </div>
+                            
+                            <!-- Fallback when no services available -->
+                            <div th:if="${#lists.isEmpty(individualServices)}" class="col-12 text-center">
+                                <div class="alert alert-info">
+                                    <h5>No services available at the moment</h5>
+                                    <p>Please check back later or contact our support team for assistance.</p>
                                 </div>
                             </div>
                         </div>
@@ -179,138 +122,85 @@
                     <div class="tab-pane border-0 p-0" id="pricing-yearly-pane" role="tabpanel"
                          aria-labelledby="pricing-yearly" tabindex="0">
                         <div class="row justify-content-center">
-                            <div class="col-lg-4 col-xl-4 col-md-8 col-sm-12">
-                                <div class="card p-3 pricing-card reveal revealrotate shadow-none">
-                                    <div class="card-header d-block text-justified pt-2">
-                                        <p class="fs-18 fw-semibold mb-1 pe-0">Clinical Basic</p>
-                                        <p class="text-justify fw-semibold mb-1"> <span
-                                                class="fs-15 me-2">$</span><span
-                                                class="fs-22 me-1">45</span><span class="fs-13">/test</span>
+                            <!-- Dynamic Clinical Services -->
+                            <div th:each="service, iterStat : ${clinicalServices}" class="col-lg-4 col-xl-4 col-md-8 col-sm-12">
+                                <div class="card p-3 pricing-card reveal revealrotate shadow-none"
+                                     th:classappend="${iterStat.index == 1} ? 'border-primary advanced' : ''">
+                                    <!-- Clinical Service Header (Featured) -->
+                                    <div th:if="${iterStat.index == 1}" 
+                                         class="p-4 bg-primary rounded-3 d-block text-justified pt-2 text-fixed-white">
+                                        <p class="fs-18 fw-semibold mb-1 pe-0" th:text="${service.serviceName}">Service Name
+                                            <span class="badge bg-white text-primary float-end font-weight-normal fs-11">Recommended</span>
                                         </p>
-                                        <p class="fs-13 mb-2">Essential genetic insights for medical
-                                            applications.</p>
-                                        <p class="fs-13 mb-1 text-secondary">Flexible payment options.</p>
+                                        <p class="text-justify fw-semibold mb-1">
+                                            <span class="fs-15 me-2">$</span>
+                                            <span class="fs-22 me-1" th:text="${service.currentPrice}">0</span>
+                                            <span class="fs-13">/test</span>
+                                        </p>
+                                        <p class="fs-13 mb-2" th:text="${service.serviceDescription}">Service description</p>
+                                        <p class="fs-13 mb-1 text-fixed-white op-7">Flexible payment options.</p>
                                     </div>
+                                    
+                                    <!-- Regular Clinical Service Header -->
+                                    <div th:unless="${iterStat.index == 1}" class="card-header d-block text-justified pt-2">
+                                        <p class="fs-18 fw-semibold mb-1" th:text="${service.serviceName}">Service Name</p>
+                                        <p class="text-justify fw-semibold mb-1">
+                                            <span class="fs-15 me-2">$</span>
+                                            <span class="fs-22 me-1" th:text="${service.currentPrice}">0</span>
+                                            <span class="fs-13">/test</span>
+                                        </p>
+                                        <p class="fs-13 mb-1" th:text="${service.serviceDescription}">Service description</p>
+                                        <p class="fs-13 mb-1" th:classappend="${iterStat.index == 2} ? 'text-danger' : 'text-secondary'">
+                                            <span th:text="${iterStat.index == 2} ? 'Volume-based pricing.' : 'Flexible payment options.'"></span>
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- Clinical Service Features -->
                                     <div class="card-body pt-2">
                                         <ul class="text-justify pricing-body ps-0 mt-3 list-unstyled">
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
+                                            <li th:each="feature : ${service.features}" th:if="${feature.isAvailable}">
+                                                <i th:class="${iterStat.index == 1 ? 'mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2' :
+            (iterStat.index == 2 ? 'mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16' :
+                                   'mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary')}"></i>
+                                                <span th:text="${feature.featureName}">Feature name</span>
+                                            </li>
+                                            <!-- Default clinical features if no features exist -->
+                                            <li th:if="${#lists.isEmpty(service.features)}">
+                                                <i th:class="${iterStat.index == 1 ? 'mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2' :
+            (iterStat.index == 2 ? 'mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16' :
+                                   'mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary')}"></i>
                                                 CLIA-certified analysis
                                             </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
+                                            <li th:if="${#lists.isEmpty(service.features)}">
+                                                <i th:class="${iterStat.index == 1 ? 'mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2' :
+            (iterStat.index == 2 ? 'mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16' :
+                                   'mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary')}"></i>
                                                 Medical-grade reporting
                                             </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                EMR integration
+                                            <li th:if="${#lists.isEmpty(service.features)}">
+                                                <i th:class="${iterStat.index == 1 ? 'mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2' :
+            (iterStat.index == 2 ? 'mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16' :
+                                   'mdi mdi-checkbox-marked-circle-outline me-2 fs-16 text-secondary')}"></i>
+                                                Professional support
                                             </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                Bulk pricing available
-                                            </li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-close-circle-outline me-2 fs-16 text-gray"></i>Pharmacogenomics
-                                                Included</li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-close-circle-outline me-2 fs-16 text-gray"></i>Provider
-                                                Consultation</li>
                                         </ul>
                                     </div>
+                                    
+                                    <!-- Select Button -->
                                     <div class="card-footer text-center border-top-0 py-0">
-                                        <button class="btn btn-outline-info w-100">
+                                        <a th:href="@{/user/order-service(medicalServiceId=${service.id})}" class="btn btn-primary w-100">
                                             <span class="ms-4 me-4">Select</span>
-                                        </button>
+                                        </a>
                                     </div>
+
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-xl-4 col-md-8 col-sm-12">
-                                <div
-                                        class="card p-3 border-primary pricing-card advanced reveal revealrotate shadow-none">
-                                    <div
-                                            class="p-4 bg-primary rounded-3 d-block text-justified pt-2 text-fixed-white">
-                                        <p class="fs-18 fw-semibold mb-1 pe-0">Clinical Advanced<span
-                                                class="badge bg-white text-primary float-end font-weight-normal fs-11">Recommended</span>
-                                        </p>
-                                        <p class="text-justify fw-semibold mb-1"> <span
-                                                class="fs-15 me-2">$</span><span
-                                                class="fs-22 me-1">89</span><span class="fs-13">/test</span>
-                                        </p>
-                                        <p class="fs-13 mb-2">Expanded genetic insights for advanced
-                                            clinical care.</p>
-                                        <p class="fs-13 mb-1 text-fixed-white op-7">Flexible payment
-                                            options.</p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <ul class="text-justify pricing-body ps-0 list-unstyled mt-3">
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                Pharmacogenomics included
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                Detailed clinical reports
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                Provider consultation
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>
-                                                API access
-                                            </li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-primary fs-16 me-2"></i>All
-                                                Clinical Basic Features</li>
-                                        </ul>
-                                    </div>
-                                    <div class="card-footer text-center border-top-0 py-0">
-                                        <button class="btn btn-primary w-100">
-                                            <span class="ms-4 me-4">Select</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-xl-4 col-md-8 col-sm-12">
-                                <div class="card border p-3 pricing-card reveal revealrotate shadow-none">
-                                    <div class="card-header d-block text-justified pt-2">
-                                        <p class="fs-18 fw-semibold mb-1">Enterprise Solution</p>
-                                        <p class="text-justify fw-semibold mb-1"> <span
-                                                class="fs-15 me-2">$</span><span
-                                                class="fs-22 me-1">149</span><span
-                                                class="fs-13">/test</span></p>
-                                        <p class="fs-13 mb-1">Scalable solutions for large-scale genetic
-                                            projects.</p>
-                                        <p class="fs-13 mb-1 text-danger">Volume-based pricing.</p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <ul class="text-justify pricing-body ps-0 mt-3 list-unstyled">
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>
-                                                Custom reporting formats
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>
-                                                Dedicated account manager
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>
-                                                White-label options
-                                            </li>
-                                            <li><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>
-                                                Volume discounts
-                                            </li>
-                                            <li class="text-muted"><i
-                                                    class="mdi mdi-checkbox-marked-circle-outline text-danger me-2 fs-16"></i>All
-                                                Clinical Advanced Features</li>
-                                        </ul>
-                                    </div>
-                                    <div class="card-footer text-center border-top-0 py-0">
-                                        <button class="btn btn-outline-info w-100">
-                                            <span class="ms-4 me-4">Select</span>
-                                        </button>
-                                    </div>
+                            
+                            <!-- Fallback when no clinical services available -->
+                            <div th:if="${#lists.isEmpty(clinicalServices)}" class="col-12 text-center">
+                                <div class="alert alert-info">
+                                    <h5>No clinical services available at the moment</h5>
+                                    <p>Please check back later or contact our support team for assistance.</p>
                                 </div>
                             </div>
                         </div>

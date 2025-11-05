@@ -69,20 +69,28 @@ public class AdminProfilesController {
     public String updateProfile(@ModelAttribute("userEditProfile") UserProfileRequest userProfile,
                                 @RequestParam(value = "file", required = false) MultipartFile file,
                                 @RequestParam("username") String username) {
-        String uploadsDir = "uploads/";
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Path path = Paths.get(uploadsDir + fileName);
-
-        try{
-            Files.createDirectories(Paths.get(uploadsDir));
-            file.transferTo(path);
-        } catch (Exception e) {
-            e.printStackTrace();
+        UserProfileResponse existingProfile = userProfileService.getUserProfile(username);
+        if(file.getOriginalFilename().equals("")) {
+            userProfile.setProfileImageUrl(existingProfile.getProfileImageUrl());
         }
+        else{
+            String uploadsDir = "uploads/";
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path path = Paths.get(uploadsDir + fileName);
 
-        String imageUrl = "/uploads/" + fileName;
+            try{
+                Files.createDirectories(Paths.get(uploadsDir));
+                file.transferTo(path);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        userProfile.setProfileImageUrl(imageUrl);
+            String imageUrl = "/uploads/" + fileName;
+            userProfile.setProfileImageUrl(imageUrl);
+        }
+        if(userProfile.getDateOfBirth() == null) {
+            userProfile.setDateOfBirth(existingProfile.getDateOfBirth());
+        }
         userProfileService.updateUserProfile(username, userProfile);
         return "redirect:/manage/profiles";
     }

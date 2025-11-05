@@ -1,5 +1,7 @@
 package com.dna_testing_system.dev.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -24,6 +26,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "tbl_test_kits")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TestKit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -79,6 +82,7 @@ public class TestKit {
     @Column(name = "updated_at")
     LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "kit", fetch = FetchType.LAZY)
     Set<OrderKit> orderKits =  new HashSet<>();
 }

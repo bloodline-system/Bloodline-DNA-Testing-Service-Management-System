@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  lang="en"
+  dir="ltr"
+  data-nav-layout="vertical"
+  data-theme-mode="light"
+  data-header-styles="light"
+  data-menu-styles="light"
+  data-toggled="close"
+>
+  <head>
+    <!-- Meta Data -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>[[${pageTitle}]]</title>
+    <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template" />
+    <meta name="Author" content="Spruko Technologies Private Limited" />
+    <meta
+      name="keywords"
+      content="admin dashboard template,admin panel html,bootstrap dashboard,admin dashboard,html template,template dashboard html,html css,bootstrap 5 admin template,bootstrap admin template,bootstrap 5 dashboard,admin panel html template,dashboard template bootstrap,admin dashboard html template,bootstrap admin panel,simple html template,admin dashboard bootstrap"
+    />
+
+    <!-- Favicon -->
+    <link rel="icon" th:href="@{/assets/images/brand-logos/favicon.ico}" type="image/x-icon" />
+
+    <!-- Choices JS -->
+    <script th:src="@{/assets/libs/choices.js/public/assets/scripts/choices.min.js}"></script>
+
+    <!-- Main Theme Js -->
+    <script th:src="@{/assets/js/main.js}"></script>
+
+    <!-- Bootstrap Css -->
+    <link id="style" th:href="@{/assets/libs/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
+
+    <!-- Style Css -->
+    <link th:href="@{/assets/css/styles.css}" rel="stylesheet" />
+
+    <!-- Icons Css -->
+    <link th:href="@{/assets/css/icons.css}" rel="stylesheet" />
+
+    <!-- Node Waves Css -->
+    <link th:href="@{/assets/libs/node-waves/waves.min.css}" rel="stylesheet" />
+
+    <!-- Simplebar Css -->
+    <link th:href="@{/assets/libs/simplebar/simplebar.min.css}" rel="stylesheet" />
+
+    <!-- Color Picker Css -->
+    <link rel="stylesheet" th:href="@{/assets/libs/flatpickr/flatpickr.min.css}" />
+    <link rel="stylesheet" th:href="@{/assets/libs/@simonwep/pickr/themes/nano.min.css}" />
+
+    <!-- Choices Css -->
+    <link rel="stylesheet" th:href="@{/assets/libs/choices.js/public/assets/styles/choices.min.css}" />
+
+    <!-- Quill Editor Css -->
+    <link rel="stylesheet" th:href="@{/assets/libs/quill/quill.snow.css}" />
+    <link rel="stylesheet" th:href="@{/assets/libs/quill/quill.bubble.css}" />
+
+    <!-- File pond Css -->
+    <link rel="stylesheet" th:href="@{/assets/libs/filepond/filepond.min.css}" />
+    <link rel="stylesheet" th:href="@{/assets/libs/filepond-plugin-image-preview/filepond-plugin-image-preview.min.css}" />
+    <link rel="stylesheet" th:href="@{/assets/libs/filepond-plugin-image-edit/filepond-plugin-image-edit.min.css}" />
+    <link rel="stylesheet" th:href="@{/assets/libs/dropzone/dropzone.css}" />
+  </head>
+
+  <body>
+    <div class="container mt-3">
+        <!-- Start::row-blog-edit -->
+            <div class="row">
+                <form th:action="@{${post.postId} != null ? '/manager/posts/update/' + ${post.postId} : '/manager/posts/save'}" method="post" th:object="${post}">
+                    <input type="hidden" th:field="*{postId}" />
+                    <div class="col-lg-12 col-md-12 col-md-12">
+                        <div class="card blog-edit">
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label class="form-label text-dark">Post Title</label>
+                                    <input type="text" th:field="*{postTitle}" class="form-control" placeholder="Post title" required/>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label text-dark">Category</label>
+                                    <select th:field="*{postCategory}" class="form-control" data-trigger name="language" id="language">
+<!--                                        <option>Select</option>-->
+                                        <option value="DNA_KNOWLEDGE">DNA Knowledge</option>
+                                        <option value="TESTING_GUIDE">Testing Guide</option>
+                                        <option value="CASE_STUDIES">Case Studies</option>
+                                        <option value="ANNOUNCEMENTS">Announcements</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <div class="ql-wrapper ql-wrapper-demo mb-3">
+                                        <label class="form-label">Post Description</label>
+                                        <div id="editor">
+                                            <input type="hidden" th:field="*{postContent}" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <label class="form-label">Upload Image</label>
+                                <div class="p-4 border rounded-6 mb-4 form-group">
+                                    <div>
+                                        <form data-single="true" method="post" action="https://httpbin.org/post" class="dropzone"></form>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label text-dark">Status</label>
+                                    <select th:field="*{postStatus}" class="form-control" data-trigger name="instructor" id="instructor">
+<!--                                        <option>Select</option>-->
+                                        <option value="DRAFT">Draft</option>
+                                        <option value="PUBLISHED">Published</option>
+                                        <option value="ARCHIVED">Archived</option>
+                                        <option value="DELETED">Deleted</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-footer ">
+                                <button type="submit" class="btn btn-primary float-end">Save</button>
+                                <a th:href="@{/manager/posts}" class="btn btn-danger">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        <!--End::row-blog-edit -->
+    </div>
+
+    <!-- Popper JS -->
+    <script th:src="@{/assets/libs/@popperjs/core/umd/popper.min.js}"></script>
+
+    <!-- Bootstrap JS -->
+    <script th:src="@{/assets/libs/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+    <!-- Defaultmenu JS -->
+    <script th:src="@{/assets/js/defaultmenu.min.js}"></script>
+
+    <!-- Node Waves JS-->
+    <script th:src="@{/assets/libs/node-waves/waves.min.js}"></script>
+
+    <!-- Sticky JS -->
+    <script th:src="@{/assets/js/sticky.js}"></script>
+
+    <!-- Simplebar JS -->
+    <script th:src="@{/assets/libs/simplebar/simplebar.min.js}"></script>
+    <script th:src="@{/assets/js/simplebar.js}"></script>
+
+    <!-- Color Picker JS -->
+    <script th:src="@{/assets/libs/@simonwep/pickr/pickr.es5.min.js}"></script>
+
+    <!-- Custom-Switcher JS -->
+    <script th:src="@{/assets/js/custom-switcher.min.js}"></script>
+
+    <!-- Quill Editor JS -->
+    <script th:src="@{/assets/libs/quill/quill.min.js}"></script>
+
+    <!-- Dropzone JS -->
+    <script th:src="@{/assets/libs/dropzone/dropzone-min.js}"></script>
+
+    <!-- Fileupload JS -->
+    <script th:src="@{/assets/js/blog-post.js}"></script>
+
+    <!-- Custom JS -->
+    <script th:src="@{/assets/js/custom.js}"></script>
+  </body>
+</html>

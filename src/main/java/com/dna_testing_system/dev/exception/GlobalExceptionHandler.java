@@ -37,6 +37,22 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles service exceptions for web requests
+     * Returns the present page with an error message
+     */
+    @ExceptionHandler(MedicalServiceException.class)
+    public String handleMedicalServiceException(
+            AuthenticationException ex,
+            HttpServletRequest request, RedirectAttributes redirectAttributes) {
+
+        log.error("Authentication error: {} (Error Code: {})",
+                ex.getMessage(), ex.getErrorCode());
+
+        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        return getCurrentViewName(request);
+    }
+
+    /**
      * Handles resource not found exceptions for web requests
      */
     @ExceptionHandler(ResourceNotFoundException.class)

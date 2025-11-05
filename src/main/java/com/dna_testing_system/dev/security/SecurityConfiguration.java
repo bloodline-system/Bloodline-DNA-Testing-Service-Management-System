@@ -1,7 +1,11 @@
 package com.dna_testing_system.dev.security;
 
+import com.dna_testing_system.dev.config.CustomAuthenticationSuccessHandler;
+import com.dna_testing_system.dev.enums.RoleType;
 import com.dna_testing_system.dev.service.impl.UserDetailsServiceImpl;
 import com.dna_testing_system.dev.utils.PasswordUtil;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,9 +21,11 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfiguration {
 
-    private final UserDetailsServiceImpl userDetailsService;
+    UserDetailsServiceImpl userDetailsService;
+    CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -27,20 +33,26 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/css/**", "/js/**", "/images/**", "/webjars/**",
-                                "/", "/register", "/login", "/error", "/assets/**",
-                                "/uploads/**"
-                                // XÓA BỎ "/layouts/**" KHỎI ĐÂY
+                                "/", "/register", "/login", "/error", "/assets/**", "/uploads/**", "/api/**", "/ws/**", "/cancel", "/public/**",
+                                "/files/**", "/uploads_information/**"  // Add permission for file directories
                         ).permitAll()
-
+                        .requestMatchers("/manager/**", "/manager/services/**", "/manager/service-types/**").hasAnyRole(RoleType.MANAGER.name(), RoleType.ADMIN.name())
+                        .requestMatchers("/admin/**").hasAnyRole(RoleType.ADMIN.name())
+                        .requestMatchers("/staff/**").hasAnyRole(RoleType.STAFF.name(), RoleType.MANAGER.name(), RoleType.ADMIN.name())
                         .requestMatchers("/user/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/register")
+                    .ignoringRequestMatchers("/register")
+                    .ignoringRequestMatchers("/staff/**")
+                        .ignoringRequestMatchers("/user/**")
+                        .ignoringRequestMatchers("/admin/**")
+                        .ignoringRequestMatchers("/manager/**")
+                    .ignoringRequestMatchers("/files/**")              // Allow file operations
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/user/home", true)
+                        .successHandler(customAuthenticationSuccessHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -64,6 +76,7 @@ public class SecurityConfiguration {
                         .frameOptions(frameOptions -> frameOptions.sameOrigin()) // Chống clickjacking
                 );
         // --- KẾT THÚC PHẦN THÊM MỚI ---
+
 
         return http.build();
     }

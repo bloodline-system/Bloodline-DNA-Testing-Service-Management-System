@@ -78,7 +78,10 @@ var options1 = {
         }
     }
 };
-document.getElementById('Sales-bar').innerHTML = ''
+const salesBar = document.getElementById('Sales-bar');
+if (salesBar) {
+    salesBar.innerHTML = '';
+}
 var chart1 = new ApexCharts(document.querySelector("#Sales-bar"), options1);
 chart1.render();
 function salesReport() {

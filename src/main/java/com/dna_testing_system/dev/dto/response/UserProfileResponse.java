@@ -24,6 +24,7 @@ public class UserProfileResponse {
     private String email;
     private String phoneNumber;
     private String profileImageUrl;
+    private String role;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;

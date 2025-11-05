@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layouts/admin-layout :: layout(~{::#main-content}, ~{::#page-scripts}, ${pageTitle}, ${breadcrumbs}, ~{::#action-buttons})}">
+
+<div id="main-content">
+    <!-- Alert for errors -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Order Statistics Cards -->
+    <div class="row mb-4" th:if="${orderStats}">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Total Orders</span>
+                                <h4 class="fw-semibold mb-0" th:text="${orderStats.totalOrders}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-primary-transparent">
+                                <i class="ri-shopping-cart-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Pending Orders</span>
+                                <h4 class="fw-semibold mb-0" th:text="${orderStats.pendingOrders}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-warning-transparent">
+                                <i class="ri-time-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">In Progress</span>
+                                <h4 class="fw-semibold mb-0" th:text="${orderStats.inProgressOrders}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-info-transparent">
+                                <i class="ri-refresh-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Completed</span>
+                                <h4 class="fw-semibold mb-0" th:text="${orderStats.completedOrders}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-success-transparent">
+                                <i class="ri-check-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Total Revenue</span>
+                                <h4 class="fw-semibold mb-0"
+                                    th:text="'$' + ${#numbers.formatDecimal(orderStats.totalRevenue, 0, 2)}">$0.00</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-success-transparent">
+                                <i class="ri-money-dollar-circle-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Avg Order Value</span>
+                                <h4 class="fw-semibold mb-0"
+                                    th:text="'$' + ${#numbers.formatDecimal(orderStats.averageOrderValue, 0, 2)}">$0.00
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-primary-transparent">
+                                <i class="ri-calculator-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card custom-card">
+        <div class="card-header">
+            <div class="card-title">Orders Management</div>
+        </div>
+        <div class="card-body">
+            <!-- Filter Form -->
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label for="searchInput" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchInput" name="search" th:value="${searchQuery}"
+                        placeholder="Search by customer, service, or order ID...">
+                </div>
+                <div class="col-md-2">
+                    <label for="statusFilter" class="form-label">Order Status</label>
+                    <select class="form-select" id="statusFilter" name="status">
+                        <option value="all" th:selected="${selectedStatus == 'all'}">All Status</option>
+                        <option value="pending" th:selected="${selectedStatus == 'pending'}">Pending</option>
+                        <option value="confirmed" th:selected="${selectedStatus == 'confirmed'}">Confirmed</option>
+                        <option value="in_progress" th:selected="${selectedStatus == 'in_progress'}">In Progress
+                        </option>
+                        <option value="completed" th:selected="${selectedStatus == 'completed'}">Completed</option>
+                        <option value="cancelled" th:selected="${selectedStatus == 'cancelled'}">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="paymentStatusFilter" class="form-label">Payment Status</label>
+                    <select class="form-select" id="paymentStatusFilter" name="paymentStatus">
+                        <option value="all" th:selected="${selectedPaymentStatus == 'all'}">All Payments</option>
+                        <option value="pending" th:selected="${selectedPaymentStatus == 'pending'}">Pending</option>
+                        <option value="paid" th:selected="${selectedPaymentStatus == 'paid'}">Paid</option>
+                        <option value="failed" th:selected="${selectedPaymentStatus == 'failed'}">Failed</option>
+                        <option value="refunded" th:selected="${selectedPaymentStatus == 'refunded'}">Refunded</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortByFilter" class="form-label">Sort By</label>
+                    <select class="form-select" id="sortByFilter" name="sortBy">
+                        <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Date Created</option>
+                        <option value="customerName" th:selected="${sortBy == 'customerName'}">Customer Name</option>
+                        <option value="serviceName" th:selected="${sortBy == 'serviceName'}">Service Name</option>
+                        <option value="totalAmount" th:selected="${sortBy == 'totalAmount'}">Total Amount</option>
+                        <option value="orderStatus" th:selected="${sortBy == 'orderStatus'}">Order Status</option>
+                        <option value="paymentStatus" th:selected="${sortBy == 'paymentStatus'}">Payment Status</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortDirFilter" class="form-label">Sort Direction</label>
+                    <select class="form-select" id="sortDirFilter" name="sortDir">
+                        <option value="desc" th:selected="${sortDir == 'desc'}">Descending</option>
+                        <option value="asc" th:selected="${sortDir == 'asc'}">Ascending</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="ri-search-line me-1"></i>Filter
+                    </button>
+                </div>
+            </form>
+
+            <!-- Orders Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Amount</th>
+                            <th>Order Status</th>
+                            <th>Payment Status</th>
+                            <th>Created Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(orders)}">
+                            <td colspan="8" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="ri-inbox-line fs-48 d-block mb-2"></i>
+                                    No orders found matching your criteria.
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:each="order : ${orders}">
+                            <td>
+                                <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="fw-semibold text-primary"
+                                    th:text="'#' + ${order.id}">#12345</a>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm me-2">
+                                        <img th:if="${order.profileImageUrl != null and !#strings.isEmpty(order.profileImageUrl)}"
+                                            th:src="@{${order.profileImageUrl}}" alt="Profile"
+                                            class="avatar-img rounded-circle">
+                                        <span
+                                            th:unless="${order.profileImageUrl != null and !#strings.isEmpty(order.profileImageUrl)}"
+                                            class="avatar-initials rounded-circle bg-primary text-white"
+                                            th:text="${#strings.substring(order.customerName, 0, 1)}">C</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold" th:text="${order.customerName}">Customer Name</div>
+                                        <small class="text-muted" th:text="${order.email}">customer@email.com</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold" th:text="${order.serviceName}">Service Name</div>
+                                <small class="text-muted" th:text="${order.serviceCategory}">Category</small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold"
+                                    th:text="'$' + ${#numbers.formatDecimal(order.finalAmount, 0, 2)}">$299.00</div>
+                                <small class="text-muted" th:if="${order.discountAmount > 0}"
+                                    th:text="'Discount: $' + ${#numbers.formatDecimal(order.discountAmount, 0, 2)}">Discount
+                                    applied</small>
+                            </td>
+                            <td>
+                                <span class="badge" th:classappend="${order.orderStatus.name() == 'PENDING' ? 'bg-warning-transparent text-warning' :
+                (order.orderStatus.name() == 'CONFIRMED' ? 'bg-info-transparent text-info' :
+                (order.orderStatus.name() == 'IN_PROGRESS' ? 'bg-primary-transparent text-primary' :
+                (order.orderStatus.name() == 'COMPLETED' ? 'bg-success-transparent text-success' :
+                (order.orderStatus.name() == 'CANCELLED' ? 'bg-danger-transparent text-danger' :
+                'bg-secondary-transparent text-secondary'))))}"
+                                    th:text="${#strings.replace(#strings.toLowerCase(order.orderStatus.name()), '_', ' ')}">Pending</span>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                    th:classappend="${order.paymentStatus.name() eq 'PENDING' ? 'bg-warning-transparent text-warning' :
+                (order.paymentStatus.name() eq 'PAID' ? 'bg-success-transparent text-success' :
+                (order.paymentStatus.name() eq 'FAILED' ? 'bg-danger-transparent text-danger' :
+                (order.paymentStatus.name() eq 'REFUNDED' ? 'bg-info-transparent text-info' : 'bg-secondary-transparent text-secondary')))}"
+                                    th:text="${#strings.toLowerCase(order.paymentStatus.name())}">Pending</span>
+                            </td>
+                            <td>
+                                <div th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Dec 25, 2024</div>
+                                <small class="text-muted"
+                                    th:text="${#temporals.format(order.createdAt, 'HH:mm')}">10:30</small>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn btn-sm btn-light"
+                                        title="View Details">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="dropdown"
+                                        title="More Actions">
+                                        <i class="ri-more-2-line"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#"
+                                                th:onclick="'updateOrderStatus(' + ${order.id} + ', \'CONFIRMED\')'">
+                                                <i class="ri-check-line me-2"></i>Confirm Order</a></li>
+                                        <li><a class="dropdown-item" href="#"
+                                                th:onclick="'updateOrderStatus(' + ${order.id} + ', \'IN_PROGRESS\')'">
+                                                <i class="ri-play-line me-2"></i>Start Processing</a></li>
+                                        <li><a class="dropdown-item" href="#"
+                                                th:onclick="'updateOrderStatus(' + ${order.id} + ', \'COMPLETED\')'">
+                                                <i class="ri-check-double-line me-2"></i>Mark Complete</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item text-danger" href="#"
+                                                th:onclick="'updateOrderStatus(' + ${order.id} + ', \'CANCELLED\')'">
+                                                <i class="ri-close-line me-2"></i>Cancel Order</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
+                <div class="text-muted">
+                    Showing <span th:text="${(currentPage * pageSize) + 1}">1</span> to
+                    <span th:text="${#numbers.min((currentPage + 1) * pageSize, totalOrders)}">20</span> of
+                    <span th:text="${totalOrders}">100</span> orders
+                </div>
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                            th:href="@{/admin/orders(page=${currentPage - 1}, size=${pageSize}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                            <i class="ri-arrow-left-line"></i>
+                        </a>
+                    </li>
+                    <th:block
+                        th:each="pageNum : ${#numbers.sequence(#numbers.max(0, currentPage - 2), #numbers.min(totalPages - 1, currentPage + 2))}">
+                        <li class="page-item" th:classappend="${pageNum == currentPage} ? 'active'">
+                            <a class="page-link"
+                                th:href="@{/admin/orders(page=${pageNum}, size=${pageSize}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                                th:text="${pageNum + 1}">1</a>
+                        </li>
+                    </th:block>
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                        <a class="page-link"
+                            th:href="@{/admin/orders(page=${currentPage + 1}, size=${pageSize}, status=${selectedStatus}, paymentStatus=${selectedPaymentStatus}, search=${searchQuery}, sortBy=${sortBy}, sortDir=${sortDir})}">
+                            <i class="ri-arrow-right-line"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div id="action-buttons">
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-success" onclick="window.location.reload()">
+            <i class="ri-refresh-line me-1"></i>Refresh
+        </button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="ri-download-line me-1"></i>Export
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportOrders('csv')">
+                        <i class="ri-file-text-line me-2"></i>Export as CSV</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportOrders('excel')">
+                        <i class="ri-file-excel-line me-2"></i>Export as Excel</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportOrders('pdf')">
+                        <i class="ri-file-pdf-line me-2"></i>Export as PDF</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        function updateOrderStatus(orderId, status) {
+            if (confirm('Are you sure you want to update this order status to ' + status.toLowerCase().replace('_', ' ') + '?')) {
+                fetch('/admin/orders/' + orderId + '/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'status=' + encodeURIComponent(status) + '&notes=' + encodeURIComponent('Status updated by admin')
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showAlert('success', data.message);
+                            // Reload page after short delay
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'An error occurred while updating the order status.');
+                    });
+            }
+        }
+
+        function exportOrders(format) {
+            // Implement export functionality
+            alert('Export functionality will be implemented for ' + format + ' format.');
+        }
+
+        function showAlert(type, message) {
+            const alertContainer = document.querySelector('.container-fluid');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.insertBefore(alert, alertContainer.firstChild);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert && alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Auto-submit form when filters change
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterInputs = document.querySelectorAll('#statusFilter, #paymentStatusFilter, #sortByFilter, #sortDirFilter');
+            filterInputs.forEach(input => {
+                input.addEventListener('change', function () {
+                    this.form.submit();
+                });
+            });
+
+            // Submit form on Enter key in search input
+            document.getElementById('searchInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    this.form.submit();
+                }
+            });
+        });
+    </script>
+</div>
+
+</html>

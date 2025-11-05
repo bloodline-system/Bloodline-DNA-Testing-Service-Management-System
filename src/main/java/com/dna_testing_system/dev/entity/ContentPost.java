@@ -48,7 +48,6 @@ public class ContentPost {
     String postContent;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 100)
     @NotNull
     @Column(name = "post_category", nullable = false, length = 100)
     PostCategory postCategory;

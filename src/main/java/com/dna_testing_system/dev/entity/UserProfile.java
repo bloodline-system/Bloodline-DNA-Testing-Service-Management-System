@@ -1,5 +1,6 @@
 package com.dna_testing_system.dev.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -28,18 +29,17 @@ public class UserProfile {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
     @Size(max = 100)
-    @NotNull
-    @Column(name = "first_name", nullable = false, length = 100)
+    @Column(name = "first_name", length = 100)
     String firstName;
 
     @Size(max = 100)
-    @NotNull
-    @Column(name = "last_name", nullable = false, length = 100)
+    @Column(name = "last_name", length = 100)
     String lastName;
 
     @Column(name = "date_of_birth")

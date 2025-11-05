@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Update Sample Collection', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-edit-line me-2"></i>Update Sample Collection Status & Quality
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/staff/update-sample-collection}" method="post">
+                        <input type="hidden" name="sampleCollectionId" th:value="${sampleCollection.collectionId}" />
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-details mb-4">
+                                <tbody>
+                                    <tr>
+                                        <th class="bg-light" style="width: 200px;">Collection ID</th>
+                                        <td><strong class="text-primary" th:text="${sampleCollection.collectionId}"></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Order ID</th>
+                                        <td><strong class="text-primary" th:text="${sampleCollection.order.id}"></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Current Status</th>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${sampleCollection.collectionStatus.name() == 'PENDING'} ? 'bg-warning' :
+                                                              (${sampleCollection.collectionStatus.name() == 'COLLECTED'} ? 'bg-info' :
+                                                              (${sampleCollection.collectionStatus.name() == 'PROCESSING'} ? 'bg-primary' :
+                                                              (${sampleCollection.collectionStatus.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger')))"
+                                                  th:text="${sampleCollection.collectionStatus}">Status</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">New Status</th>
+                                        <td>
+                                            <select name="collectionStatus" class="form-select" required>
+                                                <option th:each="status : ${T(com.dna_testing_system.dev.enums.CollectionStatus).values()}"
+                                                        th:value="${status}"
+                                                        th:text="${status}"
+                                                        th:selected="${status == sampleCollection.collectionStatus}">
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">Current Quality</th>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${sampleCollection.sampleQuality}"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-light">New Quality</th>
+                                        <td>
+                                            <select name="sampleQuality" class="form-select" required>
+                                                <option th:each="quality : ${T(com.dna_testing_system.dev.enums.SampleQuality).values()}"
+                                                        th:value="${quality}"
+                                                        th:text="${quality}"
+                                                        th:selected="${quality == sampleCollection.sampleQuality}">
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-end">
+                            <a th:href="@{/staff/list-sample-collection}" class="btn btn-outline-secondary me-2">
+                                <i class="ri-arrow-left-line me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line me-2"></i>Update
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+</th:block>
+</html>

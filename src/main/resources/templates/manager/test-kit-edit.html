@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/manager-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Edit Test Kit', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div id="content">
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="ri-check-circle-line me-2"></i><span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i><span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i><span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/manager/test-kit-management}">Test Kit Management</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/manager/test-kit-management/{id}(id=${testKitId})}">Test Kit Details</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+        </ol>
+    </nav>
+
+    <!-- Edit Test Kit Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ri-edit-line me-2"></i>Edit Test Kit
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/manager/test-kit-management/{id}/update(id=${testKitId})}" 
+                          method="post" 
+                          th:object="${testKitRequest}">
+                        
+                        <div class="row g-3">
+                            <!-- Kit Name -->
+                            <div class="col-md-6">
+                                <label for="kitName" class="form-label">Kit Name <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="kitName" 
+                                       th:field="*{kitName}" 
+                                       th:classappend="${#fields.hasErrors('kitName')} ? 'is-invalid'"
+                                       required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('kitName')}" th:errors="*{kitName}">
+                                    Kit name is required
+                                </div>
+                            </div>
+
+                            <!-- Produced By -->
+                            <div class="col-md-6">
+                                <label for="producedBy" class="form-label">Produced By <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="producedBy" 
+                                       th:field="*{producedBy}" 
+                                       th:classappend="${#fields.hasErrors('producedBy')} ? 'is-invalid'"
+                                       required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('producedBy')}" th:errors="*{producedBy}">
+                                    Producer is required
+                                </div>
+                            </div>
+
+                            <!-- Kit Type -->
+                            <div class="col-md-6">
+                                <label for="kitType" class="form-label">Kit Type <span class="text-danger">*</span></label>
+                                <select class="form-select" 
+                                        id="kitType" 
+                                        th:field="*{kitType}" 
+                                        th:classappend="${#fields.hasErrors('kitType')} ? 'is-invalid'"
+                                        required>
+                                    <option value="">Select Kit Type</option>
+                                    <option th:each="type : ${kitTypes}" 
+                                            th:value="${type}" 
+                                            th:text="${type.displayName}"
+                                            th:selected="${type == testKitRequest.kitType}">Type</option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('kitType')}" th:errors="*{kitType}">
+                                    Kit type is required
+                                </div>
+                            </div>
+
+                            <!-- Sample Type -->
+                            <div class="col-md-6">
+                                <label for="sampleType" class="form-label">Sample Type <span class="text-danger">*</span></label>
+                                <select class="form-select" 
+                                        id="sampleType" 
+                                        th:field="*{sampleType}" 
+                                        th:classappend="${#fields.hasErrors('sampleType')} ? 'is-invalid'"
+                                        required>
+                                    <option value="">Select Sample Type</option>
+                                    <option th:each="type : ${sampleTypes}" 
+                                            th:value="${type}" 
+                                            th:text="${type.displayName}"
+                                            th:selected="${type == testKitRequest.sampleType}">Type</option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('sampleType')}" th:errors="*{sampleType}">
+                                    Sample type is required
+                                </div>
+                            </div>
+
+                            <!-- Base Price -->
+                            <div class="col-md-6">
+                                <label for="basePrice" class="form-label">Base Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="basePrice" 
+                                           th:field="*{basePrice}" 
+                                           th:classappend="${#fields.hasErrors('basePrice')} ? 'is-invalid'"
+                                           step="0.01" 
+                                           min="0" 
+                                           required>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('basePrice')}" th:errors="*{basePrice}">
+                                        Valid base price is required
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Current Price -->
+                            <div class="col-md-6">
+                                <label for="currentPrice" class="form-label">Current Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="currentPrice" 
+                                           th:field="*{currentPrice}" 
+                                           th:classappend="${#fields.hasErrors('currentPrice')} ? 'is-invalid'"
+                                           step="0.01" 
+                                           min="0" 
+                                           required>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPrice')}" th:errors="*{currentPrice}">
+                                        Valid current price is required
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quantity in Stock -->
+                            <div class="col-md-6">
+                                <label for="quantityInStock" class="form-label">Quantity in Stock <span class="text-danger">*</span></label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="quantityInStock" 
+                                       th:field="*{quantityInStock}" 
+                                       th:classappend="${#fields.hasErrors('quantityInStock')} ? 'is-invalid'"
+                                       min="0" 
+                                       required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('quantityInStock')}" th:errors="*{quantityInStock}">
+                                    Valid quantity is required
+                                </div>
+                            </div>
+
+                            <!-- Expiry Date -->
+                            <div class="col-md-6">
+                                <label for="expiryDate" class="form-label">Expiry Date</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="expiryDate" 
+                                       th:field="*{expiryDate}" 
+                                       th:classappend="${#fields.hasErrors('expiryDate')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('expiryDate')}" th:errors="*{expiryDate}">
+                                    Expiry date must be in the future
+                                </div>
+                                <div class="form-text">Leave empty if no expiry date</div>
+                            </div>
+
+                            <!-- Availability -->
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           id="isAvailable" 
+                                           th:field="*{isAvailable}">
+                                    <label class="form-check-label" for="isAvailable">
+                                        <strong>Available for use</strong>
+                                    </label>
+                                    <div class="form-text">Uncheck to mark this test kit as unavailable</div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <label for="kitDescription" class="form-label">Description</label>
+                                <textarea class="form-control" 
+                                          id="kitDescription" 
+                                          th:field="*{kitDescription}" 
+                                          th:classappend="${#fields.hasErrors('kitDescription')} ? 'is-invalid'"
+                                          rows="4" 
+                                          placeholder="Optional description of the test kit..."></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('kitDescription')}" th:errors="*{kitDescription}">
+                                    Description is too long
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <a th:href="@{/manager/test-kit-management/{id}(id=${testKitId})}" 
+                                           class="btn btn-outline-secondary">
+                                            <i class="ri-arrow-left-line me-1"></i>Back to Details
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <a th:href="@{/manager/test-kit-management}" 
+                                           class="btn btn-secondary me-2">
+                                            <i class="ri-close-line me-1"></i>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="ri-save-line me-1"></i>Update Test Kit
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const alertInstance = new bootstrap.Alert(alert);
+                alertInstance.close();
+            });
+        }, 5000);
+
+        // Price validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const basePriceInput = document.getElementById('basePrice');
+            const currentPriceInput = document.getElementById('currentPrice');
+            
+            function validatePrices() {
+                const basePrice = parseFloat(basePriceInput.value) || 0;
+                const currentPrice = parseFloat(currentPriceInput.value) || 0;
+                
+                if (currentPrice > basePrice) {
+                    currentPriceInput.setCustomValidity('Current price cannot be higher than base price');
+                } else {
+                    currentPriceInput.setCustomValidity('');
+                }
+            }
+            
+            basePriceInput.addEventListener('input', validatePrices);
+            currentPriceInput.addEventListener('input', validatePrices);
+        });
+    </script>
+</div>
+
+</html>

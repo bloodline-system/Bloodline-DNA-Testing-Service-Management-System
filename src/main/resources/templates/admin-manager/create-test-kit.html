@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/common/meta :: common-meta"></head>
+<body>
+<div th:replace="fragments/manager/header :: header"></div>
+<div class="container-fluid">
+
+
+    <div class="form-container">
+        <div class="form-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                </div>
+                <div class="header-text">
+                    <h1>DNA Test Kit Creation</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-indicator">
+            <div class="progress-steps">
+                <div class="step active">
+                    <div class="step-number">1</div>
+                    <span>Basic Info</span>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <span>Pricing</span>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <span>Details</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-body">
+            <form th:action="@{/test-kits/create}" th:object="${newTestKit}" method="post">
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Basic Information</h3>
+                            <p class="section-subtitle">Essential details about your DNA test kit</p>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-grid grid-2">
+                            <div class="form-group">
+                                <label for="kitName" class="form-label label-required">
+                                    <i class="bi bi-tag"></i>
+                                    Kit Name
+                                </label>
+                                <input type="text" class="form-control" id="kitName" th:field="*{kitName}" placeholder="Enter descriptive kit name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="kitType" class="form-label label-required">
+                                    <i class="bi bi-diagram-3"></i>
+                                    Kit Type
+                                </label>
+                                <input type="text" class="form-control" id="kitType" th:field="*{kitType}" placeholder="e.g., Ancestry, Health, Paternity" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sampleType" class="form-label label-required">
+                                    <i class="bi bi-droplet"></i>
+                                    Sample Type
+                                </label>
+                                <input type="text" class="form-control" id="sampleType" th:field="*{sampleType}" placeholder="e.g., Saliva, Blood, Cheek Swab" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="producedBy" class="form-label label-required">
+                                    <i class="bi bi-building"></i>
+                                    Manufacturer
+                                </label>
+                                <input type="text" class="form-control" id="producedBy" th:field="*{producedBy}" placeholder="Company or laboratory name" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Pricing & Inventory</h3>
+                            <p class="section-subtitle">Set pricing and manage stock levels</p>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="pricing-section">
+                                    <div class="pricing-header">
+                                        <div class="pricing-icon">
+                                            <i class="bi bi-tag-fill"></i>
+                                        </div>
+                                        <h4 class="pricing-title">Price Configuration</h4>
+                                    </div>
+                                    <div class="form-grid grid-2">
+                                        <div class="form-group">
+                                            <label for="basePrice" class="form-label label-required">Base Price ($)</label>
+                                            <div class="input-group-enhanced">
+                                                <i class="bi bi-currency-dollar input-icon"></i>
+                                                <input type="number" step="0.01" class="form-control" id="basePrice" th:field="*{basePrice}" placeholder="0.00" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="currentPrice" class="form-label label-required">Current Price ($)</label>
+                                            <div class="input-group-enhanced">
+                                                <i class="bi bi-currency-dollar input-icon"></i>
+                                                <input type="number" step="0.01" class="form-control" id="currentPrice" th:field="*{currentPrice}" placeholder="0.00" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label for="quantityInStock" class="form-label label-required">
+                                        <i class="bi bi-box-seam"></i>
+                                        Stock Quantity
+                                    </label>
+                                    <div class="input-group-enhanced">
+                                        <i class="bi bi-box-seam input-icon"></i>
+                                        <input type="number" class="form-control" id="quantityInStock" th:field="*{quantityInStock}" placeholder="0" required>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <div>
+                    <h3 class="section-title">Additional Details</h3>
+                    <p class="section-subtitle">Complete kit information and specifications</p>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="form-group">
+                            <label for="kitDescription" class="form-label">
+                                <i class="bi bi-file-text"></i>
+                                Kit Description
+                            </label>
+                            <textarea class="form-control form-textarea" id="kitDescription" th:field="*{kitDescription}" placeholder="Provide detailed description of the test kit, its purpose, capabilities, and any special instructions..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label for="expiryDate" class="form-label label-required">
+                                <i class="bi bi-calendar-event"></i>
+                                Expiry Date
+                            </label>
+                            <div class="input-group-enhanced">
+                                <i class="bi bi-calendar-event input-icon"></i>
+                                <input type="date" class="form-control" id="expiryDate" th:field="*{expiryDate}" th:min="${today}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <div class="progress-text">
+                <i class="bi bi-shield-check"></i>
+                All data is encrypted and secure
+            </div>
+            <div class="btn-group-custom">
+                <a th:href="@{/test-kits}" class="btn-custom btn-secondary-custom">
+                    <i class="bi bi-arrow-left"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-custom btn-primary-custom" id="submitBtn">
+                    <i class="bi bi-plus-circle btn-icon"></i>
+                    Create Test Kit
+                </button>
+            </div>
+        </div>
+
+        </form>
+    </div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formControls = document.querySelectorAll('.form-control');
+        const form = document.querySelector('form');
+        const submitBtn = document.getElementById('submitBtn');
+
+        const priceAndQuantityInputs = document.querySelectorAll('#basePrice, #currentPrice, #quantityInStock');
+
+        priceAndQuantityInputs.forEach(input => {
+            if(input) {
+                input.addEventListener('input', function() {
+                    if (parseFloat(this.value) < 0) {
+                        this.value = 0;
+                    }
+                });
+            }
+        });
+
+        function updateProgress() {
+            const steps = document.querySelectorAll('.step');
+            const sections = document.querySelectorAll('.form-section');
+
+            sections.forEach((section, index) => {
+                const inputs = section.querySelectorAll('input[required], textarea[required]');
+                const filledInputs = Array.from(inputs).filter(input => input.value.trim() !== '');
+
+                if (steps[index + 1]) {
+                    if (filledInputs.length === inputs.length && inputs.length > 0) {
+                        steps[index + 1].classList.add('active');
+                    } else {
+                    }
+                }
+            });
+        }
+
+        formControls.forEach(input => {
+            input.addEventListener('blur', updateProgress);
+            input.addEventListener('input', updateProgress);
+        });
+
+
+        if(form) {
+            form.addEventListener('submit', function(e) {
+                if(submitBtn) {
+                    submitBtn.classList.add('btn-loading');
+                    submitBtn.innerHTML = '<i class="bi bi-arrow-clockwise btn-icon"></i>Creating Kit...';
+                    submitBtn.disabled = true;
+
+                    setTimeout(() => {
+                        if (submitBtn.disabled) {
+                            submitBtn.classList.remove('btn-loading');
+                            submitBtn.innerHTML = '<i class="bi bi-plus-circle btn-icon"></i>Create Test Kit';
+                            submitBtn.disabled = false;
+                        }
+                    }, 5000);
+                }
+            });
+        }
+
+        const basePrice = document.getElementById('basePrice');
+        const currentPrice = document.getElementById('currentPrice');
+
+        if(basePrice && currentPrice) {
+            basePrice.addEventListener('input', function() {
+                if (currentPrice.value === '' || currentPrice.value === '0') {
+                    currentPrice.value = this.value;
+                }
+            });
+        }
+
+        const sectionHeaders = document.querySelectorAll('.section-header');
+        sectionHeaders.forEach(header => {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function() {
+                this.closest('.form-section').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+        });
+
+        updateProgress();
+    });
+</script>
+</body>
+</html>

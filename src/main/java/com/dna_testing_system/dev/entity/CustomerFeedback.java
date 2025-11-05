@@ -43,7 +43,7 @@ public class CustomerFeedback {
 
     @Min(1) @Max(5)
     @Column(name = "overall_rating")
-    Integer overallRating;
+    Float overallRating;
 
     @Min(1) @Max(5)
     @Column(name = "service_quality_rating")

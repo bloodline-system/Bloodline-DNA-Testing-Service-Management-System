@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layouts/admin-layout :: layout(~{::#main-content}, ~{::#page-scripts}, ${pageTitle}, ${breadcrumbs}, ~{::#action-buttons})}">
+
+<div id="main-content">
+    <!-- Alert for errors -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${order}" class="row">
+        <!-- Order Overview Card -->
+        <div class="col-xl-8">
+            <div class="card custom-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-title">Order Details</div>
+                    <div class="d-flex gap-2">
+                        <span class="badge fs-12"
+                            th:classappend="${order.orderStatus.name() == 'PENDING' ? 'bg-warning-transparent text-warning' :
+                 (order.orderStatus.name() == 'CONFIRMED' ? 'bg-info-transparent text-info' :
+                 (order.orderStatus.name() == 'IN_PROGRESS' ? 'bg-primary-transparent text-primary' :
+                 (order.orderStatus.name() == 'COMPLETED' ? 'bg-success-transparent text-success' :
+                 (order.orderStatus.name() == 'CANCELLED' ? 'bg-danger-transparent text-danger' : 'bg-secondary-transparent text-secondary'))))}"
+                            th:text="${#strings.replace(#strings.toLowerCase(order.orderStatus.name()), '_', ' ')}">Status</span>
+                        <span class="badge fs-12"
+                            th:classappend="${order.paymentStatus.name() == 'PENDING' ? 'bg-warning-transparent text-warning' :
+                 (order.paymentStatus.name() == 'PAID' ? 'bg-success-transparent text-success' :
+                 (order.paymentStatus.name() == 'FAILED' ? 'bg-danger-transparent text-danger' :
+                 (order.paymentStatus.name() == 'REFUNDED' ? 'bg-info-transparent text-info' : 'bg-secondary-transparent text-secondary')))}"
+                            th:text="${#strings.toLowerCase(order.paymentStatus.name())}">Payment</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Order Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Order ID</label>
+                                <p class="mb-0" th:text="'#' + ${order.id}">#12345</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Service</label>
+                                <p class="mb-0">
+                                    <span th:text="${order.serviceName}">DNA Paternity Test</span>
+                                    <br><small class="text-muted" th:text="${order.serviceCategory}">Paternity
+                                        Testing</small>
+                                </p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Collection Type</label>
+                                <p class="mb-0"
+                                    th:text="${#strings.replace(#strings.toLowerCase(order.collectionType.name()), '_', ' ')}">
+                                    Home Collection</p>
+                            </div>
+                            <div class="mb-3" th:if="${order.collectionAddress}">
+                                <label class="form-label fw-semibold">Collection Address</label>
+                                <p class="mb-0" th:text="${order.collectionAddress}">123 Main St, City, State</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Order Date</label>
+                                <p class="mb-0" th:text="${#temporals.format(order.createdAt, 'MMMM dd, yyyy HH:mm')}">
+                                    December 25, 2024 10:30</p>
+                            </div>
+                            <div class="mb-3" th:if="${order.appointmentDate}">
+                                <label class="form-label fw-semibold">Appointment Date</label>
+                                <p class="mb-0" th:text="${#temporals.format(order.appointmentDate, 'MMMM dd, yyyy')}">
+                                    December 30, 2024</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Participants</label>
+                                <p class="mb-0" th:text="${order.participants} + ' participants'">2 participants</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Execution Time</label>
+                                <p class="mb-0" th:text="${order.executionTimeDays} + ' days'">5-7 days</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Information -->
+                    <hr>
+                    <h6 class="fw-semibold mb-3">Financial Information</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Amount:</span>
+                                <span class="fw-semibold"
+                                    th:text="'$' + ${#numbers.formatDecimal(order.totalAmount, 0, 2)}">$299.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2" th:if="${order.discountAmount > 0}">
+                                <span>Discount:</span>
+                                <span class="text-success"
+                                    th:text="'-$' + ${#numbers.formatDecimal(order.discountAmount, 0, 2)}">-$20.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-top pt-2">
+                                <span class="fw-semibold">Final Amount:</span>
+                                <span class="fw-semibold fs-16"
+                                    th:text="'$' + ${#numbers.formatDecimal(order.finalAmount, 0, 2)}">$279.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Participants -->
+            <div class="card custom-card"
+                th:if="${order.orderParticipants != null and !#lists.isEmpty(order.orderParticipants)}">
+                <div class="card-header">
+                    <div class="card-title">Participants</div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Date of Birth</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="participant : ${order.orderParticipants}">
+                                    <td th:text="${participant.firstName + ' ' + participant.lastName}">John Doe</td>
+                                    <td th:text="${participant.gender}">Male</td>
+                                    <td th:text="${#temporals.format(participant.dateOfBirth, 'MMM dd, yyyy')}">Jan 01,
+                                        1990</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Kits -->
+            <div class="card custom-card" th:if="${order.orderKits != null and !#lists.isEmpty(order.orderKits)}">
+                <div class="card-header">
+                    <div class="card-title">Test Kits</div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Kit Name</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="orderKit : ${order.orderKits}">
+                                    <td th:text="${orderKit.kit.kitName}">DNA Collection Kit</td>
+                                    <td th:text="${orderKit.quantityOrdered}">1</td>
+                                    <td th:text="'$' + ${#numbers.formatDecimal(orderKit.unitPrice, 0, 2)}">$50.00</td>
+                                    <td th:text="'$' + ${#numbers.formatDecimal(orderKit.totalPrice, 0, 2)}">$50.00</td>
+                                    <td>
+                                        <span class="badge bg-info-transparent text-info"
+                                            th:text="${#strings.toLowerCase(orderKit.kitStatus.name())}">ordered</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Collections -->
+            <div class="card custom-card"
+                th:if="${order.sampleCollections != null and !#lists.isEmpty(order.sampleCollections)}">
+                <div class="card-header">
+                    <div class="card-title">Sample Collections</div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Collection ID</th>
+                                    <th>Sample Type</th>
+                                    <th>Quality</th>
+                                    <th>Collection Date</th>
+                                    <th>Staff</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="collection : ${order.sampleCollections}">
+                                    <td th:text="'SC-' + ${collection.collectionId}">#SC-001</td>
+                                    <td th:text="${collection.sampleType}">Saliva</td>
+                                    <td>
+                                        <span class="badge" th:classappend="${collection.sampleQuality.name() == 'GOOD' ? 'bg-success-transparent text-success' :
+                 (collection.sampleQuality.name() == 'FAIR' ? 'bg-warning-transparent text-warning' :
+                 'bg-danger-transparent text-danger')}"
+                                            th:text="${#strings.toLowerCase(collection.sampleQuality.name())}">good</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(collection.collectionDate, 'MMM dd, yyyy HH:mm')}">
+                                        Dec 30, 2024 14:30</td>
+                                    <td th:text="${collection.staff.fullName}">Lab Technician</td>
+                                    <td>
+                                        <span class="badge bg-success-transparent text-success"
+                                            th:text="${#strings.toLowerCase(collection.collectionStatus.name())}">completed</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Information Sidebar -->
+        <div class="col-xl-4">
+            <!-- Customer Details -->
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Customer Information</div>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="avatar avatar-xl mx-auto">
+                            <img th:if="${order.profileImageUrl != null and !#strings.isEmpty(order.profileImageUrl)}"
+                                th:src="@{${order.profileImageUrl}}" alt="Profile" class="avatar-img rounded-circle">
+                            <span
+                                th:unless="${order.profileImageUrl != null and !#strings.isEmpty(order.profileImageUrl)}"
+                                class="avatar-initials rounded-circle bg-primary text-white fs-18"
+                                th:text="${#strings.substring(order.customerName, 0, 1)}">C</span>
+                        </div>
+                        <h6 class="fw-semibold mt-2 mb-0" th:text="${order.customerName}">Customer Name</h6>
+                        <small class="text-muted" th:text="${order.username}">@username</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email</label>
+                        <p class="mb-0" th:text="${order.email}">customer@email.com</p>
+                    </div>
+
+                    <div class="mb-3" th:if="${order.phoneNumber}">
+                        <label class="form-label fw-semibold">Phone Number</label>
+                        <p class="mb-0" th:text="${order.phoneNumber}">+1 234 567 8900</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Staff Assignment -->
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Staff Assignment</div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3" th:if="${order.collectionStaffName}">
+                        <label class="form-label fw-semibold">Collection Staff</label>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initials rounded-circle bg-info text-white"
+                                    th:text="${#strings.substring(order.collectionStaffName, 0, 1)}">S</span>
+                            </div>
+                            <div>
+                                <div class="fw-semibold" th:text="${order.collectionStaffName}">Staff Name</div>
+                                <small class="text-muted"
+                                    th:text="${order.collectionStaffEmail}">staff@email.com</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" th:if="${order.analysisStaffName}">
+                        <label class="form-label fw-semibold">Analysis Staff</label>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-sm me-2">
+                                <span class="avatar-initials rounded-circle bg-success text-white"
+                                    th:text="${#strings.substring(order.analysisStaffName, 0, 1)}">A</span>
+                            </div>
+                            <div>
+                                <div class="fw-semibold" th:text="${order.analysisStaffName}">Analyst Name</div>
+                                <small class="text-muted"
+                                    th:text="${order.analysisStaffEmail}">analyst@email.com</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        th:if="${#strings.isEmpty(order.collectionStaffName)} and ${#strings.isEmpty(order.analysisStaffName)}">
+                        <p class="text-muted text-center py-3">No staff assigned yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Results -->
+            <div class="card custom-card" th:if="${order.testingResultStatus}">
+                <div class="card-header">
+                    <div class="card-title">Test Results</div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Status</label>
+                        <p class="mb-0">
+                            <span class="badge bg-info-transparent text-info" th:text="${order.testingResultStatus}">In
+                                Progress</span>
+                        </p>
+                    </div>
+
+                    <div class="mb-3" th:if="${order.testingResultAnalyzedBy}">
+                        <label class="form-label fw-semibold">Analyzed By</label>
+                        <p class="mb-0" th:text="${order.testingResultAnalyzedBy}">Dr. Smith</p>
+                    </div>
+
+                    <div class="mb-3" th:if="${order.testingResultAnalysisDate}">
+                        <label class="form-label fw-semibold">Analysis Date</label>
+                        <p class="mb-0"
+                            th:text="${#temporals.format(order.testingResultAnalysisDate, 'MMM dd, yyyy HH:mm')}">Jan
+                            05, 2025 10:30</p>
+                    </div>
+
+                    <div class="mb-3" th:if="${order.testingResultSummary}">
+                        <label class="form-label fw-semibold">Summary</label>
+                        <p class="mb-0" th:text="${order.testingResultSummary}">Test summary here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Quick Actions</div>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary"
+                            th:onclick="'updateOrderStatus(' + ${order.id} + ', \'CONFIRMED\')'">
+                            <i class="ri-check-line me-1"></i>Confirm Order
+                        </button>
+                        <button type="button" class="btn btn-info"
+                            th:onclick="'updateOrderStatus(' + ${order.id} + ', \'IN_PROGRESS\')'">
+                            <i class="ri-play-line me-1"></i>Start Processing
+                        </button>
+                        <button type="button" class="btn btn-success"
+                            th:onclick="'updateOrderStatus(' + ${order.id} + ', \'COMPLETED\')'">
+                            <i class="ri-check-double-line me-1"></i>Mark Complete
+                        </button>
+                        <hr>
+                        <button type="button" class="btn btn-danger"
+                            th:onclick="'updateOrderStatus(' + ${order.id} + ', \'CANCELLED\')'">
+                            <i class="ri-close-line me-1"></i>Cancel Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="action-buttons">
+    <div class="d-flex gap-2">
+        <a th:href="@{/admin/orders}" class="btn btn-light">
+            <i class="ri-arrow-left-line me-1"></i>Back to Orders
+        </a>
+        <button type="button" class="btn btn-primary" onclick="window.print()">
+            <i class="ri-printer-line me-1"></i>Print
+        </button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="ri-download-line me-1"></i>Download
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="downloadOrder('pdf')">
+                        <i class="ri-file-pdf-line me-2"></i>Download as PDF</a></li>
+                <li><a class="dropdown-item" href="#" onclick="downloadOrder('excel')">
+                        <i class="ri-file-excel-line me-2"></i>Download as Excel</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        function updateOrderStatus(orderId, status) {
+            if (confirm('Are you sure you want to update this order status to ' + status.toLowerCase().replace('_', ' ') + '?')) {
+                fetch('/admin/orders/' + orderId + '/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'status=' + encodeURIComponent(status) + '&notes=' + encodeURIComponent('Status updated by admin from order details page')
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('success', data.message);
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'An error occurred while updating the order status.');
+                    });
+            }
+        }
+
+        function downloadOrder(format) {
+            alert('Download functionality will be implemented for ' + format + ' format.');
+        }
+
+        function showAlert(type, message) {
+            const alertContainer = document.querySelector('.container-fluid');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.insertBefore(alert, alertContainer.firstChild);
+
+            setTimeout(() => {
+                if (alert && alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</div>
+
+</html>

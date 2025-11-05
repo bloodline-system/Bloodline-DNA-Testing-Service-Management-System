@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/admin-layout :: layout(~{::#content}, ~{::page-script}, 'Admin Dashboard', null, null)}"
+    xmlns:th="http://www.thymeleaf.org" data-nav-layout="vertical" data-theme-mode="light" data-header-styles="light"
+    data-menu-styles="light" loader="disable" data-vertical-style="overlay" class="mdl-js"
+    data-toggled="icon-overlay-close">
+
+<body>
+    <div id="content">
+        <!-- Dashboard Overview Cards -->
+        <div class="row g-2 mb-3">
+            <!-- Total Users -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-start border-danger border-4 h-100">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md bg-danger-transparent">
+                                <i class="ri-user-line fs-18"></i>
+                            </div>
+                            <div class="ms-3">
+                                <p class="mb-0 text-muted fs-12">Total Users</p>
+                                <h5 class="mb-0 fw-semibold" th:text="${dashboardStats.totalUsers ?: 0}">0</h5>
+                                <small class="text-success">
+                                    <i class="ri-arrow-up-line"></i> 12% this month
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Orders -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-start border-success border-4 h-100">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md bg-success-transparent">
+                                <i class="ri-shopping-cart-line fs-18"></i>
+                            </div>
+                            <div class="ms-3">
+                                <p class="mb-0 text-muted fs-12">Total Orders</p>
+                                <h5 class="mb-0 fw-semibold" th:text="${dashboardStats.totalOrders ?: 0}">0</h5>
+                                <small class="text-success">
+                                    <i class="ri-arrow-up-line"></i> 8% this month
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Health -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-start border-info border-4 h-100">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md bg-info-transparent">
+                                <i class="ri-pulse-line fs-18"></i>
+                            </div>
+                            <div class="ms-3">
+                                <p class="mb-0 text-muted fs-12">System Health</p>
+                                <h5 class="mb-0 fw-semibold text-success">Excellent</h5>
+                                <small class="text-info">
+                                    <i class="ri-cpu-line"></i> CPU: 15% | RAM: 60%
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-start border-warning border-4 h-100">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md bg-warning-transparent">
+                                <i class="ri-money-dollar-circle-line fs-18"></i>
+                            </div>
+                            <div class="ms-3">
+                                <p class="mb-0 text-muted fs-12">Total Revenue</p>
+                                <h5 class="mb-0 fw-semibold" th:text="${dashboardStats.totalRevenue ?: '$0'}">$0</h5>
+                                <small class="text-success">
+                                    <i class="ri-arrow-up-line"></i> 15% this month
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Overview & Quick Actions -->
+        <div class="row g-2 mb-3">
+            <!-- System Status -->
+            <div class="col-xl-8">
+                <div class="card h-100">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">System Status</h6>
+                        <div class="dropdown">
+                            <a href="javascript:void(0);" class="btn btn-sm btn-outline-light dropdown-toggle py-1 px-2"
+                               data-bs-toggle="dropdown">
+                                Last 24 Hours
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="javascript:void(0);">Last Hour</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Last 24 Hours</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Last 7 Days</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-2">
+                            <div class="col-md-3 col-6">
+                                <div class="text-center p-2 border rounded">
+                                    <i class="ri-server-line fs-24 text-success"></i>
+                                    <h6 class="mb-1 fs-13">Database</h6>
+                                    <span class="badge bg-success">Online</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="text-center p-2 border rounded">
+                                    <i class="ri-mail-line fs-24 text-success"></i>
+                                    <h6 class="mb-1 fs-13">Email Service</h6>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="text-center p-2 border rounded">
+                                    <i class="ri-cloud-line fs-24 text-warning"></i>
+                                    <h6 class="mb-1 fs-13">File Storage</h6>
+                                    <span class="badge bg-warning">Warning</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="text-center p-2 border rounded">
+                                    <i class="ri-shield-check-line fs-24 text-success"></i>
+                                    <h6 class="mb-1 fs-13">Security</h6>
+                                    <span class="badge bg-success">Secure</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-xl-4">
+                <div class="card h-100">
+                    <div class="card-header py-2">
+                        <h6 class="mb-0">Quick Actions</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <a th:href="@{/admin/users}" class="list-group-item list-group-item-action py-2">
+                                <i class="ri-user-add-line me-2"></i>
+                                Manage Users
+                            </a>
+                            <a th:href="@{/admin/settings}" class="list-group-item list-group-item-action py-2">
+                                <i class="ri-settings-3-line me-2"></i>
+                                System Settings
+                            </a>
+                            <a th:href="@{/admin/reports/financial}" class="list-group-item list-group-item-action py-2">
+                                <i class="ri-file-chart-line me-2"></i>
+                                Generate Reports
+                            </a>
+                            <a th:href="@{/admin/logs}" class="list-group-item list-group-item-action py-2">
+                                <i class="ri-file-text-line me-2"></i>
+                                View System Logs
+                            </a>
+                            <a th:href="@{/admin/settings/backup}" class="list-group-item list-group-item-action py-2">
+                                <i class="ri-database-2-line me-2"></i>
+                                Backup System
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity & System Alerts -->
+        <div class="row g-2 mb-3">
+            <!-- Recent Activity -->
+            <div class="col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Recent System Activity</h6>
+                        <a th:href="@{/admin/logs}" class="btn btn-sm btn-primary py-1 px-2">View All</a>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title fs-13">New user registration</h6>
+                                    <p class="timeline-text">John Doe registered as a new customer</p>
+                                    <small class="text-muted">2 minutes ago</small>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title fs-13">System backup completed</h6>
+                                    <p class="timeline-text">Automated daily backup finished successfully</p>
+                                    <small class="text-muted">1 hour ago</small>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title fs-13">High server load detected</h6>
+                                    <p class="timeline-text">CPU usage exceeded 80% for 5 minutes</p>
+                                    <small class="text-muted">3 hours ago</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Alerts -->
+            <div class="col-xl-6">
+                <div class="card h-100">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">System Alerts</h6>
+                        <a th:href="@{/admin/alerts}" class="btn btn-sm btn-danger py-1 px-2">View All</a>
+                    </div>
+                    <div class="card-body p-3">
+                        <div th:if="${#lists.isEmpty(systemAlerts)}" class="text-center text-muted py-2">
+                            <i class="ri-shield-check-line fs-24 mb-1"></i>
+                            <p class="mb-0">No active alerts. System is running smoothly.</p>
+                        </div>
+                        <div th:if="${!#lists.isEmpty(systemAlerts)}" class="alert-list">
+                            <div th:each="alert : ${systemAlerts}"
+                                 th:class="'alert alert-' + ${alert.type} + ' border-start border-4 border-' + ${alert.type} + ' py-2 mb-2'">
+                                <div class="d-flex align-items-start">
+                                    <i th:class="'ri-error-warning-line me-2 mt-1'"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="alert-heading mb-0 fs-13" th:text="${alert.title}">Alert Title</h6>
+                                        <p class="mb-0 fs-12" th:text="${alert.message}">Alert message</p>
+                                        <small class="text-muted fs-11">Just now</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="row g-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-2">
+                        <h6 class="mb-0">Performance Metrics</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-md-3 col-sm-6">
+                                <div class="metric p-2 border rounded">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="ri-cpu-line fs-22 text-primary me-2"></i>
+                                        <h6 class="mb-0 fs-13">CPU Usage</h6>
+                                    </div>
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" style="width: 15%"></div>
+                                    </div>
+                                    <span class="text-muted fs-12">15%</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="metric p-2 border rounded">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="ri-hard-drive-line fs-22 text-success me-2"></i>
+                                        <h6 class="mb-0 fs-13">Memory Usage</h6>
+                                    </div>
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: 60%"></div>
+                                    </div>
+                                    <span class="text-muted fs-12">60%</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="metric p-2 border rounded">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="ri-database-line fs-22 text-warning me-2"></i>
+                                        <h6 class="mb-0 fs-13">Disk Space</h6>
+                                    </div>
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" style="width: 75%"></div>
+                                    </div>
+                                    <span class="text-muted fs-12">75%</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="metric p-2 border rounded">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="ri-wifi-line fs-22 text-info me-2"></i>
+                                        <h6 class="mb-0 fs-13">Network I/O</h6>
+                                    </div>
+                                    <div class="progress mb-1" style="height: 8px;">
+                                        <div class="progress-bar bg-info" style="width: 25%"></div>
+                                    </div>
+                                    <span class="text-muted fs-12">25%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-script">
+        <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+        <script>
+            // Real-time updates for dashboard metrics
+            document.addEventListener('DOMContentLoaded', function() {
+                // Update metrics every 30 seconds
+                setInterval(function() {
+                    // In a real application, this would fetch real data from the server
+                    updatePerformanceMetrics();
+                }, 30000);
+
+                function updatePerformanceMetrics() {
+                    // Mock data - in real app, fetch from server
+                    const metrics = {
+                        cpu: Math.floor(Math.random() * 30) + 10,
+                        memory: Math.floor(Math.random() * 40) + 50,
+                        disk: Math.floor(Math.random() * 20) + 70,
+                        network: Math.floor(Math.random() * 50) + 10
+                    };
+
+                    // Update progress bars
+                    updateProgressBar('cpu', metrics.cpu);
+                    updateProgressBar('memory', metrics.memory);
+                    updateProgressBar('disk', metrics.disk);
+                    updateProgressBar('network', metrics.network);
+                }
+
+                function updateProgressBar(metric, value) {
+                    const progressBar = document.querySelector(`.metric:nth-child(${getMetricIndex(metric)}) .progress-bar`);
+                    const valueSpan = document.querySelector(`.metric:nth-child(${getMetricIndex(metric)}) .text-muted`);
+
+                    if (progressBar && valueSpan) {
+                        progressBar.style.width = value + '%';
+                        valueSpan.textContent = value + '%';
+
+                        // Update color based on value
+                        progressBar.className = 'progress-bar ' + getProgressBarColor(metric, value);
+                    }
+                }
+
+                function getMetricIndex(metric) {
+                    switch(metric) {
+                        case 'cpu': return 1;
+                        case 'memory': return 2;
+                        case 'disk': return 3;
+                        case 'network': return 4;
+                        default: return 1;
+                    }
+                }
+
+                function getProgressBarColor(metric, value) {
+                    if (value > 80) return 'bg-danger';
+                    if (value > 60) return 'bg-warning';
+                    return 'bg-success';
+                }
+            });
+        </script>
+
+        <style>
+            .timeline {
+                position: relative;
+                padding-left: 20px;
+            }
+
+            .timeline-item {
+                position: relative;
+                margin-bottom: 12px;
+            }
+
+            .timeline-item:last-child {
+                margin-bottom: 0;
+            }
+
+            .timeline-marker {
+                position: absolute;
+                left: -20px;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                top: 6px;
+            }
+
+            .timeline-content h6 {
+                margin-bottom: 2px;
+            }
+
+            .timeline-text {
+                margin-bottom: 2px;
+                font-size: 13px;
+            }
+
+            .alert-list .alert {
+                padding: 0.5rem;
+            }
+
+            .alert-list .alert:last-child {
+                margin-bottom: 0;
+            }
+
+            .card-header {
+                border-bottom: 1px solid rgba(0,0,0,.075);
+            }
+
+            .progress {
+                background-color: rgba(0,0,0,.05);
+            }
+        </style>
+    </div>
+</body>
+</html>

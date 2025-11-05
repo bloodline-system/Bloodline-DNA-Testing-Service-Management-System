@@ -34,7 +34,6 @@ public class SystemReport {
     String reportName;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 100)
     @NotNull
     @Column(name = "report_type", nullable = false, length = 100)
     ReportType reportType;

@@ -8,6 +8,8 @@ public enum ServiceOrderStatus {
     SAMPLE_COLLECTED("Sample Collected"),
     SAMPLE_RECEIVED("Sample Received"),
     IN_PROGRESS("In Progress"),
+    RESULT_AVAILABLE("Result Available"),
+    IN_REVIEW("In Review"),
     COMPLETED("Completed"),
     CANCELLED("Cancelled");
 

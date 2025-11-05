@@ -1,0 +1,130 @@
+<script th:fragment="websocket-scripts" src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script th:fragment="websocket-scripts" src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script th:fragment="websocket-scripts">
+  class NotificationWebSocket {
+    constructor() {
+      this.stompClient = null;
+      this.connect();
+    }
+
+    connect() {
+      const socket = new SockJS('/ws');
+      this.stompClient = Stomp.over(socket);
+
+      const self = this;
+      this.stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+
+        // Subscribe to personal notification queue
+        self.stompClient.subscribe('/user/queue/notifications', function (notification) {
+          const notificationData = JSON.parse(notification.body);
+          self.showNewNotification(notificationData);
+          self.updateNotificationList(notificationData);
+        });
+
+        // Subscribe to unread count updates
+        self.stompClient.subscribe('/user/queue/unread-count', function (count) {
+          const unreadCount = JSON.parse(count.body);
+          self.updateUnreadCount(unreadCount);
+        });
+
+      }, function(error) {
+        console.log('WebSocket connection error: ' + error);
+        // Retry connection after 5 seconds
+        setTimeout(() => self.connect(), 5000);
+      });
+    }
+
+    showNewNotification(notification) {
+      // Show toast notification
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'info',
+          title: notification.subject,
+          text: notification.messageContent,
+          showConfirmButton: false,
+          timer: 5000,
+          timerProgressBar: true
+        });
+      } else {
+        // Fallback to browser notification
+        if (Notification.permission === 'granted') {
+          new Notification(notification.subject, {
+            body: notification.messageContent,
+            icon: '/assets/images/brand-logos/favicon.ico'
+          });
+        }
+      }
+    }
+
+    updateNotificationList(notification) {
+      const notificationList = document.getElementById('header-notification-scroll');
+      if (notificationList) {
+        // Create new notification element
+        const newNotificationHtml = `
+                    <li class="dropdown-item px-3">
+                        <div class="d-flex">
+                            <span class="avatar avatar-md me-2 avatar-rounded flex-shrink-0 bg-info">
+                                <i class="la la-bell fs-20"></i>
+                            </span>
+                            <div class="ms-3">
+                                <a href="/manager/notifications">
+                                    <h5 class="notification-label text-dark mb-1">${notification.subject}</h5>
+                                </a>
+                                <div class="notification-subtext">${notification.messageContent}</div>
+                                <div class="notification-subtext text-muted fs-11">Just now</div>
+                            </div>
+                        </div>
+                    </li>
+                `;
+        notificationList.insertAdjacentHTML('afterbegin', newNotificationHtml);
+      }
+    }
+
+    updateUnreadCount(count) {
+      const badges = document.querySelectorAll('.notification-badge');
+      badges.forEach(badge => {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+      });
+
+      // Update notification header text
+      const headerText = document.querySelector('.notification-header-text');
+      if (headerText) {
+        headerText.textContent = `You have ${count} notifications`;
+      }
+    }
+
+    markAsRead(notificationId) {
+      if (this.stompClient && this.stompClient.connected) {
+        this.stompClient.send("/app/notification.markAsRead", {}, notificationId);
+      }
+    }
+
+    disconnect() {
+      if (this.stompClient !== null) {
+        this.stompClient.disconnect();
+      }
+      console.log("Disconnected");
+    }
+  }
+
+  // Initialize WebSocket connection when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    window.notificationWS = new NotificationWebSocket();
+  });
+
+  // Clean up connection when page unloads
+  window.addEventListener('beforeunload', function() {
+    if (window.notificationWS) {
+      window.notificationWS.disconnect();
+    }
+  });
+</script>

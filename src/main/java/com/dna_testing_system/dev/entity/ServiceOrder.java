@@ -3,6 +3,7 @@ package com.dna_testing_system.dev.entity;
 import com.dna_testing_system.dev.enums.CollectionType;
 import com.dna_testing_system.dev.enums.PaymentStatus;
 import com.dna_testing_system.dev.enums.ServiceOrderStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -40,14 +41,14 @@ public class ServiceOrder {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JsonIgnore
     @JoinColumn(name = "service_id", nullable = false)
     MedicalService service;
 
     @Column(name = "appointment_date")
-    LocalDate appointmentDate;
+    LocalDateTime appointmentDate;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 50)
     @NotNull
     @Column(name = "collection_type", nullable = false, length = 50)
     CollectionType collectionType;
@@ -57,28 +58,13 @@ public class ServiceOrder {
     String collectionAddress;
 
     @Builder.Default
-    @Size(max = 50)
     @NotNull
     @Column(name = "order_status", nullable = false, length = 50)
     ServiceOrderStatus orderStatus = ServiceOrderStatus.PENDING;
 
-    @Builder.Default
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "payment_status", nullable = false, length = 50)
-    PaymentStatus paymentStatus = PaymentStatus.PENDING;
-
-    @Builder.Default
-    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
-    BigDecimal totalAmount = BigDecimal.ZERO;
-
-    @Builder.Default
-    @Column(name = "discount_amount", nullable = false, precision = 10, scale = 2)
-    BigDecimal discountAmount = BigDecimal.ZERO;
-
-    @Builder.Default
-    @Column(name = "final_amount", nullable = false, precision = 10, scale = 2)
-    BigDecimal finalAmount = BigDecimal.ZERO;
+    @OneToOne(mappedBy = "order")
+    @JsonIgnore
+    Payment payments;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -95,20 +81,22 @@ public class ServiceOrder {
     String updatedBy;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     Set<OrderKit> orderKits = new HashSet<>();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     Set<OrderParticipant> orderParticipants = new HashSet<>();
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @JsonIgnore
     Set<SampleCollection> sampleCollections = new HashSet<>();
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
-    Set<Payment> payments = new HashSet<>();
-
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @JsonIgnore
     Set<TestResult> testResults = new HashSet<>();
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @JsonIgnore
     Set<Notification> notifications = new HashSet<>();
 }

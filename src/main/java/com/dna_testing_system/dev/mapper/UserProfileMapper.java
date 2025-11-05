@@ -25,6 +25,7 @@ public interface UserProfileMapper {
     @Mapping(target = "password", ignore = true)
     @Mapping(target="isActive", source = "user.isActive")
     @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "role", expression = "java(getFirstRoleName(user))")
     UserProfileResponse toDto(User user);
     UserProfile toEntity(UserProfileRequest userProfileDTO);
 
@@ -37,4 +38,11 @@ public interface UserProfileMapper {
     @Mapping(target = "userProfile.profileImageUrl", source = "profileImageUrl")
     @Mapping(target = "userProfile.dateOfBirth", source = "dateOfBirth")
     void updateUserProfileFromDto(UserProfileRequest request, @MappingTarget UserProfile userProfile);
+
+    default String getFirstRoleName(User user) {
+        return user.getUserRoles().stream()
+                .findFirst()
+                .map(userRole -> userRole.getRole().getRoleName())
+                .orElse(null);
+    }
 }

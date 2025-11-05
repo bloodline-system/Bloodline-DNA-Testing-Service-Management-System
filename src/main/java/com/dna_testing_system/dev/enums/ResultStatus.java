@@ -5,6 +5,7 @@ public enum ResultStatus {
     PROCESSING("Đang xử lý"),
     COMPLETED("Đã hoàn thành"),
     INVALID("Không hợp lệ"),
+    CANCELLED("Hủy kết quả"),
     DELIVERED("Đã gửi kết quả");
 
     private final String description;

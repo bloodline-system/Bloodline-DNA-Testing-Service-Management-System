@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/manager-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Test Kit Details', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div id="content">
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="ri-check-circle-line me-2"></i><span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i><span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i><span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/manager/test-kit-management}">Test Kit Management</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${testKit.kitName}">Test Kit Details</li>
+        </ol>
+    </nav>
+
+    <!-- Test Kit Details -->
+    <div class="row" th:if="${testKit}">
+        <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="ri-test-tube-line me-2"></i>Test Kit Information
+                    </h5>
+                    <div>
+                        <a th:href="@{/manager/test-kit-management/{id}/edit(id=${testKit.id})}" 
+                           class="btn btn-warning btn-sm me-2">
+                            <i class="ri-edit-line me-1"></i>Edit
+                        </a>
+                        <button type="button" class="btn btn-danger btn-sm" 
+                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                th:data-kit-id="${testKit.id}"
+                                th:data-kit-name="${testKit.kitName}">
+                            <i class="ri-delete-bin-line me-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Kit Name</label>
+                            <p class="form-control-plaintext" th:text="${testKit.kitName}">Kit Name</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Produced By</label>
+                            <p class="form-control-plaintext" th:text="${testKit.producedBy}">Producer</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Kit Type</label>
+                            <p class="form-control-plaintext">
+                                <span class="badge bg-primary-transparent fs-6" th:text="${testKit.kitType}">Type</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Sample Type</label>
+                            <p class="form-control-plaintext">
+                                <span class="badge bg-info-transparent fs-6" th:text="${testKit.sampleType}">Sample</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Base Price</label>
+                            <p class="form-control-plaintext fw-semibold text-primary" th:text="'$' + ${testKit.basePrice}">$0.00</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Current Price</label>
+                            <p class="form-control-plaintext">
+                                <span class="fw-semibold text-success" th:text="'$' + ${testKit.currentPrice}">$0.00</span>
+                                <span th:if="${testKit.basePrice != testKit.currentPrice}" 
+                                      class="badge bg-warning-transparent ms-2">Sale Price</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Quantity in Stock</label>
+                            <p class="form-control-plaintext">
+                                <span th:text="${testKit.quantityInStock}">0</span>
+                                <span th:if="${testKit.lowStock}" class="badge bg-warning ms-2">
+                                    <i class="ri-alert-line me-1"></i>Low Stock
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Availability Status</label>
+                            <p class="form-control-plaintext">
+                                <span th:if="${testKit.isAvailable}" class="badge bg-success fs-6">
+                                    <i class="ri-check-line me-1"></i>Available
+                                </span>
+                                <span th:unless="${testKit.isAvailable}" class="badge bg-danger fs-6">
+                                    <i class="ri-close-line me-1"></i>Unavailable
+                                </span>
+                                <span th:if="${testKit.expired}" class="badge bg-warning fs-6 ms-2">
+                                    <i class="ri-time-line me-1"></i>Expired
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Expiry Date</label>
+                            <p class="form-control-plaintext" th:class="${testKit.expired ? 'text-danger fw-semibold' : ''}">
+                                <span th:if="${testKit.expiryDate}" 
+                                      th:text="${#temporals.format(testKit.expiryDate, 'MMMM dd, yyyy')}">Date</span>
+                                <span th:unless="${testKit.expiryDate}" class="text-muted">Not set</span>
+                            </p>
+                        </div>
+                        <div class="col-12" th:if="${testKit.kitDescription}">
+                            <label class="form-label fw-semibold">Description</label>
+                            <p class="form-control-plaintext" th:text="${testKit.kitDescription}">Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="ri-information-line me-2"></i>Status Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-md" 
+                                 th:class="${testKit.isAvailable ? 'bg-success-transparent' : 'bg-danger-transparent'}">
+                                <i th:class="${testKit.isAvailable ? 'ri-check-line text-success' : 'ri-close-line text-danger'}"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0" th:text="${testKit.availabilityStatus}">Status</h6>
+                            <small class="text-muted">Current status</small>
+                        </div>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h5 class="mb-0 text-primary" th:text="${testKit.quantityInStock}">0</h5>
+                                    <small class="text-muted">In Stock</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h5 class="mb-0" 
+                                    th:class="${testKit.basePrice == testKit.currentPrice ? 'text-muted' : 'text-success'}"
+                                    th:text="${T(java.lang.Math).round((testKit.basePrice.doubleValue() - testKit.currentPrice.doubleValue()) / testKit.basePrice.doubleValue() * 100)}">0</h5>
+                                <small class="text-muted">% Discount</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="ri-settings-3-line me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/manager/test-kit-management/{id}/edit(id=${testKit.id})}" 
+                           class="btn btn-outline-warning">
+                            <i class="ri-edit-line me-2"></i>Edit Test Kit
+                        </a>
+                        <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="ri-printer-line me-2"></i>Print Details
+                        </button>
+                        <a th:href="@{/manager/test-kit-management}" class="btn btn-outline-secondary">
+                            <i class="ri-arrow-left-line me-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timestamps -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="ri-time-line me-2"></i>Timestamps
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Created At</label>
+                        <p class="form-control-plaintext small" 
+                           th:text="${#temporals.format(testKit.createdAt, 'MMMM dd, yyyy ''at'' HH:mm')}">Date</p>
+                    </div>
+                    <div th:if="${testKit.updatedAt}">
+                        <label class="form-label fw-semibold small">Last Updated</label>
+                        <p class="form-control-plaintext small" 
+                           th:text="${#temporals.format(testKit.updatedAt, 'MMMM dd, yyyy ''at'' HH:mm')}">Date</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="ri-delete-bin-line me-2 text-danger"></i>Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the test kit <strong id="deleteKitName"></strong>?</p>
+                    <p class="text-muted">This action cannot be undone and will remove all associated data.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ri-delete-bin-line me-1"></i>Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        // Handle delete modal
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const kitId = button.getAttribute('data-kit-id');
+                const kitName = button.getAttribute('data-kit-name');
+                
+                document.getElementById('deleteKitName').textContent = kitName;
+                document.getElementById('deleteForm').action = '/manager/test-kit-management/' + kitId + '/delete';
+            });
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const alertInstance = new bootstrap.Alert(alert);
+                alertInstance.close();
+            });
+        }, 5000);
+    </script>
+</div>
+
+</html>

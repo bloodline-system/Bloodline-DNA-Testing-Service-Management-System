@@ -2,6 +2,7 @@ package com.dna_testing_system.dev.service;
 
 import com.dna_testing_system.dev.dto.request.UpdateProfileRequest;
 import com.dna_testing_system.dev.dto.response.UserResponse;
+import com.dna_testing_system.dev.entity.TestResult;
 import com.dna_testing_system.dev.entity.User;
 
 /**
@@ -30,4 +31,6 @@ public interface UserService {
      * @return UserResponse DTO
      */
     UserResponse toUserResponse(User user);
+
+    TestResult getTestResult(Long orderId);
 }
