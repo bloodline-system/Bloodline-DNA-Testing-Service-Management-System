@@ -46,7 +46,7 @@ public interface CustomerFeedbackMapper {
 
     @Named("fullNameFromUser")
     default String mapFullName(User user) {
-        if (user == null || user.getUserProfile() == null) return null;
-        return user.getUserProfile().getFirstName() + " " + user.getUserProfile().getLastName();
+        if (user == null || user.getProfile() == null) return null;
+        return user.getProfile().getFirstName() + " " + user.getProfile().getLastName();
     }
 }

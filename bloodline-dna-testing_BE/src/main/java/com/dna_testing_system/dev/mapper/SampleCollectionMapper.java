@@ -25,7 +25,6 @@ public class SampleCollectionMapper {
         SampleCollectionResponse response = new SampleCollectionResponse();
         response.setId(entity.getCollectionId());
         response.setCollectionDateTime(entity.getCollectionDate());
-        response.setCollectedBy(entity.getStaff().getFullName());
         response.setSampleId("SAMPLE-" + entity.getCollectionId());
         response.setSampleType(entity.getSampleType().name());
         response.setSampleQuality(entity.getSampleQuality());

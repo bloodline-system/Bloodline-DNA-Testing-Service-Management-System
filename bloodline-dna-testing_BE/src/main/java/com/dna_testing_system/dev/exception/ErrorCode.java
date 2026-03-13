@@ -28,7 +28,8 @@ public enum ErrorCode {
     UNAUTHORIZED_FEEDBACK_ACTION("You do not have permission to modify or delete this feedback"),
     PAYMENT_NOT_EXISTS("Payment not exists"),
     PAYMENT_PERSIST_ERROR("Payment persistence error"),
-    UNKNOWN_ERROR("Unknown error!");
+    UNKNOWN_ERROR("Unknown error!"),
+    USER_NOT_FOUND("User not found");
 
 
     private String message;

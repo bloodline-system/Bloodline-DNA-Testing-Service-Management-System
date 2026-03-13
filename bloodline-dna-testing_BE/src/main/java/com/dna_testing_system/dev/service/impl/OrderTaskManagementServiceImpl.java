@@ -66,14 +66,14 @@ public class OrderTaskManagementServiceImpl implements OrderTaskManagementServic
         for (User user : staffAvailable) {
             StaffAvailableResponse staffAvailableResponse = StaffAvailableResponse.builder()
                     .id(user.getId())
-                    .email(user.getUserProfile().getEmail())
+                    .email(user.getProfile().getEmail())
                     .username(user.getUsername())
-                    .profileImageUrl(user.getUserProfile().getProfileImageUrl())
+                    .profileImageUrl(user.getProfile().getProfileImageUrl())
                     .roleName(user.getUserRoles().stream().map(x -> x.getRole().getRoleName()).collect(Collectors.toSet()))
                     .isActive(user.getIsActive())
-                    .createdAt(user.getUserProfile().getCreatedAt())
-                    .fullName(user.getUserProfile().getFirstName() + " " + user.getUserProfile().getLastName())
-                    .phoneNumber(user.getUserProfile().getPhoneNumber())
+                    .createdAt(user.getProfile().getCreatedAt())
+                    .fullName(user.getProfile().getFirstName() + " " + user.getProfile().getLastName())
+                    .phoneNumber(user.getProfile().getPhoneNumber())
                     .build();
             staffAvailableResponses.add(staffAvailableResponse);
         }
@@ -100,7 +100,7 @@ public class OrderTaskManagementServiceImpl implements OrderTaskManagementServic
         try {
             emailSender.sendTestAssignmentNotification(order, sampleCollection, staffRequest);
             notifyToStaffForAssign(order, staffRequest);
-            log.info("Email notification sent to staff member: {}", staffRequest.getUserProfile().getEmail());
+            log.info("Email notification sent to staff member: {}", staffRequest.getProfile().getEmail());
         } catch (Exception e) {
             log.error("Failed to send email notification to staff: {}", e.getMessage());
             // Continue execution - email failure shouldn't prevent assignment
@@ -123,7 +123,7 @@ public class OrderTaskManagementServiceImpl implements OrderTaskManagementServic
         try {
             emailSender.sendTestAssignmentNotification(order, testResult, staffRequest);
             notifyToStaffForAssign(order, staffRequest);
-            log.info("Email notification sent to staff member: {}", staffRequest.getUserProfile().getEmail());
+            log.info("Email notification sent to staff member: {}", staffRequest.getProfile().getEmail());
         } catch (Exception e) {
             log.error("Failed to send email notification to staff: {}", e.getMessage());
             // Continue execution - email failure shouldn't prevent assignment
@@ -230,7 +230,7 @@ public class OrderTaskManagementServiceImpl implements OrderTaskManagementServic
 
         if (newStatus.equals(ServiceOrderStatus.COMPLETED) || newStatus.equals(ServiceOrderStatus.CANCELLED)) {
             try {
-                String userEmail = order.getCustomer().getUserProfile().getEmail();
+                String userEmail = order.getCustomer().getProfile().getEmail();
                 emailSender.sendOrderStatusUpdateNotification(order, userEmail);
 
                 log.info("Status update email notification sent to user: {}", userEmail);

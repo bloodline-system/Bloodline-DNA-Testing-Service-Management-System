@@ -17,9 +17,9 @@ public interface SystemReportMapper {
 
     // Response: from Entity → Response DTO
     @Mapping(source = "id", target = "reportId")
-    @Mapping(source = "generatedByUser.fullName", target = "generatedByUserName")
-    @Mapping(source = "generatedByUser.userProfile.email", target = "generatedByUserEmail")
-    @Mapping(source = "generatedByUser.userProfile.profileImageUrl", target = "generatedByUserImageUrl")
+    @Mapping(source = "generatedByUser.username", target = "generatedByUserName")
+    @Mapping(source = "generatedByUser.profile.email", target = "generatedByUserEmail")
+    @Mapping(source = "generatedByUser.profile.profileImageUrl", target = "generatedByUserImageUrl")
     @Mapping(expression = "java(getPrimaryRoleName(entity.getGeneratedByUser()))", target = "generatedByUserRole")
     SystemReportResponse toResponse(SystemReport entity);
 

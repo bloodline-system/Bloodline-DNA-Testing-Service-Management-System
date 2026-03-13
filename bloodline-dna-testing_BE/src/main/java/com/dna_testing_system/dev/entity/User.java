@@ -52,26 +52,15 @@ public class User {
     @Column(name = "updated_at")
     LocalDateTime updatedAt;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    UserProfile userProfile;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    UserProfile profile;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     Set<UserRole> userRoles = new HashSet<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
-    Set<ServiceOrder> serviceOrders = new HashSet<>();
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
-    Set<CustomerFeedback> customerFeedbacks = new HashSet<>();
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
-    Set<ContentPost> contentPosts = new HashSet<>();
-
-    public String getFullName() {
-        return "";
-    }
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sign_up_id")
+    SignUp signUp;
 }
