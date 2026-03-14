@@ -1,5 +1,6 @@
 package com.dna_testing_system.dev.entity;
 
+import com.dna_testing_system.dev.event.listener.UserEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -21,6 +22,7 @@ import java.util.Set;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@EntityListeners(UserEntityListener.class)
 @Table(name = "tbl_users")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {

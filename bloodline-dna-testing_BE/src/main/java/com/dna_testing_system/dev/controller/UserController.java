@@ -8,6 +8,7 @@ import com.dna_testing_system.dev.entity.TestResult;
 import com.dna_testing_system.dev.service.ContentPostService;
 import com.dna_testing_system.dev.service.UserProfileService;
 import com.dna_testing_system.dev.service.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import com.dna_testing_system.dev.service.user.UserService;
 import lombok.AccessLevel;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/api/v1/profiles")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     UserProfileService userProfileService;
@@ -41,6 +44,7 @@ public class UserController {
     TestKitService testKitService;
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @ResponseBody
     public ResponseEntity<ApiResponse<List<UserProfileResponse>>> getAllProfiles() {
         List<UserProfileResponse> profiles = userProfileService.getUserProfiles();

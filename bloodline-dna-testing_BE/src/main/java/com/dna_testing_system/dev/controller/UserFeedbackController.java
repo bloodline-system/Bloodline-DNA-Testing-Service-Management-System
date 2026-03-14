@@ -7,6 +7,7 @@ import com.dna_testing_system.dev.exception.EntityNotFoundException;
 import com.dna_testing_system.dev.exception.ErrorCode;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.dna_testing_system.dev.service.CustomerFeedbackService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +28,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/feedback")
+@SecurityRequirement(name = "bearerAuth")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserFeedbackController {
 

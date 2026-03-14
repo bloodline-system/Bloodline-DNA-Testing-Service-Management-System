@@ -2,13 +2,13 @@ package com.dna_testing_system.dev.entity;
 
 
 import com.dna_testing_system.dev.enums.SignUpStatus;
+import com.dna_testing_system.dev.event.listener.SignUpEntityListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 
 /**
@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@EntityListeners(SignUpEntityListener.class)
 @Table(name = "tbl_sign_up")
 public class SignUp {
 
