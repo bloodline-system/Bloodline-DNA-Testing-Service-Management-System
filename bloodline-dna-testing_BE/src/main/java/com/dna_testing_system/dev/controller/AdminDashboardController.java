@@ -282,13 +282,14 @@ public class AdminDashboardController extends BaseController {
                     () -> new RuntimeException("User not found")
             );
             // Update basic user fields
-            existingUser.getUserProfile().setEmail(email);
+            existingUser.getProfile().setEmail(email);
             existingUser.setIsActive(active);
-            existingUser.getUserProfile().setPhoneNumber(phone);
+            existingUser.getProfile().setPhoneNumber(phone);
             existingUser.setUpdatedAt(LocalDateTime.now());
             existingUser.getUserRoles().stream().findFirst().ifPresent(userRole -> {
                 var roleType =  RoleType.valueOf(role);
-                var newRole = roleRepository.findByRoleName(roleType.name());
+                var newRole = roleRepository.findByRoleName(roleType.name())
+                        .orElseThrow(() -> new RuntimeException("Role not found"));
                 userRole.setRole(newRole);
             });
 

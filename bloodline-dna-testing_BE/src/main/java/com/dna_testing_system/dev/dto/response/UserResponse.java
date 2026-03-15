@@ -22,7 +22,7 @@ public class UserResponse {
     private String email;
     private String phoneNumber;
     private String profileImageUrl;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
     

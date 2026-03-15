@@ -1,112 +1,49 @@
 package com.dna_testing_system.dev.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.dna_testing_system.dev.dto.ApiResponse;
+import com.dna_testing_system.dev.utils.ExceptionHandlerUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@ControllerAdvice
-public class GlobalExceptionHandler {
+@RestControllerAdvice
+class GlobalExceptionHandler {
 
-    /**
-     * Handles authentication exceptions for web requests
-     * Returns the user to the login page with an error message
-     */
-    @ExceptionHandler(AuthenticationException.class)
-    public String handleAuthenticationException(
-            AuthenticationException ex,
-            HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        
-        log.error("Authentication error: {} (Error Code: {})",
-                ex.getMessage(), ex.getErrorCode());
-        
-        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        return getCurrentViewName(request);
+    @ExceptionHandler({
+            ResourceNotFoundException.class ,SignUpNotValidException.class,
+            OptFailException.class, AddRoleFailException.class, LoginNotValidException.class,
+            InvalidTokenException.class, BlacklistedTokenException.class,
+            RuntimeException.class
+
+    })
+    ResponseEntity<ApiResponse<Void>> handleBadRequestsException(RuntimeException ex, WebRequest request) {
+        return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.BAD_REQUEST);
     }
 
     /**
-     * Handles service exceptions for web requests
-     * Returns the present page with an error message
+     * Handles validation errors.
+     *
+     * @param ex the exception
+     * @return error response with status 400
      */
-    @ExceptionHandler(MedicalServiceException.class)
-    public String handleMedicalServiceException(
-            AuthenticationException ex,
-            HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
 
-        log.error("Authentication error: {} (Error Code: {})",
-                ex.getMessage(), ex.getErrorCode());
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
 
-        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        return getCurrentViewName(request);
-    }
-
-    /**
-     * Handles resource not found exceptions for web requests
-     */
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public String handleResourceNotFoundException(
-            ResourceNotFoundException ex,
-            HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        
-        log.error("Resource not found: {}", ex.getMessage());
-        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        
-        // Return the current view or a default error page
-        return getCurrentViewName(request);
-    }
-
-    
-    /**
-     * Handles all other exceptions for web requests
-     */
-    @ExceptionHandler(Exception.class)
-    public String handleGenericException(
-            Exception ex,
-            RedirectAttributes redirectAttributes) {
-        
-        log.error("Unexpected error: {}", ex.getMessage(), ex);
-        redirectAttributes.addFlashAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
-        
-        return "redirect:/access-denied";
-    }
-    
-    /**
-     * Extracts the current view name from the request
-     */
-    private String getCurrentViewName(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        String contextPath = request.getContextPath();
-        
-        if (!contextPath.isEmpty() && uri.startsWith(contextPath)) {
-            uri = uri.substring(contextPath.length());
-        }
-
-        if (uri.startsWith("/")) {
-            uri = uri.substring(1);
-        }
-        
-        // Default to home page if URI is empty
-        if (uri.isEmpty()) {
-            uri = "index";
-        }
-        
-        // Remove extensions if present
-        if (uri.contains(".")) {
-            uri = uri.substring(0, uri.lastIndexOf("."));
-        }
-        
-        return "redirect:/" + uri;
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 }

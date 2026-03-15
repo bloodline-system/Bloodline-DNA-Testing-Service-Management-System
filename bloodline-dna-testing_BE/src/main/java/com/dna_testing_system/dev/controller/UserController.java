@@ -1,23 +1,27 @@
 package com.dna_testing_system.dev.controller;
 
 
+import com.dna_testing_system.dev.dto.ApiResponse;
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
 import com.dna_testing_system.dev.dto.response.*;
 import com.dna_testing_system.dev.entity.TestResult;
 import com.dna_testing_system.dev.service.ContentPostService;
 import com.dna_testing_system.dev.service.UserProfileService;
 import com.dna_testing_system.dev.service.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
+import com.dna_testing_system.dev.service.user.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,7 +30,8 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/user") // Thêm base path
+@RequestMapping("/api/v1/profiles")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     UserProfileService userProfileService;
@@ -38,35 +43,47 @@ public class UserController {
     MedicalServiceManageService medicalService;
     TestKitService testKitService;
 
-    @GetMapping("/profile")  // URL sẽ là /user/profile
-    public String getProfile(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentPrincipalName = authentication.getName();
-        UserProfileResponse userProfile = userProfileService.getUserProfile(currentPrincipalName);
-        model.addAttribute("userProfile", userProfile);
-        return "user/profile";
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<List<UserProfileResponse>>> getAllProfiles() {
+        List<UserProfileResponse> profiles = userProfileService.getUserProfiles();
+        return ResponseEntity.ok(
+                ApiResponse.success(HttpStatus.OK.value(), "Get all profiles successfully", profiles)
+        );
     }
 
-    @GetMapping("/profile/update")
-    public String showUpdateProfileForm(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentPrincipalName = authentication.getName();
-        UserProfileResponse userProfileData = userProfileService.getUserProfile(currentPrincipalName);
-
-        // Dữ liệu cũ chỉ có 1 dòng này
-        model.addAttribute("userEditProfile", userProfileData);
-
-        model.addAttribute("userProfile", userProfileData);
-
-        return "user/edit-profile"; //
+    @GetMapping("/search")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<List<UserProfileResponse>>> searchProfiles(@RequestParam("name") String name) {
+        List<UserProfileResponse> profiles = userProfileService.getUserProfileByName(name);
+        return ResponseEntity.ok(
+                ApiResponse.success(HttpStatus.OK.value(), "Search profiles successfully", profiles)
+        );
     }
-    @PostMapping("/profile/update")
-    public String updateProfile(@ModelAttribute("userEditProfile") UserProfileRequest userProfile,
-                                @RequestParam(value = "file", required = false) MultipartFile file,
-                                Model model) { // Thêm Model
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentPrincipalName = authentication.getName();
-        UserProfileResponse existingProfile = userProfileService.getUserProfile(currentPrincipalName);
+
+    @GetMapping("/{username}")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(@PathVariable String username,
+                                                                       HttpServletRequest httpServletRequest) {
+        try {
+            UserProfileResponse userProfile = userProfileService.getUserProfile(username);
+            return ResponseEntity.ok(
+                    ApiResponse.success(HttpStatus.OK.value(), "Get profile successfully", userProfile)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", httpServletRequest.getRequestURI()));
+        }
+    }
+
+    @PutMapping("/{username}")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(@PathVariable String username,
+                                                                          @ModelAttribute("userEditProfile") UserProfileRequest userProfile,
+                                                                          @RequestParam(value = "file", required = false) MultipartFile file,
+                                                                          HttpServletRequest httpServletRequest) {
+        UserProfileResponse existingProfile = userProfileService.getUserProfile(username);
 
 
 
@@ -109,15 +126,33 @@ public class UserController {
         }
 
 
-        userProfileService.updateUserProfile(currentPrincipalName, userProfile);
+        boolean updated = userProfileService.updateUserProfile(username, userProfile);
+        if (!updated) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", httpServletRequest.getRequestURI()));
+        }
 
-        // Refresh lại thông tin user cho header
-        UserProfileResponse updatedProfile = userProfileService.getUserProfile(currentPrincipalName);
-        model.addAttribute("userProfile", updatedProfile);
-
-        return "redirect:/user/profile";
+        UserProfileResponse updatedProfile = userProfileService.getUserProfile(username);
+        return ResponseEntity.ok(
+                ApiResponse.success(HttpStatus.OK.value(), "Update profile successfully", updatedProfile)
+        );
     }
-    @GetMapping("/user/dashboard")
+
+    @DeleteMapping("/{username}")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<Boolean>> deleteProfile(@PathVariable String username,
+                                                              HttpServletRequest httpServletRequest) {
+        boolean deleted = userProfileService.deleteUserProfile(username);
+        if (!deleted) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", httpServletRequest.getRequestURI()));
+        }
+
+        return ResponseEntity.ok(
+                ApiResponse.success(HttpStatus.OK.value(), "Delete profile successfully", true)
+        );
+    }
+    @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("pageTitle", "Dashboard - Trang chủ");
         model.addAttribute("breadcrumbActive", "Dashboard");

@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +27,10 @@ public class Permission {
     @NotNull
     @Column(name = "permission_name", nullable = false, length = 100)
     String permissionName;
+
+    @Size(max = 500)
+    @Column(name = "permission_description", length = 500)
+    String permissionDescription;
 
     @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<RolePermission> rolePermissions = new HashSet<>();

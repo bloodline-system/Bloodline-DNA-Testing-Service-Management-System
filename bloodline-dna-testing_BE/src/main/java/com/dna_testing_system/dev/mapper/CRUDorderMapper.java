@@ -7,15 +7,15 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface CRUDorderMapper {
-    @Mapping(target = "idServiceOrder", source = "orderService.id")
-    @Mapping(target="finalAmount", source = "orderService.payments.netAmount")
-    @Mapping(target = "orderStatus", source = "orderService.orderStatus")
-    @Mapping(target = "userName", source = "orderService.customer.username")
-    @Mapping(target = "userEmail", source = "orderService.customer.userProfile.email")
-    @Mapping(target ="userPhoneNumber", source = "orderService.customer.userProfile.phoneNumber")
-    @Mapping(target = "medicalServiceName", source = "orderService.service.serviceName")
-    @Mapping(target = "appointmentDate", source = "orderService.appointmentDate")
-    @Mapping(target = "collectionType", source = "orderService.collectionType")
-    @Mapping(target = "collectionAddress", source = "orderService.collectionAddress")
+    @Mapping(target = "idServiceOrder", source = "id")
+    @Mapping(target="finalAmount", source = "payments.netAmount")
+    @Mapping(target = "orderStatus", source = "orderStatus")
+    @Mapping(target = "userName", source = "customer.username")
+    @Mapping(target = "userEmail", source = "customer.profile.email")
+    @Mapping(target ="userPhoneNumber", source = "customer.profile.phoneNumber")
+    @Mapping(target = "medicalServiceName", source = "service.serviceName")
+    @Mapping(target = "appointmentDate", source = "appointmentDate")
+    @Mapping(target = "collectionType", source = "collectionType")
+    @Mapping(target = "collectionAddress", source = "collectionAddress")
     CRUDorderResponse toCRUDorderResponse(ServiceOrder orderService);
 }

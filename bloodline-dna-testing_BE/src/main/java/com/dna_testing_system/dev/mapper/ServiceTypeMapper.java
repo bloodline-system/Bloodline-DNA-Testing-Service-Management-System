@@ -1,6 +1,5 @@
 package com.dna_testing_system.dev.mapper;
 
-import com.dna_testing_system.dev.dto.request.RegisterRequest;
 import com.dna_testing_system.dev.dto.request.ServiceTypeRequest;
 import com.dna_testing_system.dev.dto.response.ServiceTypeResponse;
 import com.dna_testing_system.dev.entity.ServiceType;

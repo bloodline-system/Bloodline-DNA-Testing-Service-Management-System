@@ -35,7 +35,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         // Tìm user và userProfile
                 User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
-        UserProfile userProfile = user.getUserProfile();
+        UserProfile userProfile = user.getProfile();
         if (userProfile == null) {
             // Nếu userProfile chưa tồn tại thì tạo mới
             userProfile = userProfileMapper.toEntity(request);
@@ -62,9 +62,9 @@ public class UserProfileServiceImpl implements UserProfileService {
     public boolean deleteUserProfile(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
-        if (user.getUserProfile() != null) {
-            userProfileRepository.delete(user.getUserProfile());
-            user.setUserProfile(null);
+        if (user.getProfile() != null) {
+            userProfileRepository.delete(user.getProfile());
+            user.setProfile(null);
             userRepository.save(user);
         }
         // Nếu muốn xóa luôn user thì có thể gọi userRepository.delete(user);
@@ -76,8 +76,8 @@ public class UserProfileServiceImpl implements UserProfileService {
     public List<UserProfileResponse> getUserProfileByName(String name) {
         List<User> users = userRepository.findAll();
         for (User user : users) {
-            if (!user.getUserProfile().getFirstName().equalsIgnoreCase(name) &&
-                    !user.getUserProfile().getLastName().equalsIgnoreCase(name)) {
+            if (!user.getProfile().getFirstName().equalsIgnoreCase(name) &&
+                    !user.getProfile().getLastName().equalsIgnoreCase(name)) {
                 users.remove(user);
             }
         }

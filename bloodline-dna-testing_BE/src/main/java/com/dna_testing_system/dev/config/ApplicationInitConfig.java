@@ -99,7 +99,8 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
     }
     private void createStaffDefault() {
         if (!userRepository.existsByUsername("staff1")) {
-            Role role = roleRepository.findByRoleName(RoleType.STAFF.name());
+            Role role = roleRepository.findByRoleName(RoleType.STAFF.name())
+                    .orElseThrow(() -> new RuntimeException("Default role STAFF not found in database"));
 
             // Create and save the User entity with minimal information
             User user = User.builder()
@@ -132,11 +133,12 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
 
             userProfileRepository.save(userProfile);
 
-            user.setUserProfile(userProfile);
+            user.setProfile(userProfile);
             userRepository.save(user);
         }
         if (!userRepository.existsByUsername("staff2")) {
-            Role role = roleRepository.findByRoleName(RoleType.STAFF.name());
+            Role role = roleRepository.findByRoleName(RoleType.STAFF.name())
+                    .orElseThrow(() -> new RuntimeException("Default role STAFF not found in database"));
 
             // Create and save the User entity with minimal information
             User user = User.builder()
@@ -169,14 +171,15 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
 
             userProfileRepository.save(userProfile);
 
-            user.setUserProfile(userProfile);
+            user.setProfile(userProfile);
             userRepository.save(user);
         }
     }
 
     private void createManagerDefault() {
         if (!userRepository.existsByUsername("manager")) {
-            Role role = roleRepository.findByRoleName(RoleType.MANAGER.name());
+            Role role = roleRepository.findByRoleName(RoleType.MANAGER.name())
+                    .orElseThrow(() -> new RuntimeException("Default role MANAGER not found in database"));
 
             // Create and save the User entity with minimal information
             User user = User.builder()
@@ -206,11 +209,12 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
 
             userProfileRepository.save(userProfile);
 
-            user.setUserProfile(userProfile);
+            user.setProfile(userProfile);
             userRepository.save(user);
         }
         if (!userRepository.existsByUsername("manager2")) {
-            Role role = roleRepository.findByRoleName(RoleType.MANAGER.name());
+            Role role = roleRepository.findByRoleName(RoleType.MANAGER.name())
+                    .orElseThrow(() -> new RuntimeException("Default role MANAGER not found in database"));
 
             // Create and save the User entity with minimal information
             User user = User.builder()
@@ -240,14 +244,15 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
 
             userProfileRepository.save(userProfile);
 
-            user.setUserProfile(userProfile);
+            user.setProfile(userProfile);
             userRepository.save(user);
         }
     }
 
     private void createAdminDefault() {
         if (!userRepository.existsByUsername("admin")) {
-            Role role = roleRepository.findByRoleName(RoleType.ADMIN.name());
+            Role role = roleRepository.findByRoleName(RoleType.ADMIN.name())
+                    .orElseThrow(() -> new RuntimeException("Default role ADMIN not found in database"));
 
             // Create and save the User entity with minimal information
             User user = User.builder()
@@ -277,7 +282,7 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
 
             userProfileRepository.save(userProfile);
 
-            user.setUserProfile(userProfile);
+            user.setProfile(userProfile);
             userRepository.save(user);
         }
     }

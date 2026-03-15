@@ -64,7 +64,7 @@ public class EmailSenderImpl implements EmailSender {
 
 
         sendEmailWithTemplate(
-                staffMember.getUserProfile().getEmail(),
+                staffMember.getProfile().getEmail(),
                 "New DNA Test Assignment: Order #" + order.getId(),
                 "test-assignment-notification",
                 templateModel
@@ -82,7 +82,7 @@ public class EmailSenderImpl implements EmailSender {
 
 
         sendEmailWithTemplate(
-                staffMember.getUserProfile().getEmail(),
+                staffMember.getProfile().getEmail(),
                 "New DNA Test Assignment: Order #" + order.getId(),
                 "test-result-assignment-notification",
                 templateModel

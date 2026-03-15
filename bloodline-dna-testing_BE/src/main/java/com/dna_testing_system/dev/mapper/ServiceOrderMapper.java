@@ -16,9 +16,9 @@ public interface ServiceOrderMapper {
 
     @Mapping(target = "customerName", expression = "java(getFullName(order.getCustomer()))")
     @Mapping(source = "customer.username", target = "username")
-    @Mapping(source = "customer.userProfile.profileImageUrl", target = "profileImageUrl")
-    @Mapping(source = "customer.userProfile.email", target = "email")
-    @Mapping(source = "customer.userProfile.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "customer.profile.profileImageUrl", target = "profileImageUrl")
+    @Mapping(source = "customer.profile.email", target = "email")
+    @Mapping(source = "customer.profile.phoneNumber", target = "phoneNumber")
     @Mapping(source = "service.serviceName", target = "serviceName")
     @Mapping(source = "service.serviceType.typeName", target = "serviceType")
     @Mapping(source = "service.serviceCategory.description", target = "serviceCategory")
@@ -46,8 +46,8 @@ public interface ServiceOrderMapper {
     ServiceOrderResponse toDto(ServiceOrder order);
 
     default String getFullName(User user) {
-        if (user != null && user.getUserProfile() != null) {
-            return user.getUserProfile().getFirstName() + " " + user.getUserProfile().getLastName();
+        if (user != null && user.getProfile() != null) {
+            return user.getProfile().getFirstName() + " " + user.getProfile().getLastName();
         }
         return null;
     }
@@ -64,13 +64,13 @@ public interface ServiceOrderMapper {
 
     default String getCollectionStaffEmail(ServiceOrder order) {
         var sc = getFirstSampleCollection(order);
-        return (sc != null && sc.getStaff() != null) ? sc.getStaff().getUserProfile().getEmail() : null;
+        return (sc != null && sc.getStaff() != null) ? sc.getStaff().getProfile().getEmail() : null;
     }
 
     default String getCollectionStaffPhone(ServiceOrder order) {
         var sc = getFirstSampleCollection(order);
-        return (sc != null && sc.getStaff() != null && sc.getStaff().getUserProfile() != null)
-                ? sc.getStaff().getUserProfile().getPhoneNumber() : null;
+        return (sc != null && sc.getStaff() != null && sc.getStaff().getProfile() != null)
+                ? sc.getStaff().getProfile().getPhoneNumber() : null;
     }
 
     // TestResult (lấy bản đầu tiên)
@@ -85,13 +85,13 @@ public interface ServiceOrderMapper {
 
     default String getAnalysisStaffEmail(ServiceOrder order) {
         var tr = getFirstTestResult(order);
-        return (tr != null && tr.getAnalyzedByStaff() != null) ? tr.getAnalyzedByStaff().getUserProfile().getEmail() : null;
+        return (tr != null && tr.getAnalyzedByStaff() != null) ? tr.getAnalyzedByStaff().getProfile().getEmail() : null;
     }
 
     default String getAnalysisStaffPhone(ServiceOrder order) {
         var tr = getFirstTestResult(order);
-        return (tr != null && tr.getAnalyzedByStaff() != null && tr.getAnalyzedByStaff().getUserProfile() != null)
-                ? tr.getAnalyzedByStaff().getUserProfile().getPhoneNumber() : null;
+        return (tr != null && tr.getAnalyzedByStaff() != null && tr.getAnalyzedByStaff().getProfile() != null)
+                ? tr.getAnalyzedByStaff().getProfile().getPhoneNumber() : null;
     }
 
     default String getTestResultStatus(ServiceOrder order) {

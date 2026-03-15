@@ -9,9 +9,9 @@ import org.mapstruct.*;
 public interface PaymentMapper {
     @Mapping(source = "order.id", target = "orderId")
     @Mapping(source = "order.service.serviceName", target = "serviceName")
-    @Mapping(source = "order.customer.userProfile.email", target = "email")
-    @Mapping(source = "order.customer.userProfile.phoneNumber", target = "phoneNumber")
-    @Mapping(source = "order.customer.userProfile", target = "customerName", qualifiedByName = "mapCustomerName")
+    @Mapping(source = "order.customer.profile.email", target = "email")
+    @Mapping(source = "order.customer.profile.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "order.customer.profile", target = "customerName", qualifiedByName = "mapCustomerName")
     @Mapping(source = "order.collectionAddress", target = "collectionAddress")
     @Mapping(source = "promotion.promotionCode", target = "promotionCode") // can err
     @Mapping(source = "paymentMethod", target = "paymentMethod")
