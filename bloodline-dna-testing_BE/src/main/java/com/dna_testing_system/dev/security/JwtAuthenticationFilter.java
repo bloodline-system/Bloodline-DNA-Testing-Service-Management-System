@@ -1,5 +1,7 @@
 package com.dna_testing_system.dev.security;
 
+import com.dna_testing_system.dev.dto.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.dna_testing_system.dev.service.auth.JwtKeyService;
 import com.dna_testing_system.dev.service.auth.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
@@ -9,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtKeyService jwtKeyService;
     private final TokenBlacklistService tokenBlacklistService;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
@@ -63,7 +67,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(BEARER_PREFIX.length());
         if (!jwtKeyService.validateToken(token) || tokenBlacklistService.isAccessTokenBlacklisted(token)) {
+            ApiResponse<Void> apiResponse = ApiResponse.error(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Invalid or expired token",
+                    request.getRequestURI()
+            );
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            objectMapper.writeValue(response.getWriter(), apiResponse);
             return;
         }
 

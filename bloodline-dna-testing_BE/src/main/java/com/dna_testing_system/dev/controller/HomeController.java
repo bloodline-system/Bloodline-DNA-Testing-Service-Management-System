@@ -1,8 +1,8 @@
 package com.dna_testing_system.dev.controller;
 
-import com.dna_testing_system.dev.dto.response.MedicalServiceResponse;
+import com.dna_testing_system.dev.dto.response.medical_service.MedicalServiceResponse;
 import com.dna_testing_system.dev.dto.response.UserProfileResponse;
-import com.dna_testing_system.dev.service.MedicalServiceManageService;
+import com.dna_testing_system.dev.service.service.MedicalServiceManageService;
 import com.dna_testing_system.dev.service.UserProfileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

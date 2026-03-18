@@ -1,9 +1,9 @@
 package com.dna_testing_system.dev.mapper;
 
-import com.dna_testing_system.dev.dto.request.MedicalServiceRequest;
-import com.dna_testing_system.dev.dto.request.MedicalServiceUpdateRequest;
-import com.dna_testing_system.dev.dto.response.MedicalServiceFilterResponse;
-import com.dna_testing_system.dev.dto.response.MedicalServiceResponse;
+import com.dna_testing_system.dev.dto.request.medical_service.MedicalServiceRequest;
+import com.dna_testing_system.dev.dto.request.medical_service.MedicalServiceUpdateRequest;
+import com.dna_testing_system.dev.dto.response.medical_service.MedicalServiceFilterResponse;
+import com.dna_testing_system.dev.dto.response.medical_service.MedicalServiceResponse;
 import com.dna_testing_system.dev.dto.response.ServiceFeatureAssignmentResponse;
 import com.dna_testing_system.dev.entity.MedicalService;
 import com.dna_testing_system.dev.entity.ServiceFeature;
@@ -21,6 +21,10 @@ public interface MedicalServiceMapper {
     MedicalServiceResponse toResponse(MedicalService service);
 
     List<MedicalServiceResponse> toResponse(List<MedicalService> services);
+
+    @Mapping(target = "serviceTypeName", source = "serviceType.typeName")
+    MedicalServiceFilterResponse toFilterResponse(MedicalService service);
+
     List<MedicalServiceFilterResponse> toResultFilter(List<MedicalService> services);
     @Mapping(target = "serviceFeatures", source = "editFeatureAssignments")
     void updateMedicalService(MedicalServiceUpdateRequest updateRequest, @MappingTarget MedicalService medicalService);

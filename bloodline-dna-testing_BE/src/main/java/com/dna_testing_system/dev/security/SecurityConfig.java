@@ -1,7 +1,10 @@
 package com.dna_testing_system.dev.security;
 
+import com.dna_testing_system.dev.dto.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.dna_testing_system.dev.properties.JwtProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -15,6 +18,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +30,7 @@ public class SecurityConfig {
 
     private final JwtProperties jwtProperties;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -50,6 +55,32 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+                    .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            ApiResponse<Void> apiResponse = ApiResponse.error(
+                                HttpServletResponse.SC_UNAUTHORIZED,
+                                authException.getMessage(),
+                                request.getRequestURI()
+                            );
+
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setCharacterEncoding("UTF-8");
+                            objectMapper.writeValue(response.getWriter(), apiResponse);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            ApiResponse<Void> apiResponse = ApiResponse.error(
+                                HttpServletResponse.SC_FORBIDDEN,
+                                accessDeniedException.getMessage(),
+                                request.getRequestURI()
+                            );
+
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setCharacterEncoding("UTF-8");
+                            objectMapper.writeValue(response.getWriter(), apiResponse);
+                        })
+                    )
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )

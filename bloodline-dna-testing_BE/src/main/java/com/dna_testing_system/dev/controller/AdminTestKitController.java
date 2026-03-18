@@ -1,10 +1,10 @@
 package com.dna_testing_system.dev.controller;
 
-import com.dna_testing_system.dev.dto.request.TestKitRequest;
-import com.dna_testing_system.dev.dto.response.TestKitResponse;
+import com.dna_testing_system.dev.dto.request.test_kit.TestKitRequest;
+import com.dna_testing_system.dev.dto.response.test_kit.TestKitResponse;
 import com.dna_testing_system.dev.enums.KitType;
 import com.dna_testing_system.dev.enums.SampleType;
-import com.dna_testing_system.dev.service.TestKitService;
+import com.dna_testing_system.dev.service.staff.TestKitService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

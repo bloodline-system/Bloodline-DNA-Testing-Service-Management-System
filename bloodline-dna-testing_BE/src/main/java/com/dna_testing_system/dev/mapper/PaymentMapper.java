@@ -1,6 +1,6 @@
 package com.dna_testing_system.dev.mapper;
 
-import com.dna_testing_system.dev.dto.request.PaymentUpdatingRequest;
+import com.dna_testing_system.dev.dto.request.staff.PaymentUpdatingRequest;
 import com.dna_testing_system.dev.dto.response.PaymentResponse;
 import com.dna_testing_system.dev.entity.Payment;
 import org.mapstruct.*;
