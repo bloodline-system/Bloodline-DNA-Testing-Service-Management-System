@@ -1,7 +1,7 @@
 package com.dna_testing_system.dev.mapper;
 
-import com.dna_testing_system.dev.dto.request.ServiceTypeRequest;
-import com.dna_testing_system.dev.dto.response.ServiceTypeResponse;
+import com.dna_testing_system.dev.dto.request.medical_service.ServiceTypeRequest;
+import com.dna_testing_system.dev.dto.response.medical_service.ServiceTypeResponse;
 import com.dna_testing_system.dev.entity.ServiceType;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

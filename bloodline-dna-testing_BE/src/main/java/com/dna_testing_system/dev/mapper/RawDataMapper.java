@@ -1,6 +1,6 @@
 package com.dna_testing_system.dev.mapper;
 
-import com.dna_testing_system.dev.dto.request.RawDataRequest;
+import com.dna_testing_system.dev.dto.request.staff.RawDataRequest;
 import com.dna_testing_system.dev.dto.response.RawDataResponse;
 import com.dna_testing_system.dev.entity.RawTestData;
 import org.mapstruct.Mapper;

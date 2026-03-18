@@ -1,10 +1,10 @@
 package com.dna_testing_system.dev.controller;
 
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
-import com.dna_testing_system.dev.dto.response.MedicalServiceResponse;
+import com.dna_testing_system.dev.dto.response.medical_service.MedicalServiceResponse;
 import com.dna_testing_system.dev.dto.response.ServiceOrderResponse;
 import com.dna_testing_system.dev.dto.response.UserProfileResponse;
-import com.dna_testing_system.dev.service.MedicalServiceManageService;
+import com.dna_testing_system.dev.service.service.MedicalServiceManageService;
 import com.dna_testing_system.dev.service.NotificationService;
 import com.dna_testing_system.dev.service.OrderTaskManagementService;
 import com.dna_testing_system.dev.service.UserProfileService;

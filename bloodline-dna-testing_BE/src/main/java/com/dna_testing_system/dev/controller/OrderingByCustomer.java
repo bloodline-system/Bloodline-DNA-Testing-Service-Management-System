@@ -4,11 +4,13 @@ import com.dna_testing_system.dev.dto.request.OrderTestKitRequest;
 import com.dna_testing_system.dev.dto.request.ParticipantRequest;
 import com.dna_testing_system.dev.dto.request.ServiceOrderRequestByCustomer;
 import com.dna_testing_system.dev.dto.response.*;
-import com.dna_testing_system.dev.entity.MedicalService;
+import com.dna_testing_system.dev.dto.response.medical_service.MedicalServiceResponse;
+import com.dna_testing_system.dev.dto.response.test_kit.TestKitResponse;
 import com.dna_testing_system.dev.entity.ServiceOrder;
 import com.dna_testing_system.dev.enums.CollectionType;
-import com.dna_testing_system.dev.enums.ServiceOrderStatus;
 import com.dna_testing_system.dev.service.*;
+import com.dna_testing_system.dev.service.service.MedicalServiceManageService;
+import com.dna_testing_system.dev.service.staff.TestKitService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

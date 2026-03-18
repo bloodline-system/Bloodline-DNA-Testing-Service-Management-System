@@ -1,14 +1,11 @@
 package com.dna_testing_system.dev.mapper;
 
-import com.dna_testing_system.dev.dto.request.TestResultsResquest;
-import com.dna_testing_system.dev.dto.response.TestResultsResponse;
+import com.dna_testing_system.dev.dto.request.staff.TestResultsResquest;
+import com.dna_testing_system.dev.dto.response.staff.TestResultsResponse;
 import com.dna_testing_system.dev.entity.TestResult;
-import com.dna_testing_system.dev.enums.ResultStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-
-import java.time.LocalDateTime;
 
 @Mapper(componentModel = "spring")
 public interface TestResultsMapper {

@@ -1,18 +1,15 @@
 package com.dna_testing_system.dev.controller;
 
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
-import com.dna_testing_system.dev.dto.response.MedicalServiceResponse;
+import com.dna_testing_system.dev.dto.response.medical_service.MedicalServiceResponse;
 import com.dna_testing_system.dev.dto.response.ServiceOrderResponse;
-import com.dna_testing_system.dev.dto.response.SystemReportResponse;
 import com.dna_testing_system.dev.dto.response.UserProfileResponse;
-import com.dna_testing_system.dev.entity.Role;
 import com.dna_testing_system.dev.entity.User;
-import com.dna_testing_system.dev.entity.UserRole;
 import com.dna_testing_system.dev.enums.RoleType;
 import com.dna_testing_system.dev.repository.RoleRepository;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.dna_testing_system.dev.repository.UserRoleRepository;
-import com.dna_testing_system.dev.service.MedicalServiceManageService;
+import com.dna_testing_system.dev.service.service.MedicalServiceManageService;
 import com.dna_testing_system.dev.service.OrderTaskManagementService;
 import com.dna_testing_system.dev.service.SystemReportService;
 import com.dna_testing_system.dev.service.UserProfileService;
@@ -48,9 +45,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j

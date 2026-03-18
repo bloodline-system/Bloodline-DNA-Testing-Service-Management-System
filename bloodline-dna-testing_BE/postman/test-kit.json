@@ -1,0 +1,386 @@
+{
+  "info": {
+    "_postman_id": "15e6f9cb-94a7-42ac-8892-b4e7456678fa",
+    "name": "Test Kit Management API",
+    "description": "Test Kits CRUD + search endpoints\nWith basic test scripts for status, structure and partial content validation\nCurrent date context: March 2026",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34182990",
+    "_collection_link": "https://go.postman.co/collection/34182990-15e6f9cb-94a7-42ac-8892-b4e7456678fa?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Get Test Kit with paginated",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has standard wrapper\", function () {",
+              "    let jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"code\");",
+              "    pm.expect(jsonData).to.have.property(\"message\");",
+              "    pm.expect(jsonData).to.have.property(\"data\");",
+              "    pm.expect(jsonData).to.have.property(\"timestamp\");",
+              "});",
+              "",
+              "pm.test(\"Data contains pageable content\", function () {",
+              "    let jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.be.an(\"object\");",
+              "    pm.expect(jsonData.data).to.have.property(\"content\").that.is.an(\"array\");",
+              "    pm.expect(jsonData.data).to.have.property(\"pageNumber\");",
+              "    pm.expect(jsonData.data).to.have.property(\"pageSize\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/test-kits?page=0&size=10&sort=id,desc",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "test-kits"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            },
+            {
+              "key": "sort",
+              "value": "id,desc"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Test Kit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response has wrapper\", function () {",
+              "    let jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"code\", 201);",
+              "    pm.expect(jsonData).to.have.property(\"message\");",
+              "    pm.expect(jsonData).to.have.property(\"timestamp\");",
+              "});",
+              "",
+              "pm.test(\"Created entity returns some identifier\", function () {",
+              "    let jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.include(\"Test kit created successfully\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"kitName\": \"COVID-19 Antigen Rapid Test\",\n  \"kitType\": \"PRENATAL\",\n  \"sampleType\": \"BLOOD\",\n  \"basePrice\": 4.99,\n  \"currentPrice\": 3.99,\n  \"quantityInStock\": 1200,\n  \"kitDescription\": \"Rapid antigen test - results in 15 minutes\",\n  \"expiryDate\": \"2027-12-31\",\n  \"producedBy\": \"BioRapid Inc.\",\n  \"isAvailable\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/test-kits",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "test-kits"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Test Kit By ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains kit data\", function () {",
+              "    let jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.be.an(\"object\");",
+              "    pm.expect(jsonData.data).to.have.property(\"id\").that.is.a(\"number\");",
+              "    pm.expect(jsonData.data).to.have.property(\"kitName\");",
+              "    pm.expect(jsonData.data).to.have.property(\"kitType\");",
+              "    pm.expect(jsonData.data).to.have.property(\"sampleType\");",
+              "    pm.expect(jsonData.data).to.have.property(\"quantityInStock\");",
+              "    pm.expect(jsonData.data).to.have.property(\"expiryDate\");",
+              "    pm.expect(jsonData.data).to.have.property(\"isAvailable\").that.is.a(\"boolean\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/test-kits/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "test-kits",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Test Kit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Update response has wrapper\", function () {",
+              "    pm.response.to.have.jsonBody(\"code\", 200);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"kitName\": \"COVID-19 Antigen Rapid Test - Updated\",\n  \"kitType\": \"PRENATAL\",\n  \"sampleType\": \"BLOOD\",\n  \"basePrice\": 4.99,\n  \"currentPrice\": 2.99,\n  \"quantityInStock\": 950,\n  \"kitDescription\": \"Rapid antigen test - now with improved sensitivity\",\n  \"expiryDate\": \"2027-12-31\",\n  \"producedBy\": \"BioRapid Inc.\",\n  \"isAvailable\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/test-kits/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "test-kits",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Test Kit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204 No Content\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});",
+              "",
+              "pm.test(\"No response body\", function () {",
+              "    pm.expect(pm.response.text()).to.be.empty;",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/test-kits/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "test-kits",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search Test Kit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Search returns pageable content\", function () {",
+              "    let jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data.content).to.be.an(\"array\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/test-kits/search?query=rapid&page=0&size=8",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "test-kits",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "query",
+              "value": "rapid"
+            },
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "8"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}

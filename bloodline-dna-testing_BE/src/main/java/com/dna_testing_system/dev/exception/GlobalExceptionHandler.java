@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
@@ -18,16 +19,41 @@ import java.util.Map;
 class GlobalExceptionHandler {
 
     @ExceptionHandler({
-            ResourceNotFoundException.class ,SignUpNotValidException.class,
+            SignUpNotValidException.class,
             OptFailException.class, AddRoleFailException.class, LoginNotValidException.class,
             InvalidTokenException.class, BlacklistedTokenException.class,
-            RuntimeException.class
-
     })
     ResponseEntity<ApiResponse<Void>> handleBadRequestsException(RuntimeException ex, WebRequest request) {
         return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler({
+            ResourceNotFoundException.class
+    })
+    ResponseEntity<ApiResponse<Void>> handleNotFoundsException(RuntimeException ex, WebRequest request) {
+        return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({
+            RuntimeException.class
+    })
+    ResponseEntity<ApiResponse<Void>> handleServerException(RuntimeException ex, WebRequest request) {
+        return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({
+            HttpClientErrorException.Unauthorized.class
+    })
+    ResponseEntity<ApiResponse<Void>> handleUnauthorizedException(RuntimeException ex, WebRequest request) {
+        return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler({
+            HttpClientErrorException.Forbidden.class
+    })
+    ResponseEntity<ApiResponse<Void>> handleForbiddenException(RuntimeException ex, WebRequest request) {
+        return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.FORBIDDEN);
+    }
     /**
      * Handles validation errors.
      *

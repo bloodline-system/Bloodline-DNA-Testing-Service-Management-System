@@ -16,6 +16,8 @@ public class AuthTokensResponseDTO {
         @JsonProperty("refresh_token")
         String refreshToken;
 
+        @JsonProperty("expires_in")
+        Long expiresIn;
         // Only user identifier — client can fetch full profile separately
         @JsonProperty("user_id")
         String userId;

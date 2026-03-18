@@ -26,7 +26,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -98,6 +100,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         responseDTO.setAccessToken(jwtKeyService.generateToken(user, jwtProperties.getTokenExp()));
         responseDTO.setRefreshToken(jwtKeyService.generateRefreshToken(user, jwtProperties.getRefreshTokenExp()));
+        responseDTO.setExpiresIn(System.currentTimeMillis() + jwtProperties.getTokenExp().toMillis());
 
         log.info("Generated access and refresh tokens for user: {}", user.getUsername());
         return responseDTO;
