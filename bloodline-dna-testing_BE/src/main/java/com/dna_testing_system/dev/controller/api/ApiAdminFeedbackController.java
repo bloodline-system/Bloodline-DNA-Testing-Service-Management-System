@@ -1,11 +1,13 @@
-package com.dna_testing_system.dev.controller;
+package com.dna_testing_system.dev.controller.api;
 
+import com.dna_testing_system.dev.dto.ApiResponse;
 import com.dna_testing_system.dev.dto.request.RespondFeedbackRequest;
 import com.dna_testing_system.dev.dto.response.CustomerFeedbackResponse;
 import com.dna_testing_system.dev.exception.EntityNotFoundException;
 import com.dna_testing_system.dev.exception.ErrorCode;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.dna_testing_system.dev.service.CustomerFeedbackService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,12 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,16 +26,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/feedback")
+@RequestMapping("/api/v1/admin/feedback")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApiAdminFeedbackController {
 
     CustomerFeedbackService customerFeedbackService;
     UserRepository userRepository;
 
-    // GET ALL - với pagination + filter
+    // GET ALL - with pagination + filter
     @GetMapping
-    public ResponseEntity<?> getAllFeedbacks(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAllFeedbacks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "") String customerName,
@@ -45,7 +43,8 @@ public class ApiAdminFeedbackController {
             @RequestParam(defaultValue = "all") String responseStatus,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam(defaultValue = "desc") String sortDir,
+            HttpServletRequest request) {
 
         try {
             Page<CustomerFeedbackResponse> feedbackPage = customerFeedbackService.getAllFeedbacks(page, size, search);
@@ -76,40 +75,42 @@ public class ApiAdminFeedbackController {
                     "feedbackStats", stats
             );
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Feedback list loaded", response));
 
         } catch (Exception e) {
             log.error("Error loading customer feedback: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unable to load feedback data: " + e.getMessage());
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load feedback data: " + e.getMessage(), request.getRequestURI()));
         }
     }
 
     // GET BY ID
     @GetMapping("/{feedbackId}")
-    public ResponseEntity<?> getFeedbackById(@PathVariable Long feedbackId) {
+    public ResponseEntity<ApiResponse<CustomerFeedbackResponse>> getFeedbackById(@PathVariable Long feedbackId,
+                                                                                 HttpServletRequest request) {
         try {
             CustomerFeedbackResponse feedback = customerFeedbackService.getFeedbackById(feedbackId);
             if (feedback == null) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Feedback not found", request.getRequestURI()));
             }
-            return ResponseEntity.ok(feedback);
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Feedback loaded", feedback));
         } catch (Exception e) {
             log.error("Error loading feedback details for ID: " + feedbackId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unable to load feedback details");
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load feedback details", request.getRequestURI()));
         }
     }
 
     // RESPOND TO FEEDBACK
-    @PostMapping("/{feedbackId}")
-    public ResponseEntity<?> respondToFeedback(
+    @PatchMapping("/{feedbackId}/respond")
+    public ResponseEntity<ApiResponse<CustomerFeedbackResponse>> respondToFeedback(
             @PathVariable Long feedbackId,
-            @RequestBody Map<String, String> body) {
+            @RequestBody RespondFeedbackRequest respondRequest,
+            HttpServletRequest request) {
 
-        String responseContent = body.get("responseContent");
-        if (responseContent == null || responseContent.isBlank()) {
-            return ResponseEntity.badRequest().body("responseContent không được để trống");
+        if (respondRequest == null || respondRequest.getResponseContent() == null || respondRequest.getResponseContent().isBlank()) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "responseContent không được để trống", request.getRequestURI()));
         }
 
         try {
@@ -117,20 +118,18 @@ public class ApiAdminFeedbackController {
             var existingUser = userRepository.findByUsername(auth.getName())
                     .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS));
 
-            RespondFeedbackRequest request = RespondFeedbackRequest.builder()
-                    .respondByUserId(existingUser.getId())
-                    .responseContent(responseContent)
-                    .build();
+            respondRequest.setRespondByUserId(existingUser.getId());
 
-            customerFeedbackService.respondToFeedback(feedbackId, request);
-            return ResponseEntity.ok("Response submitted successfully");
+            CustomerFeedbackResponse response = customerFeedbackService.respondToFeedback(feedbackId, respondRequest);
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Response submitted successfully", response));
 
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "User not found", request.getRequestURI()));
         } catch (Exception e) {
             log.error("Error responding to feedback: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to submit response: " + e.getMessage());
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to submit response: " + e.getMessage(), request.getRequestURI()));
         }
     }
 
@@ -218,21 +217,5 @@ public class ApiAdminFeedbackController {
         public void setAverageTimeliness(double averageTimeliness) { this.averageTimeliness = averageTimeliness; }
     }
 
-    // Helper classes for breadcrumb navigation
-    public static class BreadcrumbItem {
-        private String label;
-        private String url;
-
-        public BreadcrumbItem(String label, String url) {
-            this.label = label;
-            this.url = url;
-        }
-
-        public String getLabel() { return label; }
-        public void setLabel(String label) { this.label = label; }
-
-        public String getUrl() { return url; }
-        public void setUrl(String url) { this.url = url; }
-    }
 }
 

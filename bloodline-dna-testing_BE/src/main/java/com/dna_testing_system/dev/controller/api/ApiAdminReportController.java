@@ -1,5 +1,6 @@
-package com.dna_testing_system.dev.controller;
+package com.dna_testing_system.dev.controller.api;
 
+import com.dna_testing_system.dev.dto.ApiResponse;
 import com.dna_testing_system.dev.dto.request.NewReportRequest;
 import com.dna_testing_system.dev.dto.request.UpdatingReportRequest;
 import com.dna_testing_system.dev.dto.response.SystemReportResponse;
@@ -11,6 +12,7 @@ import com.dna_testing_system.dev.exception.EntityNotFoundException;
 import com.dna_testing_system.dev.exception.ErrorCode;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.dna_testing_system.dev.service.SystemReportService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,10 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/reports")
+@RequestMapping("/api/v1/admin/reports")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApiAdminReportController {
 
@@ -45,14 +44,15 @@ public class ApiAdminReportController {
 
     // GET ALL + filter + pagination + stats
     @GetMapping
-    public ResponseEntity<?> getAllReports(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAllReports(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "all") String status,
             @RequestParam(defaultValue = "all") String generatedByRole,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam(defaultValue = "desc") String sortDir,
+            HttpServletRequest request) {
 
         try {
             List<SystemReportResponse> allReports = systemReportService.getAllSystemReports();
@@ -99,30 +99,37 @@ public class ApiAdminReportController {
                     "allRoles", RoleType.values()
             );
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Report list loaded", response));
 
         } catch (Exception e) {
             log.error("Error loading reports: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unable to load reports data");
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load reports data", request.getRequestURI()));
         }
     }
 
     // GET BY ID
     @GetMapping("/{reportId}")
-    public ResponseEntity<?> getReportById(@PathVariable Long reportId) {
+    public ResponseEntity<ApiResponse<SystemReportResponse>> getReportById(@PathVariable Long reportId,
+                                                                           HttpServletRequest request) {
         try {
             SystemReportResponse report = systemReportService.getSystemReportByReportId(reportId);
-            return ResponseEntity.ok(report);
+            if (report == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Report not found", request.getRequestURI()));
+            }
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Report loaded", report));
         } catch (Exception e) {
             log.error("Error loading report details: ", e);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load report details", request.getRequestURI()));
         }
     }
 
     // CREATE
     @PostMapping
-    public ResponseEntity<?> createReport(@RequestBody NewReportRequest reportRequest) {
+    public ResponseEntity<ApiResponse<SystemReportResponse>> createReport(@RequestBody NewReportRequest reportRequest,
+                                                                          HttpServletRequest request) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             User currentUser = userRepository.findByUsername(auth.getName())
@@ -131,28 +138,31 @@ public class ApiAdminReportController {
                     .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS));
 
             reportRequest.setGeneratedByUser(currentUser);
-            systemReportService.createNewReport(reportRequest);
+            SystemReportResponse created = systemReportService.createNewReport(reportRequest);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("Report created successfully");
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.success(HttpStatus.CREATED.value(), "Report created successfully", created));
 
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "User not found", request.getRequestURI()));
         } catch (Exception e) {
             log.error("Error creating report: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to create report: " + e.getMessage());
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to create report: " + e.getMessage(), request.getRequestURI()));
         }
     }
 
     // UPDATE STATUS
     @PatchMapping("/{reportId}/status")
-    public ResponseEntity<?> updateReportStatus(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> updateReportStatus(
             @PathVariable Long reportId,
-            @RequestBody Map<String, String> body) {
+            @RequestBody Map<String, String> body,
+            HttpServletRequest request) {
 
         String status = body.get("status");
         if (status == null || status.isBlank()) {
-            return ResponseEntity.badRequest().body("status không được để trống");
+            return ResponseEntity.badRequest().body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "status không được để trống", request.getRequestURI()));
         }
 
         try {
@@ -174,19 +184,20 @@ public class ApiAdminReportController {
 
             systemReportService.updateExistReport(updateRequest, reportId);
 
-            return ResponseEntity.ok(Map.of(
+            Map<String, Object> response = Map.of(
                     "success", true,
                     "message", "Report status updated successfully to " + status
-            ));
+            );
+
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Report status updated", response));
 
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "User not found", request.getRequestURI()));
         } catch (Exception e) {
             log.error("Error updating report status: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "success", false,
-                    "message", "Failed to update report status: " + e.getMessage()
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to update report status: " + e.getMessage(), request.getRequestURI()));
         }
     }
 

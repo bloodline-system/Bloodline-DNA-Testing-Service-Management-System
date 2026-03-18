@@ -1,10 +1,12 @@
-package com.dna_testing_system.dev.controller;
+package com.dna_testing_system.dev.controller.api;
 
+import com.dna_testing_system.dev.dto.ApiResponse;
 import com.dna_testing_system.dev.dto.request.TestKitRequest;
 import com.dna_testing_system.dev.dto.response.TestKitResponse;
 import com.dna_testing_system.dev.enums.KitType;
 import com.dna_testing_system.dev.enums.SampleType;
 import com.dna_testing_system.dev.service.TestKitService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,16 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/admin/test-kits")
+@RequestMapping("/api/v1/admin/test-kits")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApiAdminTestKitController {
 
@@ -41,13 +38,14 @@ public class ApiAdminTestKitController {
 
     // GET ALL + filter + pagination + stats
     @GetMapping
-    public ResponseEntity<?> getAllTestKits(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAllTestKits(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "all") String availability,
             @RequestParam(defaultValue = "all") String kitType,
-            @RequestParam(defaultValue = "all") String sampleType) {
+            @RequestParam(defaultValue = "all") String sampleType,
+            HttpServletRequest request) {
 
         try {
             List<TestKitResponse> allTestKits = testKitService.GetTestKitResponseList();
@@ -86,80 +84,91 @@ public class ApiAdminTestKitController {
                     "sampleTypes", SampleType.values()
             );
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Test kits loaded", response));
 
         } catch (Exception e) {
             log.error("Error loading test kits: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unable to load test kit data");
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load test kit data", request.getRequestURI()));
         }
     }
 
     // GET BY ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getTestKitById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<TestKitResponse>> getTestKitById(@PathVariable Long id,
+                                                                       HttpServletRequest request) {
         try {
             TestKitResponse testKit = testKitService.GetTestKitResponseById(id);
-            return ResponseEntity.ok(testKit);
+            if (testKit == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Test kit not found", request.getRequestURI()));
+            }
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Test kit loaded", testKit));
         } catch (Exception e) {
             log.error("Error loading test kit ID: " + id, e);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load test kit", request.getRequestURI()));
         }
     }
 
     // CREATE
     @PostMapping
-    public ResponseEntity<?> createTestKit(@Valid @RequestBody TestKitRequest testKitRequest,
-                                           BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<Void>> createTestKit(@Valid @RequestBody TestKitRequest testKitRequest,
+                                                           BindingResult bindingResult,
+                                                           HttpServletRequest request) {
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(err -> err.getField() + ": " + err.getDefaultMessage())
                     .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
+            return ResponseEntity.badRequest().body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), String.join(", ", errors), request.getRequestURI()));
         }
 
         try {
             testKitService.CreateTestKit(testKitRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Test kit created successfully");
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.success(HttpStatus.CREATED.value(), "Test kit created successfully", null));
         } catch (Exception e) {
             log.error("Error creating test kit: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to create test kit: " + e.getMessage());
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to create test kit: " + e.getMessage(), request.getRequestURI()));
         }
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTestKit(@PathVariable Long id,
-                                           @Valid @RequestBody TestKitRequest testKitRequest,
-                                           BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<TestKitResponse>> updateTestKit(@PathVariable Long id,
+                                                                      @Valid @RequestBody TestKitRequest testKitRequest,
+                                                                      BindingResult bindingResult,
+                                                                      HttpServletRequest request) {
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(err -> err.getField() + ": " + err.getDefaultMessage())
                     .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errors);
+            return ResponseEntity.badRequest().body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), String.join(", ", errors), request.getRequestURI()));
         }
 
         try {
             testKitService.UpdateTestKit(id, testKitRequest);
-            return ResponseEntity.ok("Test kit updated successfully");
+            TestKitResponse updated = testKitService.GetTestKitResponseById(id);
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Test kit updated successfully", updated));
         } catch (Exception e) {
             log.error("Error updating test kit ID: " + id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to update test kit: " + e.getMessage());
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to update test kit: " + e.getMessage(), request.getRequestURI()));
         }
     }
 
     // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTestKit(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Boolean>> deleteTestKit(@PathVariable Long id,
+                                                              HttpServletRequest request) {
         try {
             testKitService.DeleteTestKit(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Test kit deleted successfully", true));
         } catch (Exception e) {
             log.error("Error deleting test kit ID: " + id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to delete test kit: " + e.getMessage());
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to delete test kit: " + e.getMessage(), request.getRequestURI()));
         }
     }
 
