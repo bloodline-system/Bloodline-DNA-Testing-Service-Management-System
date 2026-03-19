@@ -4,71 +4,115 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e9e57501-afd8-478c-9b6d-d45942ba6632" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/controller/api/ApiAdminFeedbackController.java" beforeDir="false" afterPath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/controller/api/ApiAdminFeedbackController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/controller/api/ApiAdminProfilesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/controller/api/ApiAdminProfilesController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/controller/api/ApiAdminReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/controller/api/ApiAdminReportController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/controller/api/ApiAdminTestKitController.java" beforeDir="false" afterPath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/controller/api/ApiAdminTestKitController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/bloodline-dna-testing_BE/src/main/java/com/dna_testing_system/dev/security/SecurityConfig.java" afterDir="false" />
+    <list default="true" id="8d09a2b3-1b1d-456c-af53-0e43e5ac7152" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../.github/workflows/api-tests.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/api-tests.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/api-tests.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Class" />
-      </list>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;tinhonline262&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/tinhonline262/Bloodline-DNA-Testing-Service-Management-System&quot;,
+    &quot;accountId&quot;: &quot;79536e5a-1254-4b19-9408-a652c9248cd0&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
     </option>
   </component>
-  <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 7
+  &quot;associatedIndex&quot;: 0
 }</component>
-  <component name="ProjectId" id="3ApnzRcpOwR8YDYQ4KrQ6FRQKNS" />
+  <component name="ProjectId" id="3AkS03l9zh1WahlCZiygIsoZmA4" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.DevApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "E:/2026/testing/Bloodline-DNA-Testing-Service-Management-System",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "MavenSettings",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven.dev [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.dev [compile].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.DevApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;development&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/source/new/software-testing/bloodline-dna-testing_BE/src/main/resources/templates/email&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;File.Encoding&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\Program Files\\JetBrains\\IntelliJ IDEA 2025.1.1.1\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\resources\templates\email" />
+      <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\java\com\dna_testing_system\dev" />
+      <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\java\com\dna_testing_system\dev\service" />
+      <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\java\com\dna_testing_system\dev\constant" />
+      <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\java\com\dna_testing_system\dev\config" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.dna_testing_system.dev.utils" />
+      <recent name="com.dna_testing_system.dev.service.auth" />
+      <recent name="com.dna_testing_system.dev.service.impl.auth" />
+      <recent name="com.dna_testing_system.dev.service.impl" />
+      <recent name="com.dna_testing_system.dev.security" />
+    </key>
+  </component>
   <component name="RunManager">
-    <configuration name="DevApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <configuration name="DevApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="dev" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.dna_testing_system.dev.DevApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.dna_testing_system.dev.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.DevApplication" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -80,45 +124,38 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="e9e57501-afd8-478c-9b6d-d45942ba6632" name="Changes" comment="" />
-      <created>1773298641366</created>
+      <changelist id="8d09a2b3-1b1d-456c-af53-0e43e5ac7152" name="Changes" comment="" />
+      <created>1773134848245</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1773298641366</updated>
-      <workItem from="1773298642754" duration="10150000" />
-      <workItem from="1773416280836" duration="1362000" />
-      <workItem from="1773562399683" duration="5296000" />
-      <workItem from="1773637777697" duration="3752000" />
-      <workItem from="1773758858216" duration="676000" />
-      <workItem from="1773793888229" duration="1943000" />
-      <workItem from="1773796649717" duration="548000" />
-      <workItem from="1773797247443" duration="6092000" />
+      <updated>1773134848245</updated>
+      <workItem from="1773134849468" duration="227000" />
+      <workItem from="1773135146800" duration="1225000" />
+      <workItem from="1773241762904" duration="3867000" />
+      <workItem from="1773296165955" duration="25376000" />
+      <workItem from="1773474941416" duration="9809000" />
+      <workItem from="1773497995560" duration="1516000" />
+      <workItem from="1773547529821" duration="23345000" />
+      <workItem from="1773822716060" duration="1094000" />
+      <workItem from="1773900228551" duration="5220000" />
     </task>
+    <task id="LOCAL-00001">
+      <option name="closed" value="true" />
+      <created>1773429272313</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1773429272313</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="UnknownFeatures">
-    <option featureType="dependencySupport" implementationName="java:org.springframework.security:spring-security-core" />
-    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-core" />
-    <option featureType="dependencySupport" implementationName="javascript:npm:react" />
-    <option featureType="dependencySupport" implementationName="java:jakarta.validation:jakarta.validation-api" />
-    <option featureType="dependencySupport" implementationName="javascript:npm:tailwindcss" />
-    <option featureType="dependencySupport" implementationName="javascript:npm:vite" />
-    <option featureType="dependencySupport" implementationName="java:io.projectreactor:reactor-core" />
-    <option featureType="dependencySupport" implementationName="javascript:npm:webpack" />
-    <option featureType="dependencySupport" implementationName="java:org.springframework.data:spring-data-commons" />
-    <option featureType="dependencySupport" implementationName="executable:kubectl" />
-    <option featureType="dependencySupport" implementationName="java:org.hibernate.validator:hibernate-validator" />
-    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-webmvc" />
-    <option featureType="dependencySupport" implementationName="java:org.projectlombok:lombok" />
-    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-websocket" />
-    <option featureType="dependencySupport" implementationName="executable:docker" />
-    <option featureType="dependencySupport" implementationName="java:jakarta.persistence:jakarta.persistence-api" />
-    <option featureType="dependencySupport" implementationName="java:org.thymeleaf:thymeleaf" />
-    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-messaging" />
-    <option featureType="dependencySupport" implementationName="java:org.springframework.boot:spring-boot" />
-    <option featureType="dependencySupport" implementationName="javascript:npm:postcss" />
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Bloodline_DNA_Testing_Service_Management_System$DevApplication.ic" NAME="DevApplication Coverage Results" MODIFIED="1773134993627" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.dna_testing_system.dev.*</FILTER>
+    </SUITE>
   </component>
 </project>
