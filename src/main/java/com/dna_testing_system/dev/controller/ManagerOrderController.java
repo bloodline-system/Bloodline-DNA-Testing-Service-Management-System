@@ -1,22 +1,18 @@
 package com.dna_testing_system.dev.controller;
 
+import com.dna_testing_system.dev.dto.ApiResponse;
 import com.dna_testing_system.dev.dto.request.StaffAvailableRequest;
-import com.dna_testing_system.dev.dto.response.UserProfileResponse;
 import com.dna_testing_system.dev.service.OrderTaskManagementService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.AbstractController;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,100 +20,92 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/manager")
+@RequestMapping("/api/v1/manager")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ManagerOrderController extends BaseController {
     OrderTaskManagementService orderTaskManagementService;
 
-
     @PostMapping("/order-management/update-status")
-    public String updateOrderStatus(@RequestParam Long orderId,
-                                    @RequestParam String status,
-                                    @RequestParam(required = false) String notes,
-                                    RedirectAttributes redirectAttributes) {
+    public ApiResponse<Void> updateOrderStatus(@RequestParam Long orderId,
+            @RequestParam String status,
+            @RequestParam(required = false) String notes) {
         try {
             orderTaskManagementService.updateOrderStatus(orderId, status);
-            redirectAttributes.addAttribute("success", "true");
             log.info("Order status updated successfully for order ID: {}", orderId);
+            return ApiResponse.success(HttpStatus.OK.value(), "Order status updated", null);
         } catch (Exception e) {
             log.error("Error updating order status: {}", e.getMessage());
-            redirectAttributes.addAttribute("error", "true");
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to update order status",
+                    "/api/v1/manager/order-management/update-status");
         }
-        return "redirect:/manager/order-management";
     }
 
     @GetMapping("/order-management")
-    public String orderManagement(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() &&
-                !authentication.getName().equals("anonymousUser")) {
+    public ApiResponse<Map<String, Object>> orderManagement() {
+        Map<String, Object> response = new HashMap<>();
 
-            String currentPrincipalName = authentication.getName();
-            UserProfileResponse userProfile = userProfileService.getUserProfile(currentPrincipalName);
-            model.addAttribute("userProfile", userProfile);
-        }
         try {
             var orders = orderTaskManagementService.getServiceOrders();
-            model.addAttribute("orders", orders);
-            model.addAttribute("pageTitle", "Order Management");
+            response.put("orders", orders);
+            response.put("pageTitle", "Order Management");
 
             // Calculate counts for each status
             Map<String, Long> statusCounts = orders.stream()
                     .collect(Collectors.groupingBy(
                             order -> order.getOrderStatus().name().toLowerCase().replace("_", "-"),
-                            Collectors.counting()
-                    ));
+                            Collectors.counting()));
 
-            model.addAttribute("statusCounts", statusCounts);
-            model.addAttribute("totalOrders", orders.size());
-
+            response.put("statusCounts", statusCounts);
+            response.put("totalOrders", orders.size());
         } catch (Exception e) {
             log.error("Error loading orders: {}", e.getMessage());
-            model.addAttribute("orders", new ArrayList<>());
-            model.addAttribute("statusCounts", new HashMap<>());
-            model.addAttribute("totalOrders", 0);
+            response.put("orders", new ArrayList<>());
+            response.put("statusCounts", new HashMap<>());
+            response.put("totalOrders", 0);
         }
 
-        return "manager/order-management";
+        return ApiResponse.success(HttpStatus.OK.value(), "Order management data", response);
     }
+
     @GetMapping("/new-orders")
-    public String newOrders(Model model) {
-        model.addAttribute("pageTitle", "New Orders Management");
+    public ApiResponse<Map<String, Object>> newOrders() {
+        Map<String, Object> response = new HashMap<>();
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() &&
-                !authentication.getName().equals("anonymousUser")) {
+        try {
+            // Load new orders (unassigned orders with PENDING status)
+            var newOrders = orderTaskManagementService.getNewOrders();
 
-            String currentPrincipalName = authentication.getName();
-            UserProfileResponse userProfile = userProfileService.getUserProfile(currentPrincipalName);
-            model.addAttribute("userProfile", userProfile);
+            // Load available staff
+            var availableStaff = orderTaskManagementService.getStaffAvailable();
+
+            response.put("newOrders", newOrders);
+            response.put("availableStaff", availableStaff);
+            response.put("newOrdersCount", newOrders.size());
+            response.put("availableStaffCount", availableStaff.size());
+            response.put("assignedTodayCount", 0); // This could be calculated from database
+            response.put("pendingAssignmentCount", newOrders.size());
+
+            return ApiResponse.success(HttpStatus.OK.value(), "New orders data", response);
+        } catch (Exception e) {
+            log.error("Error loading new orders: {}", e.getMessage());
+            response.put("newOrders", new ArrayList<>());
+            response.put("availableStaff", new ArrayList<>());
+            response.put("newOrdersCount", 0);
+            response.put("availableStaffCount", 0);
+            response.put("assignedTodayCount", 0);
+            response.put("pendingAssignmentCount", 0);
+            return ApiResponse.success(HttpStatus.OK.value(), "New orders data", response);
         }
-        // Load new orders (unassigned orders with PENDING status)
-        var newOrders = orderTaskManagementService.getNewOrders();
-
-        // Load available staff
-        var availableStaff = orderTaskManagementService.getStaffAvailable();
-
-        // Calculate statistics
-        model.addAttribute("newOrders", newOrders);
-        model.addAttribute("availableStaff", availableStaff);
-        model.addAttribute("newOrdersCount", newOrders.size());
-        model.addAttribute("availableStaffCount", availableStaff.size());
-        model.addAttribute("assignedTodayCount", 0); // This could be calculated from database
-        model.addAttribute("pendingAssignmentCount", newOrders.size());
-
-        return "manager/new-order-management";
     }
 
     @PostMapping("/assign-staff")
-    public String assignStaff(@RequestParam Long orderId,
-                              @RequestParam String collectStaffId,
-                              @RequestParam String analysisStaffId,
-                              @RequestParam(required = false) String assignmentType,
-                              @RequestParam(required = false) String notes,
-                              RedirectAttributes redirectAttributes) {
+    public ApiResponse<Void> assignStaff(@RequestParam Long orderId,
+            @RequestParam String collectStaffId,
+            @RequestParam String analysisStaffId,
+            @RequestParam(required = false) String assignmentType,
+            @RequestParam(required = false) String notes) {
         try {
             StaffAvailableRequest collectStaffRequest = StaffAvailableRequest.builder()
                     .staffId(collectStaffId)
@@ -125,17 +113,13 @@ public class ManagerOrderController extends BaseController {
             StaffAvailableRequest analysisStaffRequest = StaffAvailableRequest.builder()
                     .staffId(analysisStaffId)
                     .build();
-            // You can add notes field to StaffAvailableRequest if needed
 
             orderTaskManagementService.taskAssignmentForStaff(orderId, collectStaffRequest, analysisStaffRequest);
-
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Staff successfully assigned to order!");
+            return ApiResponse.success(HttpStatus.OK.value(), "Staff assigned to order", null);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Failed to assign staff: " + e.getMessage());
+            log.error("Failed to assign staff: {}", e.getMessage());
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to assign staff",
+                    "/api/v1/manager/assign-staff");
         }
-
-        return "redirect:/manager/new-orders";
     }
 }
