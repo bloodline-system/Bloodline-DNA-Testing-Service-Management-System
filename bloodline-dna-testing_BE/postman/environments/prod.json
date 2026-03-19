@@ -1,0 +1,34 @@
+{
+	"id": "c74a6e78-32e5-448c-93ba-5cb996b01158",
+	"name": "PROD",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "expires_in",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		}
+	],
+	"color": null,
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2026-03-17T16:07:54.332Z",
+	"_postman_exported_using": "Postman/12.2.0"
+}
