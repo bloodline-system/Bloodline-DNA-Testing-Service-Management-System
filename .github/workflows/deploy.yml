@@ -46,6 +46,11 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY-$IMAGE_ENV:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY-$IMAGE_ENV:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+      - name: Convert ENV to upper
+        run: echo "IMAGE_ENV_UPPER=${IMAGE_ENV^^}" >> $GITHUB_ENV
+        env:
+          IMAGE_ENV: ${{ inputs.environment }}
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.10
         env:
@@ -74,9 +79,9 @@ jobs:
               -e PASSWORD_SMTP=${{ secrets.PASSWORD_SMTP }} \
               -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
               -e ENVIRONMENT_CONFIG=${{ env.IMAGE_ENV }} \
-              -e DBMS_CONNECTION: ${{ secrets[format('DBMS_CONNECTION_{0}', upper(env.IMAGE_ENV))] }} \
-              -e DBMS_USERNAME=${{ secrets[format('DBMS_USERNAME_{0}', upper(env.IMAGE_ENV))] }} \
-              -e DBMS_PASSWORD=${{ secrets[format('DBMS_PASSWORD_{0}', upper(env.IMAGE_ENV))] }} \
-              -e REDIS_HOST=${{ secrets[format('REDIS_HOST_{0}', upper(env.IMAGE_ENV))] }} \
-              -e REDIS_PASSWORD=${{ secrets[format('REDIS_PASSWORD{0}', upper(env.IMAGE_ENV))] }} \
-              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}-${{IMAGE_ENV}}:latest
+              -e DBMS_CONNECTION=${{ secrets[format('DBMS_CONNECTION_{0}', env.IMAGE_ENV_UPPER)] }} \
+              -e DBMS_USERNAME=${{ secrets[format('DBMS_USERNAME_{0}', env.IMAGE_ENV_UPPER)] }} \
+              -e DBMS_PASSWORD=${{ secrets[format('DBMS_PASSWORD_{0}', env.IMAGE_ENV_UPPER)] }} \
+              -e REDIS_HOST=${{ secrets[format('REDIS_HOST_{0}', env.IMAGE_ENV_UPPER)] }} \
+              -e REDIS_PASSWORD=${{ secrets[format('REDIS_PASSWORD_{0}', env.IMAGE_ENV_UPPER)] }} \
+              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}-${{ env.IMAGE_ENV }}:latest
