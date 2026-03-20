@@ -1,0 +1,9 @@
+name: Deploy API Service to AWS
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+jobs:

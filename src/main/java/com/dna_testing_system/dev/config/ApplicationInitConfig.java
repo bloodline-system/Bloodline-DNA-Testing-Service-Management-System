@@ -46,7 +46,6 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
         createAdminDefault();
         createManagerDefault();
         createStaffDefault();
-        launchBrowser();
     }
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
