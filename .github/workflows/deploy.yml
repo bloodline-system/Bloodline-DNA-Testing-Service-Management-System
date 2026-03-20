@@ -84,4 +84,4 @@ jobs:
               -e DBMS_PASSWORD=${{ secrets[format('DBMS_PASSWORD_{0}', env.IMAGE_ENV_UPPER)] }} \
               -e REDIS_HOST=${{ secrets[format('REDIS_HOST_{0}', env.IMAGE_ENV_UPPER)] }} \
               -e REDIS_PASSWORD=${{ secrets[format('REDIS_PASSWORD_{0}', env.IMAGE_ENV_UPPER)] }} \
-              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}-${{ env.IMAGE_ENV }}:latest
+              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
