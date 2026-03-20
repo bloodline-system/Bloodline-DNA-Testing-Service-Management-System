@@ -25,6 +25,7 @@ jobs:
       - name: Run Unit Test + Sonar
         run: |
           mvn clean verify sonar:sonar \
+            -Dspring.profiles.active=test \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
       
 

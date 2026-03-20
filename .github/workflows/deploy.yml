@@ -8,7 +8,7 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: tker-dev/bloodline-system
-  CONTAINER_NAME: containerName
+  CONTAINER_NAME: bloodline-system-api
 
 jobs:
   build-and-deploy:
@@ -25,22 +25,63 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Debug Dockerfile
         run: |
           pwd
           ls -la
-
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: latest
+          IMAGE_ENV: ${{ inputs.environment }}
         run: |
           # Build a docker container and
           # push it to ECR
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY-$IMAGE_ENV:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY-$IMAGE_ENV:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY-$IMAGE_ENV:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Convert ENV to upper
+        run: echo "IMAGE_ENV_UPPER=${IMAGE_ENV^^}" >> $GITHUB_ENV
+        env:
+          IMAGE_ENV: ${{ inputs.environment }}
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.10
+        env:
+          IMAGE_ENV: ${{ inputs.environment }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} \
+              | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+
+            # Pull latest image
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}-${{env.IMAGE_ENV}}:latest
+
+            # Stop old container (if running)
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+
+            docker run -d \
+              -p 80:8080 \
+              --name ${{ env.CONTAINER_NAME }} \
+              -e HOST_SMTP=${{ secrets.HOST_SMTP }} \
+              -e PORT_SMTP=${{ secrets.PORT_SMTP }} \
+              -e USERNAME_SMTP=${{ secrets.USERNAME_SMTP }} \
+              -e PASSWORD_SMTP=${{ secrets.PASSWORD_SMTP }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e ENVIRONMENT_CONFIG=${{ env.IMAGE_ENV }} \
+              -e DBMS_CONNECTION=${{ secrets[format('DBMS_CONNECTION_{0}', env.IMAGE_ENV_UPPER)] }} \
+              -e DBMS_USERNAME=${{ secrets[format('DBMS_USERNAME_{0}', env.IMAGE_ENV_UPPER)] }} \
+              -e DBMS_PASSWORD=${{ secrets[format('DBMS_PASSWORD_{0}', env.IMAGE_ENV_UPPER)] }} \
+              -e REDIS_HOST=${{ secrets[format('REDIS_HOST_{0}', env.IMAGE_ENV_UPPER)] }} \
+              -e REDIS_PASSWORD=${{ secrets[format('REDIS_PASSWORD_{0}', env.IMAGE_ENV_UPPER)] }} \
+              ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}-${{ env.IMAGE_ENV }}:latest
