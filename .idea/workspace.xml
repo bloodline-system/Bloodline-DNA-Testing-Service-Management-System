@@ -5,27 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8d09a2b3-1b1d-456c-af53-0e43e5ac7152" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/pipeline.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/pipeline.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/AccessDeniedController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/AdminDashboardController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/AdminFeedbackController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/AdminProfilesController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/AdminReportController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/AdminTestKitController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/BaseController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/ContentPostController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/DNAServiceNavigationController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/HomeController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/ManagerDashboardController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/ManagerOrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/ManagerOrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/OrderingByCustomer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/PromotionController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/PublicController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-staging.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-staging.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,7 +148,7 @@
       <workItem from="1773900228551" duration="6879000" />
       <workItem from="1773944844180" duration="1797000" />
       <workItem from="1773987773932" duration="349000" />
-      <workItem from="1774003280434" duration="3417000" />
+      <workItem from="1774003280434" duration="4206000" />
     </task>
     <task id="LOCAL-00001">
       <option name="closed" value="true" />
