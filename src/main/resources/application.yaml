@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  profiles:
+    active: ${ENVIRONMENT_CONFIG:dev}
   application:
     name: dev
   mail:
@@ -25,8 +27,6 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  profiles:
-    active: ${ENVIRONMENT_CONFIG:dev}
 
 logging:
   level:
