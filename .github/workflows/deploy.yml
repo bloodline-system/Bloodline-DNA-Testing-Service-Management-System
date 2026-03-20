@@ -30,6 +30,9 @@ jobs:
           pwd
           ls -la
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
