@@ -5,10 +5,10 @@ spring:
   application:
     name: dev
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: dnatestingnotification@gmail.com
-    password: ugltgfcsfppohwam
+    host: ${HOST_SMTP:smtp.gmail.com}
+    port: ${PORT_SMTP:587}
+    username: ${USERNAME_SMTP:dnatestingnotification@gmail.com}
+    password: ${PASSWORD_SMTP:ugltgfcsfppohwam}
     properties:
       mail:
         smtp:
@@ -21,12 +21,13 @@ spring:
       client-library-url: https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.n.js
   thymeleaf:
     cache: false
-  profiles:
-    active: staging
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  profiles:
+    active: ${ENVIRONMENT_CONFIG:dev}
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

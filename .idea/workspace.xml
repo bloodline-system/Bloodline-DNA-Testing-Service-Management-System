@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8d09a2b3-1b1d-456c-af53-0e43e5ac7152" name="Changes" comment="" />
+    <list default="true" id="8d09a2b3-1b1d-456c-af53-0e43e5ac7152" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-staging.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-staging.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yaml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -147,6 +152,8 @@
       <workItem from="1773944844180" duration="1797000" />
       <workItem from="1773987773932" duration="349000" />
       <workItem from="1774003280434" duration="6917000" />
+      <workItem from="1774028387343" duration="2152000" />
+      <workItem from="1774035930708" duration="1806000" />
     </task>
     <task id="LOCAL-00001">
       <option name="closed" value="true" />
