@@ -5,10 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8d09a2b3-1b1d-456c-af53-0e43e5ac7152" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/application-dev.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/application-stagging.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +71,7 @@
     "Spring Boot.DevApplication.executor": "Run",
     "git-widget-placeholder": "ci/cd-branch",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "D:/source/new/software-testing/bloodline-dna-testing_BE/src/main/resources/templates/email",
+    "last_opened_file_path": "D:/source/new/software-testing/bloodline-dna-testing_BE/src/main/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -90,11 +89,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\resources" />
       <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\resources\templates\email" />
       <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\java\com\dna_testing_system\dev" />
       <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\java\com\dna_testing_system\dev\service" />
       <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\java\com\dna_testing_system\dev\constant" />
-      <recent name="D:\source\new\software-testing\bloodline-dna-testing_BE\src\main\java\com\dna_testing_system\dev\config" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.dna_testing_system.dev.utils" />
