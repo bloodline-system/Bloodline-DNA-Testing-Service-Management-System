@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/manager")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ManagerOrderController extends BaseController {
+public class ManagerOrderController {
     OrderTaskManagementService orderTaskManagementService;
 
     @PostMapping("/order-management/update-status")
