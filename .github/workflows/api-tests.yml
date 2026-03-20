@@ -1,12 +1,6 @@
-name: 🧪 API Tests + Auto Jira Bug
+name: API Tests + Auto Jira Bug
 
 on:
-  push:
-    branches: [main, develop, staging]
-  pull_request:
-    branches: [main, develop]
-  schedule:
-    - cron: "0 8 * * *" # 15:00 ICT (UTC+7)
   workflow_call:
     inputs:
       environment:
@@ -66,9 +60,6 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: bloodline-dna-testing_BE
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
@@ -95,8 +86,8 @@ jobs:
         id: newman
         continue-on-error: true
         run: |
-          newman run bloodline-dna-testing_BE/postman/${{ matrix.collection }}.json \
-            --environment bloodline-dna-testing_BE/postman/environments/${{ env.ENVIRONMENT }}.json \
+          newman run postman/${{ matrix.collection }}.json \
+            --environment postman/environments/${{ env.ENVIRONMENT }}.json \
             --env-var "baseUrl=${{ env.API_BASE_URL }}" \
             --reporters cli,json,htmlextra \
             --reporter-json-export      reports/result.json \

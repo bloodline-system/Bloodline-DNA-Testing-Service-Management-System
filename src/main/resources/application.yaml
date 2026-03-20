@@ -21,10 +21,8 @@ spring:
       client-library-url: https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.n.js
   thymeleaf:
     cache: false
-  datasource:
-    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/dna_testing_system}
-    username: ${DBMS_USERNAME:root}
-    password: ${DBMS_PASSWORD:root}
+  profiles:
+    active: staging
   jpa:
     hibernate:
       ddl-auto: update
