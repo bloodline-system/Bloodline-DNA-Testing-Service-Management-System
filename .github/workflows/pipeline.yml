@@ -30,7 +30,7 @@ jobs:
 
   # Deploy staging (develop)
   deploy-staging:
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    if: github.ref_name == 'development' && github.event_name == 'push'
     uses: ./.github/workflows/deploy.yml
     with:
       environment: staging
