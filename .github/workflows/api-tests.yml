@@ -1,10 +1,6 @@
 name: API Tests + Auto Jira Bug
 
 on:
-  pull_request:
-    branches: [main, development]
-  schedule:
-    - cron: "0 8 * * *" # 15:00 ICT (UTC+7)
   workflow_call:
     inputs:
       environment:
