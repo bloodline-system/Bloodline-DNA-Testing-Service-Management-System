@@ -25,7 +25,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @Slf4j
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/feedback")
 @SecurityRequirement(name = "bearerAuth")
