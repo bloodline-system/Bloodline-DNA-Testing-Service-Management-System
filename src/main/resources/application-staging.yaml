@@ -1,5 +1,11 @@
 spring:
+  data:
+    redis:
+      host: clustercfg.bloodline-system-cache-valkey.gdqxr2.use1.cache.amazonaws.com
+      port: 6379
+      password: ${REDIS_PASSWORD}
   datasource:
     url: ${DBMS_CONNECTION:jdbc:mysql://bloodline-system-db.cc5ksw4uwyzr.us-east-1.rds.amazonaws.com:3306/dna_testing_system}
     username: ${DBMS_USERNAME:admin}
     password: ${DBMS_PASSWORD:bloodline-system-db-password}
+

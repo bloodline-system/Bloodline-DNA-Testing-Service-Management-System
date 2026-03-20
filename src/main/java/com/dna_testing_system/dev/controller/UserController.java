@@ -156,30 +156,4 @@ public class UserController {
                 ApiResponse.success(HttpStatus.OK.value(), "Delete profile successfully", true)
         );
     }
-    @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("pageTitle", "Dashboard - Trang chủ");
-        model.addAttribute("breadcrumbActive", "Dashboard");
-        model.addAttribute("currentPage", "dashboard"); // Để đánh dấu mục menu active
-        return "user/dashboard"; // Trả về template dashboard.html
-    }
-
-    @GetMapping("/view-results")
-    public String viewResults(Model model, @RequestParam("orderId") Long orderId) {
-        TestResult testResult = userService.getTestResult(orderId);
-        TestResultsResponse testResultsResponse = staffService.getTestResultById(testResult.getId());
-        RawDataResponse rawDataResponse = staffService.getRawDataById(testResult.getRawData().getId());
-        model.addAttribute("rawData", rawDataResponse);
-        model.addAttribute("testResult", testResultsResponse);
-        // Lấy thông tin kết quả xét nghiệm từ service
-        return "user/view-results"; // Trả về template view-results.html
-    }
-    // Blog for user
-    ContentPostService contentPostService;
-    // Hien thi danh sach bai viet dang co
-    @GetMapping(value = "/posts")
-    public String showPostList(Model model) {
-        model.addAttribute("posts", contentPostService.getAllPosts());
-        return "/user/blog";
-    }
 }
