@@ -29,8 +29,9 @@ COPY --from=jre-build /opt/java-minimal /opt/java
 # Copy application
 COPY --from=build /app/target/*.jar /app/app.jar
 
-# Non-root user for safety
-RUN useradd -ms /bin/bash appuser
+RUN mkdir -p /app/uploads /app/uploads_information && \
+    useradd -ms /bin/bash appuser && \
+    chown -R appuser:appuser /app/uploads /app/uploads_information
 USER appuser
 
 WORKDIR /app
