@@ -38,7 +38,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: latest
-          IMAGE_ENV: ${{ github.event.inputs.environment }}
+          IMAGE_ENV: ${{ inputs.environment }}
         run: |
           # Build a docker container and
           # push it to ECR
@@ -49,7 +49,7 @@ jobs:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.10
         env:
-          IMAGE_ENV: ${{ github.event.inputs.environment }}
+          IMAGE_ENV: ${{ inputs.environment }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
