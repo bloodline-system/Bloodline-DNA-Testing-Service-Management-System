@@ -6,6 +6,7 @@ import com.dna_testing_system.dev.dto.request.auth.RefreshTokenRequestDTO;
 import com.dna_testing_system.dev.dto.request.auth.RegisterRequestDTO;
 import com.dna_testing_system.dev.dto.request.auth.VerificationOptRequestDTO;
 import com.dna_testing_system.dev.dto.response.auth.AuthTokensResponseDTO;
+import com.dna_testing_system.dev.dto.response.auth.OtpDebugResponseDTO;
 import com.dna_testing_system.dev.dto.response.auth.RegisterResponseDTO;
 import com.dna_testing_system.dev.entity.SignUp;
 import com.dna_testing_system.dev.entity.User;
@@ -161,6 +162,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         signUpEntity.setCountAttemptVerificationToken(signUpEntity.getCountAttemptVerificationToken() + 1);
         signUpRepository.save(signUpEntity);
         log.info("Verification token resent successfully for signUpId: {}", signUpId);
+    }
+
+    @Override
+    public OtpDebugResponseDTO getOtpForDebugging(String signUpId) {
+        log.info("Retrieving OTP for debugging for signUpId: {}", signUpId);
+        SignUp signUpEntity = signUpRepository.findById(signUpId)
+                .orElseThrow(() -> {
+                    log.warn("SignUp not found for ID: {}", signUpId);
+                    return new OptFailException("Invalid sign-up ID");
+                });
+        if (signUpEntity.getStatus() != SignUpStatus.PENDING) {
+            log.warn("Attempt to retrieve OTP for sign-up with invalid status: {}. SignUp ID: {}", signUpEntity.getStatus(), signUpId);
+            throw new OptFailException("Cannot retrieve OTP for non-pending sign-up");
+        }
+        log.info("OTP retrieved successfully for debugging for signUpId: {}", signUpId);
+        return OtpDebugResponseDTO.builder()
+                .otpCode(signUpEntity.getCurrentVerificationToken())
+                .build();
     }
 
 

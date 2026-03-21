@@ -1,0 +1,548 @@
+{
+  "info": {
+    "_postman_id": "97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+    "name": "Auth API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34182990",
+    "_collection_link": "https://go.postman.co/collection/34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Sign Up",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Lưu signup-id\", () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.data[\"sign-up-id\"]).to.be.a(\"string\");",
+              "  pm.environment.set(\"signup-id\", body.data[\"sign-up-id\"]);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "let username = pm.variables.replaceIn(\"{{$randomUserName}}\");\r",
+              "let email = pm.variables.replaceIn(\"{{$randomEmail}}\");\r",
+              "let password = pm.variables.replaceIn(\"{{$randomPassword}}\");\r",
+              "\r",
+              "pm.environment.set(\"username\", username);\r",
+              "pm.environment.set(\"email\", email);\r",
+              "pm.environment.set(\"password\", password);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"{{password}}\",\r\n  \"email\": \"{{email}}\",\r\n  \"firstName\": \"Tinh\",\r\n  \"lastName\": \"Huynh\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/sign-up",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "sign-up"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Resend OTP",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseCode = pm.response.code;",
+              "",
+              "pm.test(\"Status code is valid\", function () {",
+              "    pm.expect(responseCode).to.be.oneOf([200, 202, 400]);",
+              "});",
+              "",
+              "if (responseCode === 200 || responseCode === 202) {",
+              "    pm.test(\"OTP email sent successfully\", function () {",
+              "        pm.expect(pm.response.text()).to.include(\"User verification email sent successfully\");",
+              "    });",
+              "} else if (responseCode === 400) {",
+              "    pm.test(\"Rate limit response is valid\", function () {",
+              "        const body = pm.response.json();",
+              "        pm.expect(body).to.have.property(\"code\", 400);",
+              "        pm.expect(body).to.have.property(\"message\");",
+              "        pm.expect(body.message).to.include(\"Please wait\");",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/resend-otp?signUpId={{signup-id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "resend-otp"
+          ],
+          "query": [
+            {
+              "key": "signUpId",
+              "value": "{{signup-id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Debug Get OTP Signup",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Check if OTP is present\", function () {\r",
+              "    var body = pm.response.json();\r",
+              "    pm.expect(body.data[\"otp_code\"]).to.be.a(\"string\");\r",
+              "    pm.expect(body.data[\"otp_code\"]).to.have.lengthOf(6);\r",
+              "    pm.environment.set(\"otp_code\", body.data[\"otp_code\"]); // Store OTP in environment variable for further use\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/debug/otp/{{signup-id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "debug",
+            "otp",
+            "{{signup-id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Verification OTP",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 400 && pm.response.json().message === \"Verification token has expired\") {\r",
+              "    try {\r",
+              "        const response = await pm.execution.runRequest(\"34182990-829c4555-756c-4d2d-95b0-ad09e9756d37\");\r",
+              "        pm.execution.runRequest(\"34182990-19ab6e15-662e-45a2-a3a1-a4194dd514df\")\r",
+              "        console.log(response.json());\r",
+              "    } catch (err) {\r",
+              "        console.error(err);\r",
+              "    }\r",
+              "}\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Body matches string\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"User verified successfully\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {
+              "34182990-829c4555-756c-4d2d-95b0-ad09e9756d37": {
+                "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                "location": [
+                  "Auth API",
+                  "Resend OTP"
+                ]
+              },
+              "34182990-19ab6e15-662e-45a2-a3a1-a4194dd514df": {
+                "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                "location": [
+                  "Auth API",
+                  "Debug Get OTP Signup"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"signUpId\": \"{{signup-id}}\",\n  \"otp\": \"{{otp_code}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/verification",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "verification"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "if (jsonData.data) {",
+              "    pm.environment.set(\"access_token\", jsonData.data.access_token);",
+              "    pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+              "    pm.environment.set(\"expires_in\", jsonData.data.expires_in);",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"{{password}}\",\r\n  \"rememberMe\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Refresh Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "if (jsonData.code === 200) {\r",
+              "    pm.test(\"Access token is present\", function () {\r",
+              "        pm.expect(jsonData.data.access_token).to.not.be.null;\r",
+              "    });\r",
+              "\r",
+              "    pm.test(\"Refresh token is present\", function () {\r",
+              "        pm.expect(jsonData.data.refresh_token).to.not.be.null;\r",
+              "        });\r",
+              "\r",
+              "    pm.test(\"Add token to environment variables\", function () {\r",
+              "        pm.environment.set(\"access_token\", jsonData.data.access_token);\r",
+              "        pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);\r",
+              "        pm.environment.set(\"expires_in\", jsonData.data.expires_in);\r",
+              "    });\r",
+              "\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"refreshToken\": \"{{refresh_token}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/refresh-token",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "refresh-token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Logout",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Tự động refresh token nếu hết hạn\r",
+              "const token = pm.environment.get(\"access_token\");\r",
+              "const expiresIn = pm.environment.get(\"expires_in\");\r",
+              "\r",
+              "if (!token || Date.now() > expiresIn) {\r",
+              "  // Gọi API refresh token\r",
+              "    try {\r",
+              "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+              "\r",
+              "        console.log(response.json());\r",
+              "    } catch (err) {\r",
+              "        console.error(err);\r",
+              "    }\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {
+              "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                "location": [
+                  "Auth API",
+                  "Refresh Token"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Body matches string\", function () {\r",
+              "    pm.expect(pm.response.text()).to.include(\"Logout successfully\");\r",
+              "});\r",
+              "\r",
+              "pm.environment.unset(\"access_token\");\r",
+              "pm.environment.unset(\"refresh_token\");\r",
+              "pm.environment.unset(\"expires_in\")"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"refreshToken\": \"{{refresh_token}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "logout"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "signup-id",
+      "value": ""
+    }
+  ]
+}
