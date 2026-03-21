@@ -3,7 +3,7 @@
 	"name": "PROD",
 	"values": [
 		{
-			"key": "base_url",
+			"key": "baseUrl",
 			"value": "",
 			"type": "default",
 			"enabled": true
