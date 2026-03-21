@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8d09a2b3-1b1d-456c-af53-0e43e5ac7152" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/config/ApplicationInitConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/dna_testing_system/dev/config/ApplicationInitConfig.java" afterDir="false" />
-    </list>
+    <list default="true" id="8d09a2b3-1b1d-456c-af53-0e43e5ac7152" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -72,7 +65,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.DevApplication.executor": "Run",
-    "git-widget-placeholder": "development",
+    "git-widget-placeholder": "PROJ-5-Quản-lý-bộ-kit-xét-nghiệm-Test-Kit-Management",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "E:/2026/Bloodline-DNA-Testing-Service-Management-System",
     "node.js.detected.package.eslint": "true",
@@ -158,7 +151,7 @@
       <workItem from="1774003280434" duration="6917000" />
       <workItem from="1774028387343" duration="2152000" />
       <workItem from="1774035930708" duration="7851000" />
-      <workItem from="1774077690100" duration="716000" />
+      <workItem from="1774077690100" duration="3128000" />
     </task>
     <task id="LOCAL-00001">
       <option name="closed" value="true" />
