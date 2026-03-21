@@ -39,6 +39,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/","/api/v1/auth/**",
+                    "/access-denied",
+                    "/api/v1/errors/**",
                                 "/actuator/**",
                                 "/oauth2/**",
                                 "/login/oauth2/code/google",

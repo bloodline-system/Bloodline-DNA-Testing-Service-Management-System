@@ -39,6 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return "/".equals(path)
+            || "/access-denied".equals(path)
+            || path.startsWith("/api/v1/errors/")
             || path.startsWith("/actuator/")
             || path.startsWith("/oauth2/")
             || "/login/oauth2/code/google".equals(path)
