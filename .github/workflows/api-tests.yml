@@ -9,18 +9,6 @@ on:
       collection:
         required: false
         type: string
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment"
-        required: true
-        default: "dev"
-        type: choice
-        options: [dev, staging, prod]
-      collection:
-        description: "Collection name to run (leave blank = all)"
-        required: false
-        default: ""
 
 # ─────────────────────────────────────────────────────────────────
 # Job 1 — Discover collections and build the matrix dynamically.
@@ -42,7 +30,7 @@ jobs:
             | xargs -I{} basename {} .json \
             | jq -Rsc 'split("\n") | map(select(. != ""))')
 
-          FILTER="${{ github.event.inputs.collection }}"
+          FILTER="${{ inputs.collection }}"
           if [[ -n "$FILTER" ]]; then
             MATRIX=$(echo "$ALL" | jq -c --arg f "$FILTER" '[.[] | select(. == $f)]')
           else
@@ -74,12 +62,12 @@ jobs:
 
       - name: Set environment variables
         run: |
-          case "${{ github.event.inputs.environment || 'dev' }}" in
+          case "${{ inputs.environment || 'dev' }}" in
             prod)    API_URL="${{ secrets.API_BASE_URL_PROD }}"    ;;
             staging) API_URL="${{ secrets.API_BASE_URL_STAGING }}" ;;
             *)       API_URL="${{ secrets.API_BASE_URL_DEV }}"     ;;
           esac
-          echo "ENVIRONMENT=${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_ENV
+          echo "ENVIRONMENT=${{ inputs.environment || 'dev' }}" >> $GITHUB_ENV
           echo "API_BASE_URL=$API_URL"                                        >> $GITHUB_ENV
 
       - name: Run — ${{ matrix.collection }}
