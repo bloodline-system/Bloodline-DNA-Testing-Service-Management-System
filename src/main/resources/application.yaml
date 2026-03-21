@@ -47,3 +47,15 @@ identity:
 mail:
   sender:
     from: ${MAIL_SENDER_FROM:dnatestingnotification@gmail.com}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true

@@ -9,18 +9,6 @@ on:
       collection:
         required: false
         type: string
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment"
-        required: true
-        default: "dev"
-        type: choice
-        options: [dev, staging, prod]
-      collection:
-        description: "Collection name to run (leave blank = all)"
-        required: false
-        default: ""
 
 # ─────────────────────────────────────────────────────────────────
 # Job 1 — Discover collections and build the matrix dynamically.
@@ -28,7 +16,7 @@ on:
 # ─────────────────────────────────────────────────────────────────
 jobs:
   setup:
-    name: 🗂️ Discover collections
+    name: Discover collections
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.discover.outputs.matrix }}
@@ -42,7 +30,7 @@ jobs:
             | xargs -I{} basename {} .json \
             | jq -Rsc 'split("\n") | map(select(. != ""))')
 
-          FILTER="${{ github.event.inputs.collection }}"
+          FILTER="${{ inputs.collection }}"
           if [[ -n "$FILTER" ]]; then
             MATRIX=$(echo "$ALL" | jq -c --arg f "$FILTER" '[.[] | select(. == $f)]')
           else
@@ -56,7 +44,7 @@ jobs:
   # Job 2 — Run each discovered collection in parallel
   # ─────────────────────────────────────────────────────────────────
   api-tests:
-    name: 🔍 ${{ matrix.collection }}
+    name: ${{ matrix.collection }}
     needs: setup
     runs-on: ubuntu-latest
 
@@ -67,22 +55,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 📦 Install Newman
+      - name: Install Newman
         run: |
           npm install -g newman newman-reporter-htmlextra
           mkdir -p reports
 
-      - name: 🌍 Set environment variables
+      - name: Set environment variables
         run: |
-          case "${{ github.event.inputs.environment || 'dev' }}" in
+          case "${{ inputs.environment || 'dev' }}" in
             prod)    API_URL="${{ secrets.API_BASE_URL_PROD }}"    ;;
             staging) API_URL="${{ secrets.API_BASE_URL_STAGING }}" ;;
             *)       API_URL="${{ secrets.API_BASE_URL_DEV }}"     ;;
           esac
-          echo "ENVIRONMENT=${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_ENV
+          echo "ENVIRONMENT=${{ inputs.environment || 'dev' }}" >> $GITHUB_ENV
           echo "API_BASE_URL=$API_URL"                                        >> $GITHUB_ENV
 
-      - name: 🧪 Run — ${{ matrix.collection }}
+      - name: Wait for API ready
+        run: |
+          echo "⏳ Waiting for API..."
+          for i in {1..30}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_BASE_URL_STAGING }}/actuator/health || true)
+
+            if [ "$STATUS" = "200" ]; then
+              echo "API is ready!"
+              exit 0
+            fi
+
+            echo "⏳ Retry $i..."
+            sleep 5
+          done
+
+          echo "API not ready"
+          exit 1
+
+      - name: Run — ${{ matrix.collection }}
         id: newman
         continue-on-error: true
         run: |
@@ -96,13 +102,13 @@ jobs:
             --timeout-request 30000
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
-      - name: 📊 Parse results
+      - name: Parse results
         id: parse
         if: always()
         run: |
           if [[ ! -f reports/result.json ]]; then
             { echo "total=0"; echo "failed=1"; echo "passed=0"; echo "status=fail"; } >> $GITHUB_OUTPUT
-            echo "### ❌ ${{ matrix.collection }} — result.json not found" >> $GITHUB_STEP_SUMMARY
+            echo "### ${{ matrix.collection }} — result.json not found" >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
 
@@ -119,15 +125,15 @@ jobs:
           fi
 
           {
-            echo "### 🧪 ${{ matrix.collection }} · ${{ env.ENVIRONMENT }}"
+            echo "### ${{ matrix.collection }} · ${{ env.ENVIRONMENT }}"
             echo "| | Count |"
             echo "|---|---|"
-            echo "| ✅ Passed | $PASSED |"
-            echo "| ❌ Failed | $FAILED |"
-            echo "| 📦 Total  | $TOTAL  |"
+            echo "| Passed | $PASSED |"
+            echo "| Failed | $FAILED |"
+            echo "| Total  | $TOTAL  |"
           } >> $GITHUB_STEP_SUMMARY
 
-      - name: 📤 Upload report
+      - name: upload report
         if: always()
         continue-on-error: true
         uses: actions/upload-artifact@v4
@@ -136,7 +142,7 @@ jobs:
           path: reports/
           retention-days: 30
 
-      - name: 🐛 Log / comment bug to Jira
+      - name: Log / comment bug to Jira
         if: steps.parse.outputs.status == 'fail'
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
@@ -248,8 +254,8 @@ jobs:
               || { echo "❌ Failed (HTTP $HTTP):"; cat /tmp/jira_create.json; exit 1; }
           fi
 
-      - name: ❌ Fail if tests failed
+      - name: Fail if tests failed
         if: steps.parse.outputs.status == 'fail'
         run: |
-          echo "💥 ${{ matrix.collection }}: ${{ steps.parse.outputs.failed }}/${{ steps.parse.outputs.total }} failed"
+          echo "${{ matrix.collection }}: ${{ steps.parse.outputs.failed }}/${{ steps.parse.outputs.total }} failed"
           exit 1

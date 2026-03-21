@@ -27,7 +27,7 @@ jobs:
           mvn clean verify sonar:sonar \
             -Dspring.profiles.active=test \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-      
+
 
   # Deploy staging (develop)
   deploy-staging:
@@ -37,13 +37,13 @@ jobs:
       environment: staging
     secrets: inherit
 
-#  # Test staging
-#  test-staging:
-#    needs: deploy-staging
-#    uses: ./.github/workflows/api-tests.yml
-#    with:
-#      environment: staging
-#    secrets: inherit
+  # Test Staging
+  test-staging:
+    needs: deploy-staging
+    uses: ./.github/workflows/api-tests.yml
+    with:
+      environment: staging
+    secrets: inherit
 #
 #  # Deploy production (main)
 #  deploy-prod:
