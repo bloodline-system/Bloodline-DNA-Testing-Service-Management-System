@@ -37,13 +37,13 @@ jobs:
       environment: staging
     secrets: inherit
 
-#  # Test staging
-#  test-staging:
-#    needs: deploy-staging
-#    uses: ./.github/workflows/api-tests.yml
-#    with:
-#      environment: staging
-#    secrets: inherit
+  # Test production
+  test-staging:
+    needs: deploy-staging
+    uses: ./.github/workflows/api-tests.yml
+    with:
+      environment: staging
+    secrets: inherit
 #
 #  # Deploy production (main)
 #  deploy-prod:
