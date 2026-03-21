@@ -256,7 +256,7 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
             // Create and save the User entity with minimal information
             User user = User.builder()
                     .username("admin")
-                    .passwordHash(PasswordUtil.encode("admin"))
+                    .passwordHash(PasswordUtil.encode("admin123"))
                     .isActive(true)
                     .userRoles(new HashSet<>())
                     .build();
