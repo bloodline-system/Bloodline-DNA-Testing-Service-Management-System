@@ -70,6 +70,24 @@ jobs:
           echo "ENVIRONMENT=${{ inputs.environment || 'dev' }}" >> $GITHUB_ENV
           echo "API_BASE_URL=$API_URL"                                        >> $GITHUB_ENV
 
+      - name: Wait for API ready
+        run: |
+          echo "⏳ Waiting for API..."
+          for i in {1..30}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_BASE_URL_STAGING }}/actuator/health || true)
+
+            if [ "$STATUS" = "200" ]; then
+              echo "API is ready!"
+              exit 0
+            fi
+
+            echo "⏳ Retry $i..."
+            sleep 5
+          done
+
+          echo "API not ready"
+          exit 1
+
       - name: Run — ${{ matrix.collection }}
         id: newman
         continue-on-error: true
