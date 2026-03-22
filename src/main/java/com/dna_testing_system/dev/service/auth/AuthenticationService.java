@@ -6,6 +6,7 @@ import com.dna_testing_system.dev.dto.request.auth.RefreshTokenRequestDTO;
 import com.dna_testing_system.dev.dto.request.auth.RegisterRequestDTO;
 import com.dna_testing_system.dev.dto.request.auth.VerificationOptRequestDTO;
 import com.dna_testing_system.dev.dto.response.auth.AuthTokensResponseDTO;
+import com.dna_testing_system.dev.dto.response.auth.OtpDebugResponseDTO;
 import com.dna_testing_system.dev.dto.response.auth.RegisterResponseDTO;
 
 public interface AuthenticationService {
@@ -15,4 +16,6 @@ public interface AuthenticationService {
         RegisterResponseDTO register(RegisterRequestDTO registerRequestDTO);
         void verifyUserRegistration(VerificationOptRequestDTO verificationOptRequestDTO);
         void resendUserVerificationOTP(String signUpId);
+
+        OtpDebugResponseDTO getOtpForDebugging(String signUpId);
 }

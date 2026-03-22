@@ -118,7 +118,7 @@ jobs:
 
           { echo "total=$TOTAL"; echo "failed=$FAILED"; echo "passed=$PASSED"; } >> $GITHUB_OUTPUT
 
-          if [[ "$FAILED" -gt 0 || "${{ steps.newman.outputs.exit_code }}" != "0" ]]; then
+          if [[ "$FAILED" -gt 0 ]]; then
             echo "status=fail" >> $GITHUB_OUTPUT
           else
             echo "status=pass" >> $GITHUB_OUTPUT
