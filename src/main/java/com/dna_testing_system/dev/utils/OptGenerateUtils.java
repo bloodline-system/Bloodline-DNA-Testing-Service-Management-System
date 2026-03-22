@@ -2,10 +2,12 @@ package com.dna_testing_system.dev.utils;
 
 import com.dna_testing_system.dev.constant.OptConstants;
 import com.dna_testing_system.dev.exception.OptFailException;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 @UtilityClass
@@ -20,8 +22,10 @@ public class OptGenerateUtils {
 
     public void validateResendOtp(LocalDateTime lastSentTime) {
 
-        if (lastSentTime != null &&
-                LocalDateTime.now().isBefore(
+        if (lastSentTime == null) {
+            throw new OptFailException("lastSentTime is null");
+        }
+        if (LocalDateTime.now().isBefore(
                         lastSentTime.plusSeconds(OptConstants.RESEND_INTERVAL_SECONDS)
                 )) {
 
@@ -30,7 +34,9 @@ public class OptGenerateUtils {
     }
 
     public void validateOtpAttempts(int attempts) {
-
+        if (attempts < 0) {
+            throw new OptFailException("Attempts cannot be negative");
+        }
         if (attempts >= OptConstants.MAX_ATTEMPTS) {
             throw new OptFailException("Too many incorrect OTP attempts");
         }
