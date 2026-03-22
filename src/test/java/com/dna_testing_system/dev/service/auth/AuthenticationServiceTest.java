@@ -214,7 +214,7 @@ class AuthenticationServiceTest {
         when(signUpRepository.existsByUsernameAndStatusIn(eq(request.getUsername()), anyList())).thenReturn(false);
         when(signUpRepository.existsByEmailAndStatusIn(eq(request.getEmail()), anyList())).thenReturn(false);
         when(authMapper.toSignUp(request)).thenReturn(mappedSignUp);
-        when(Objects.requireNonNull(passwordEncoder.encode("password123"))).thenReturn("encoded-password");
+        when((passwordEncoder.encode(anyString()))).thenReturn("encoded-password");
         when(signUpRepository.save(mappedSignUp)).thenReturn(mappedSignUp);
         when(authMapper.toRegisterResponseDTO(mappedSignUp)).thenReturn(responseDTO);
 
