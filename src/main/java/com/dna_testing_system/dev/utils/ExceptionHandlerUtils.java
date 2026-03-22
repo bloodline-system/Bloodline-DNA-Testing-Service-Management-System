@@ -12,16 +12,6 @@ import org.springframework.web.context.request.WebRequest;
 @Slf4j
 public class ExceptionHandlerUtils {
 
-    public ResponseEntity<ApiResponse<Void>> generateErrorResponse(Exception ex, String exceptionMessage, WebRequest request, HttpStatus status) {
-        log.error("Exception caught - status: {}, path: {}, message: {}",
-                status.value(),
-                request.getDescription(false),
-                ex.getMessage());
-
-        ApiResponse<Void> errorResponse = ApiResponse.error(status.value(), exceptionMessage, request.getDescription(false));
-        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(status.value()));
-    }
-
     public ResponseEntity<ApiResponse<Void>> generateErrorResponse(Exception ex, WebRequest request, HttpStatus status) {
         log.error("Exception caught - status: {}, path: {}, message: {}",
                 status.value(),
