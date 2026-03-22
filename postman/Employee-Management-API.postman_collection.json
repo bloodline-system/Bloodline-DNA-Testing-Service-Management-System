@@ -91,9 +91,9 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/login",
+              "raw": "{{baseUrl}}/api/v1/auth/login",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -150,7 +150,9 @@
                   "    }",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -168,9 +170,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/users?page=0&size=20&sortBy=createdAt&sortDir=desc",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/users?page=0&size=20&sortBy=createdAt&sortDir=desc",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -225,7 +227,9 @@
                   "    pm.expect(body.data).to.have.property(\"users\").that.is.an(\"array\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -243,9 +247,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/users?search=staff&page=0&size=10",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/users?search=staff&page=0&size=10",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -299,7 +303,9 @@
                   "    pm.expect(body.data).to.have.property(\"isActive\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -317,9 +323,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -387,9 +393,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/profiles",
+              "raw": "{{baseUrl}}/api/v1/admin/profiles",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -451,9 +457,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/profiles/staff1",
+              "raw": "{{baseUrl}}/api/v1/admin/profiles/staff1",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -501,7 +507,9 @@
                   "    pm.expect(body.data).to.have.property(\"username\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -533,9 +541,9 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -574,7 +582,9 @@
                   "    pm.expect(body.data).to.have.property(\"email\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -603,9 +613,9 @@
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/profiles/staff1",
+              "raw": "{{baseUrl}}/api/v1/admin/profiles/staff1",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -646,7 +656,9 @@
                   "    pm.expect(body.message).to.include(\"updated successfully\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -678,9 +690,9 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -717,7 +729,9 @@
                   "    pm.expect(body.message).to.include(\"updated successfully\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -749,9 +763,9 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -793,7 +807,9 @@
                   "    pm.expect(body.message).to.include(\"updated successfully\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -825,9 +841,9 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -864,7 +880,9 @@
                   "    pm.expect(body.message).to.include(\"updated successfully\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -896,9 +914,9 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -936,7 +954,9 @@
                   "    pm.expect(body.data).to.equal(true);",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -954,9 +974,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/profiles/{{staff_username}}",
+              "raw": "{{baseUrl}}/api/v1/admin/profiles/{{staff_username}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -1001,7 +1021,9 @@
                   "    pm.expect(body.data).to.have.property(\"pageSize\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1019,9 +1041,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/staff/orders?page=0&size=10&sort=id,desc",
+              "raw": "{{baseUrl}}/api/v1/staff/orders?page=0&size=10&sort=id,desc",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -1071,7 +1093,9 @@
                   "    pm.expect(body.data).to.have.property(\"content\").that.is.an(\"array\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1089,9 +1113,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/staff/orders?status=COMPLETED&page=0&size=10",
+              "raw": "{{baseUrl}}/api/v1/staff/orders?status=COMPLETED&page=0&size=10",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -1144,7 +1168,9 @@
                   "    pm.expect(body.data).to.have.property(\"pageSize\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1162,9 +1188,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/staff/test-results?page=0&size=10&sort=id,desc",
+              "raw": "{{baseUrl}}/api/v1/staff/test-results?page=0&size=10&sort=id,desc",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -1217,7 +1243,9 @@
                   "    pm.expect(body.data).to.have.property(\"pageSize\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1235,9 +1263,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/staff/sample-collections?page=0&size=10&sort=collectionId,desc",
+              "raw": "{{baseUrl}}/api/v1/staff/sample-collections?page=0&size=10&sort=collectionId,desc",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -1289,7 +1317,9 @@
                   "    pm.expect(body.data).to.have.property(\"performanceMetrics\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1307,9 +1337,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/stats",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/stats",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -1346,7 +1376,9 @@
                   "    pm.expect(body.data).to.be.an(\"array\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1364,9 +1396,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/admin/dashboard/recent-activities",
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard/recent-activities",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "api",
@@ -1406,7 +1438,7 @@
   ],
   "variable": [
     {
-      "key": "base_url",
+      "key": "baseUrl",
       "value": ""
     },
     {
