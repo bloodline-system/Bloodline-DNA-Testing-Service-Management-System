@@ -15,6 +15,7 @@ import com.dna_testing_system.dev.service.staff.TestKitService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import com.dna_testing_system.dev.service.user.UserService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -83,63 +84,85 @@ public class UserController {
 
     @PutMapping("/{username}")
     @ResponseBody
-    public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(@PathVariable String username,
-                                                                          @ModelAttribute("userEditProfile") UserProfileRequest userProfile,
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(@Valid @PathVariable String username,
+                                                                          @RequestBody UserProfileRequest userProfile,
                                                                           @RequestParam(value = "file", required = false) MultipartFile file,
                                                                           HttpServletRequest httpServletRequest) {
-        UserProfileResponse existingProfile = userProfileService.getUserProfile(username);
+        try {
+            UserProfileResponse existingProfile = userProfileService.getUserProfile(username);
+            String oldImageUrl = null;
 
-
-
-        if (file != null && !file.getOriginalFilename().equals("")) {
-            String uploadsDir = "uploads/";
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path path = Paths.get(uploadsDir + fileName);
-
-            try {
-
-                Files.createDirectories(Paths.get(uploadsDir));
-                file.transferTo(path);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            String imageUrl = "/uploads/" + fileName;
-            userProfile.setProfileImageUrl(imageUrl);
-            // Nếu imageUrl là /uploads/abcxyz.jpg
-            String oldImageUrl = existingProfile.getProfileImageUrl();
-            if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
-                // Chuyển về đường dẫn vật lý
-                String fileSystemPath = oldImageUrl.replaceFirst("/", ""); // "uploads/abcxyz.jpg"
-                Path oldImagePath = Paths.get(fileSystemPath);
+            // Handle file upload and get new image URL (before transaction)
+            if (file != null && file.getOriginalFilename() != null && !file.getOriginalFilename().isEmpty()) {
                 try {
-                    Files.deleteIfExists(oldImagePath);
+                    String uploadsDir = "uploads/";
+                    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                    Path uploadPath = Paths.get(uploadsDir);
+                    
+                    Files.createDirectories(uploadPath);
+                    Path filePath = uploadPath.resolve(fileName);
+                    file.transferTo(filePath.toFile());
+                    
+                    String newImageUrl = "/uploads/" + fileName;
+                    oldImageUrl = existingProfile.getProfileImageUrl();
+                    userProfile.setProfileImageUrl(newImageUrl);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "File upload failed: " + e.getMessage(), httpServletRequest.getRequestURI()));
                 }
+            } else {
+                // Keep existing image if no new file uploaded
+                userProfile.setProfileImageUrl(existingProfile.getProfileImageUrl());
             }
 
-        } else {
-            // Giữ nguyên ảnh cũ nếu không upload ảnh mới
-            userProfile.setProfileImageUrl(existingProfile.getProfileImageUrl());
+            // Preserve dateOfBirth if not provided
+            if (userProfile.getDateOfBirth() == null) {
+                userProfile.setDateOfBirth(existingProfile.getDateOfBirth());
+            }
+
+            // Preserve email if not provided (required field in database)
+            if (userProfile.getEmail() == null || userProfile.getEmail().trim().isEmpty()) {
+                userProfile.setEmail(existingProfile.getEmail());
+            }
+
+            // Update profile in database (transactional)
+            boolean updated = userProfileService.updateUserProfile(username, userProfile);
+            if (!updated) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", httpServletRequest.getRequestURI()));
+            }
+
+            // Delete old image file AFTER successful transaction (non-transactional cleanup)
+            if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
+                deleteOldProfileImage(oldImageUrl);
+            }
+
+            UserProfileResponse updatedProfile = userProfileService.getUserProfile(username);
+            return ResponseEntity.ok(
+                    ApiResponse.success(HttpStatus.OK.value(), "Update profile successfully", updatedProfile)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error updating profile: " + e.getMessage(), httpServletRequest.getRequestURI()));
         }
+    }
 
-        // Giữ nguyên dateOfBirth nếu không có thay đổi
-        if (userProfile.getDateOfBirth() == null) {
-            userProfile.setDateOfBirth(existingProfile.getDateOfBirth());
+    /**
+     * Delete old profile image file asynchronously (non-transactional cleanup)
+     * Failures in this operation do not affect the main transaction
+     */
+    private void deleteOldProfileImage(String imageUrl) {
+        try {
+            if (imageUrl != null && !imageUrl.isEmpty() && imageUrl.startsWith("/uploads/")) {
+                // Convert URL path to file system path
+                String fileSystemPath = imageUrl.substring(1); // Remove leading slash: "/uploads/file.jpg" -> "uploads/file.jpg"
+                Path imagePath = Paths.get(fileSystemPath);
+                Files.deleteIfExists(imagePath);
+            }
+        } catch (Exception e) {
+            // Log the error but don't fail the request - old file deletion is not critical
+            System.err.println("Warning: Failed to delete old profile image: " + e.getMessage());
         }
-
-
-        boolean updated = userProfileService.updateUserProfile(username, userProfile);
-        if (!updated) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", httpServletRequest.getRequestURI()));
-        }
-
-        UserProfileResponse updatedProfile = userProfileService.getUserProfile(username);
-        return ResponseEntity.ok(
-                ApiResponse.success(HttpStatus.OK.value(), "Update profile successfully", updatedProfile)
-        );
     }
 
     @DeleteMapping("/{username}")
