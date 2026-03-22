@@ -1,145 +1,425 @@
 {
   "info": {
-    "name": "Manager Posts API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "_postman_id": "841bac34-47d5-4cbd-9bcf-a4b05df958c3",
+    "name": "Post Management API (fixed)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44542379",
+    "_collection_link": "https://go.postman.co/collection/44542379-841bac34-47d5-4cbd-9bcf-a4b05df958c3?source=collection_link"
   },
   "item": [
     {
-      "name": "Login",
-      "event": [
+      "name": "Auth",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Login OK', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
-              "let json = {};",
-              "try { json = pm.response.json(); } catch(e) {}",
-              "if (json && json.data && json.data.access_token) {",
-              "  pm.environment.set('access_token', json.data.access_token);",
-              "}"
-            ]
-          }
+          "name": "Login (ADMIN/MANAGER)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('data');",
+                  "if (json && json.data) {",
+                  "  pm.environment.set('access_token', json.data.access_token);",
+                  "  pm.environment.set('refresh_token', json.data.refresh_token);",
+                  "  pm.environment.set('expires_in', json.data.expires_in);",
+                  "  pm.environment.set('user_id', json.data.user_id);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"{{admin_username}}\",\r\n  \"password\": \"{{admin_password}}\",\r\n  \"rememberMe\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"username\":\"admin\",\"password\":\"admin@123\",\"rememberMe\":true}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/auth/login"
-        }
-      }
+      ]
     },
     {
-      "name": "List posts",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{access_token}}" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/manager/posts?page=0&size=10"
-        }
-      }
-    },
-    {
-      "name": "Create post",
-      "event": [
+      "name": "Posts (Manager)",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "let json = {};",
-              "try { json = pm.response.json(); } catch(e) {}",
-              "if (json && json.postId) {",
-              "  pm.environment.set('post_id', json.postId);",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{access_token}}" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"postTitle\":\"Test Post\",\"postContent\":\"Test content\",\"featuredImageUrl\":\"\",\"postCategory\":\"NEWS\",\"tags\":[\"NEWS\",\"TIPS\"],\"postStatus\":\"DRAFT\"}"
+          "name": "List posts (paging + filters)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('data');",
+                  "pm.expect(json.data).to.have.property('content');",
+                  "pm.expect(json.data).to.have.property('pageNumber');",
+                  "pm.expect(json.data).to.have.property('totalPages');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/posts?page=0&size=10&sort=createdAt,desc&q=&status=all&category=all&tag=all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                },
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": "all"
+                },
+                {
+                  "key": "category",
+                  "value": "all"
+                },
+                {
+                  "key": "tag",
+                  "value": "all"
+                }
+              ]
+            }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/manager/posts"
-        }
-      }
-    },
-    {
-      "name": "Get post",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{access_token}}" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}"
-        }
-      }
-    },
-    {
-      "name": "Update post",
-      "request": {
-        "method": "PUT",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{access_token}}" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"postTitle\":\"Updated Post\",\"postContent\":\"Updated content\",\"featuredImageUrl\":\"\",\"postCategory\":\"NEWS\",\"tags\":[\"NEWS\",\"TIPS\"],\"postStatus\":\"DRAFT\"}"
+        {
+          "name": "Create post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('data');",
+                  "pm.expect(json.data).to.have.property('postId');",
+                  "pm.environment.set('post_id', json.data.postId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"postTitle\": \"Post title (Postman)\",\r\n  \"postContent\": \"Post content created from Postman\",\r\n  \"featuredImageUrl\": \"https://example.com/image.jpg\",\r\n  \"postCategory\": \"TESTING_GUIDE\",\r\n  \"tags\": [\"DNA_TESTING\", \"TIPS\"],\r\n  \"postStatus\": \"DRAFT\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts"
+              ]
+            }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}"
+        {
+          "name": "Get post by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('data');",
+                  "pm.expect(json.data).to.have.property('postId');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update post (PUT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('data');",
+                  "pm.expect(json.data).to.have.property('postId');",
+                  "pm.expect(json.data.postTitle).to.eql('Post title (updated)');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"postTitle\": \"Post title (updated)\",\r\n  \"postContent\": \"Updated content\",\r\n  \"featuredImageUrl\": \"https://example.com/image-updated.jpg\",\r\n  \"postCategory\": \"NEWS\",\r\n  \"tags\": [\"NEWS\"],\r\n  \"postStatus\": \"DRAFT\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish post (PATCH status)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.expect(json).to.have.property('data');",
+                  "pm.expect(json.data).to.have.property('postStatus');",
+                  "pm.expect(json.data.postStatus).to.eql('PUBLISHED');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}/status?status=PUBLISHED",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PUBLISHED"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Soft delete post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Hard delete post (?hard=true)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}?hard=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}"
+              ],
+              "query": [
+                {
+                  "key": "hard",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
         }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
       }
-    },
+    ]
+  },
+  "variable": [
     {
-      "name": "Publish post",
-      "request": {
-        "method": "PATCH",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{access_token}}" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}/status?status=PUBLISHED"
-        }
-      }
-    },
-    {
-      "name": "Soft delete",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{access_token}}" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}"
-        }
-      }
-    },
-    {
-      "name": "Hard delete",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{access_token}}" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}?hard=true"
-        }
-      }
+      "key": "baseUrl",
+      "value": "{{base_url}}",
+      "type": "string"
     }
   ]
 }
