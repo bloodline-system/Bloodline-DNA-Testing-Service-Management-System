@@ -1,0 +1,648 @@
+{
+  "info": {
+    "_postman_id": "9e857e9a-ec4f-4ce8-8ea6-f6b6a7b23f19",
+    "name": "Bloodline DNA - REST Controllers",
+    "description": "Collection cho các controller đã chuẩn hóa theo hướng REST/API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44542392",
+    "_collection_link": "https://go.postman.co/collection/44542392-9e857e9a-ec4f-4ce8-8ea6-f6b6a7b23f19?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "AuthController",
+      "item": [
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {};",
+                  "try { json = pm.response.json(); } catch(e) {}",
+                  "if (json?.data?.access_token) pm.collectionVariables.set('access_token', json.data.access_token);",
+                  "if (json?.data?.refresh_token) pm.collectionVariables.set('refresh_token', json.data.refresh_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\",\n  \"rememberMe\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json = {};",
+                  "try { json = pm.response.json(); } catch(e) {}",
+                  "if (json?.data?.access_token) pm.collectionVariables.set('access_token_user', json.data.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{profile_username}}\",\n  \"password\": \"{{profile_password}}\",\n  \"rememberMe\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "UserController",
+      "item": [
+        {
+          "name": "Get All Profiles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {\r",
+                  "  pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "const json = pm.response.json();\r",
+                  "pm.test(\"Get all profiles success\", function () {\r",
+                  "  pm.expect(json.code).to.eql(200);\r",
+                  "  pm.expect(json.data).to.be.an(\"array\");\r",
+                  "});\r",
+                  "if (json.data.length > 0 && json.data[0].username) {\r",
+                  "  pm.environment.set(\"profile_username\", json.data[0].username);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token_user}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{access_token_user}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/profiles/all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Profiles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let json;\r",
+                  "\r",
+                  "pm.test(\"Response is valid JSON\", function () {\r",
+                  "json = pm.response.json();\r",
+                  "pm.expect(json).to.be.an(\"object\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has ApiResponse structure\", function () {\r",
+                  "pm.expect(json).to.have.property(\"code\");\r",
+                  "pm.expect(json).to.have.property(\"message\");\r",
+                  "pm.expect(json).to.have.property(\"data\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"API returns success code\", function () {\r",
+                  "pm.expect(json.code).to.eql(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Data is an array of profiles\", function () {\r",
+                  "pm.expect(json.data).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Each profile has required fields\", function () {\r",
+                  "if (json.data.length > 0) {\r",
+                  "let profile = json.data[0];\r",
+                  "\r",
+                  "```\r",
+                  "    pm.expect(profile).to.have.property(\"id\");\r",
+                  "    pm.expect(profile).to.have.property(\"username\");\r",
+                  "    pm.expect(profile).to.have.property(\"email\");\r",
+                  "}\r",
+                  "```\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "// Save first profile info for next APIs\r",
+                  "if (json.data.length > 0) {\r",
+                  "pm.environment.set(\"profile_id\", json.data[0].id);\r",
+                  "pm.environment.set(\"profile_username\", json.data[0].username);\r",
+                  "\r",
+                  "```\r",
+                  "console.log(\"Saved profile_id and profile_username to environment\");\r",
+                  "```\r",
+                  "\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token_user}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profiles/search?name={{search_name}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{search_name}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile By Username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 404\", function () {\r",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);\r",
+                  "});\r",
+                  "const json = pm.response.json();\r",
+                  "if (pm.response.code === 200) {\r",
+                  "  pm.test(\"Profile payload valid\", function () {\r",
+                  "    pm.expect(json.code).to.eql(200);\r",
+                  "    pm.expect(json.data).to.be.an(\"object\");\r",
+                  "  });\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token_user}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profiles/{{profile_username}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{profile_username}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token_user}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "firstName",
+                  "value": "Thanh",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Nhi",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "thanhnhi1@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "dateOfBirth",
+                  "value": "2000-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "phoneNumber",
+                  "value": "0900000000",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "thanhnhi1",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/profiles/{{profile_username}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{profile_username}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token_user}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profiles/{{profile_username}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{profile_username}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "UserFeedbackController",
+      "item": [
+        {
+          "name": "Create Feedback",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token_user}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "serviceId",
+                  "value": "{{service_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "orderId",
+                  "value": "{{order_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "serviceQualityRating",
+                  "value": "5",
+                  "type": "text"
+                },
+                {
+                  "key": "staffBehaviorRating",
+                  "value": "5",
+                  "type": "text"
+                },
+                {
+                  "key": "timelinessRating",
+                  "value": "4",
+                  "type": "text"
+                },
+                {
+                  "key": "feedbackTitle",
+                  "value": "Dich vu tot",
+                  "type": "text"
+                },
+                {
+                  "key": "feedbackContent",
+                  "value": "Nhan vien ho tro nhanh va chuyen nghiep",
+                  "type": "text"
+                },
+                {
+                  "key": "responseRequired",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/feedback/{{feedback_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "feedback",
+                "{{feedback_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View My Feedback",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token_user}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/feedback",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "feedback"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Feedback By Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token_user}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/feedback/{{feedback_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "feedback",
+                "{{feedback_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "access_token_user",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_username",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "profile_username",
+      "value": "thanhnhi1",
+      "type": "string"
+    },
+    {
+      "key": "profile_password",
+      "value": "thanhnhi1",
+      "type": "string"
+    },
+    {
+      "key": "service_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "feedback_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "sample_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "sign_up_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otp",
+      "value": "123456",
+      "type": "string"
+    }
+  ]
+}
