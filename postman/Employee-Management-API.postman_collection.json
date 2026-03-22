@@ -1,0 +1,1438 @@
+{
+  "info": {
+    "_postman_id": "452d4eaf-67b6-4e46-af63-b252d167bb0f",
+    "name": "Employee Management API",
+    "description": "Quản lý Nhân viên - DNA Testing System\nCho phép quản trị viên quản lý thông tin và phân công công việc cho đội ngũ nhân viên.\n\nChức năng:\n1. Thêm nhân viên mới (đầy đủ thông tin cá nhân & chuyên môn)\n2. Cập nhật thông tin nhân viên (chức vụ, phòng ban, liên hệ)\n3. Xóa / vô hiệu hóa tài khoản nhân viên đã nghỉ việc\n4. Phân quyền và gán vai trò (Manager, Staff)\n5. Xem lịch sử công việc và đơn xét nghiệm nhân viên đã xử lý\n\nResponse wrapper format:\n{\n  \"code\": 200,\n  \"message\": \"...\",\n  \"data\": { ... },\n  \"timestamp\": \"...\"\n}\n\nDefault credentials (seed data):\n- Admin   : admin / admin\n- Manager : manager / manager\n- Staff1  : staff1 / staff\n- Staff2  : staff2 / staff2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "39783418",
+    "_collection_link": "https://go.postman.co/collection/39783418-452d4eaf-67b6-4e46-af63-b252d167bb0f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Đăng Nhập Admin",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.environment.set(\"access_token\", jsonData.data.access_token);",
+                  "    pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+                  "    pm.environment.set(\"expires_in\", jsonData.data.expires_in);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn",
+                  "const token = pm.environment.get(\"access_token\");",
+                  "const expiresIn = pm.environment.get(\"expires_in\");",
+                  "",
+                  "// expires_in là date string dạng \"Sun Mar 15 15:31:29 GMT+07:00 2026\"",
+                  "const expiry = expiresIn ? new Date(expiresIn).getTime() : 0;",
+                  "",
+                  "if (!token || Date.now() > expiry) {",
+                  "  // Gọi API refresh token",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get(\"baseUrl\") + \"/api/v1/auth/refresh\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\" },",
+                  "    body: {",
+                  "      mode: \"raw\",",
+                  "      raw: JSON.stringify({ token: pm.environment.get(\"refresh_token\") })",
+                  "    }",
+                  "  }, (err, res) => {",
+                  "    if (!err && res) {",
+                  "      const data = res.json().data;",
+                  "      if (data) {",
+                  "        pm.environment.set(\"access_token\", data.access_token);",
+                  "        pm.environment.set(\"refresh_token\", data.refresh_token);",
+                  "        pm.environment.set(\"expires_in\", data.expires_in);",
+                  "      }",
+                  "    }",
+                  "  });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"admin1234\",\r\n  \"rememberMe\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Xem Danh Sách & Thông Tin Nhân Viên",
+      "item": [
+        {
+          "name": "Get All Employees (Paginated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Data contains users list and pagination\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"object\");",
+                  "    pm.expect(body.data).to.have.property(\"users\").that.is.an(\"array\");",
+                  "    pm.expect(body.data).to.have.property(\"totalElements\");",
+                  "    pm.expect(body.data).to.have.property(\"totalPages\");",
+                  "    pm.expect(body.data).to.have.property(\"currentPage\");",
+                  "});",
+                  "",
+                  "pm.test(\"Lưu admin_user_id từ danh sách nhân viên STAFF\", function () {",
+                  "    const body = pm.response.json();",
+                  "    if (body.data && body.data.users && body.data.users.length > 0) {",
+                  "        const staffUser = body.data.users.find(u =>",
+                  "            u.userRoles && u.userRoles.some(r => r.role && r.role.roleName === \"STAFF\")",
+                  "        );",
+                  "        const target = staffUser || body.data.users[0];",
+                  "        pm.environment.set(\"admin_user_id\", target.id);",
+                  "        pm.expect(target.id).to.be.a(\"string\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/users?page=0&size=20&sortBy=createdAt&sortDir=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDir",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Employees by Name/Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Search result returns users array\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.have.property(\"users\").that.is.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/users?search=staff&page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "staff"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Employee data contains required fields\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"object\");",
+                  "    pm.expect(body.data).to.have.property(\"id\");",
+                  "    pm.expect(body.data).to.have.property(\"username\");",
+                  "    pm.expect(body.data).to.have.property(\"isActive\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Employee Profiles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Data is an array of profiles\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Each profile has required fields\", function () {",
+                  "    const body = pm.response.json();",
+                  "    if (body.data.length > 0) {",
+                  "        const profile = body.data[0];",
+                  "        pm.expect(profile).to.have.property(\"username\");",
+                  "        pm.expect(profile).to.have.property(\"email\");",
+                  "        pm.expect(profile).to.have.property(\"isActive\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/profiles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profiles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee Profile by Username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Profile data contains personal details\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"object\");",
+                  "    pm.expect(body.data).to.have.property(\"username\");",
+                  "    pm.expect(body.data).to.have.property(\"email\");",
+                  "    pm.expect(body.data).to.have.property(\"firstName\");",
+                  "    pm.expect(body.data).to.have.property(\"lastName\");",
+                  "    pm.expect(body.data).to.have.property(\"role\");",
+                  "    pm.expect(body.data).to.have.property(\"isActive\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/profiles/staff1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profiles",
+                "staff1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Cập Nhật Thông Tin Nhân Viên",
+      "item": [
+        {
+          "name": "Update Employee Info (email, phone)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\", 200);",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Update message is correct\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.message).to.include(\"updated successfully\");",
+                  "});",
+                  "",
+                  "pm.test(\"Updated employee data is returned\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"object\");",
+                  "    pm.expect(body.data).to.have.property(\"id\");",
+                  "    pm.expect(body.data).to.have.property(\"username\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"staff1_updated@dnatesting.com\",\n  \"phone\": \"0909123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Employee Profile (multipart)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\", 200);",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Updated profile data is returned\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"object\");",
+                  "    pm.expect(body.data).to.have.property(\"firstName\");",
+                  "    pm.expect(body.data).to.have.property(\"email\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "profile",
+                  "value": "{\"firstName\": \"Nguyễn\", \"lastName\": \"Văn Cập Nhật\", \"email\": \"staff1_profile@dnatesting.com\", \"phoneNumber\": \"0912000001\", \"password\": \"NewPassword@123\", \"dateOfBirth\": \"1995-05-20\"}",
+                  "type": "text",
+                  "contentType": "application/json"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/profiles/staff1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profiles",
+                "staff1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Phân Quyền & Gán Vai Trò",
+      "item": [
+        {
+          "name": "Assign Role STAFF to Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\", 200);",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Role assignment message is correct\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.message).to.include(\"updated successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"STAFF\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Role MANAGER to Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\", 200);",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"MANAGER role assigned successfully\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.message).to.include(\"updated successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"MANAGER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Vô Hiệu Hóa & Xóa Tài Khoản",
+      "item": [
+        {
+          "name": "Deactivate Employee Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\", 200);",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Deactivation update message is correct\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.message).to.include(\"updated successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reactivate Employee Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\", 200);",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Reactivation message is correct\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.message).to.include(\"updated successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Employee Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Delete response is true\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.message).to.include(\"deleted successfully\");",
+                  "    pm.expect(body.data).to.equal(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/profiles/{{staff_username}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profiles",
+                "{{staff_username}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Lịch Sử Công Việc & Đơn Xét Nghiệm",
+      "item": [
+        {
+          "name": "Get Employee Work Orders (Paginated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Data contains pageable content\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"object\");",
+                  "    pm.expect(body.data).to.have.property(\"content\").that.is.an(\"array\");",
+                  "    pm.expect(body.data).to.have.property(\"pageNumber\");",
+                  "    pm.expect(body.data).to.have.property(\"pageSize\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff/orders?page=0&size=10&sort=id,desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee Orders - Filter by Status COMPLETED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Filtered orders return pageable content\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.have.property(\"content\").that.is.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff/orders?status=COMPLETED&page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "COMPLETED"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee Test Results (Paginated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Data contains pageable content\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"object\");",
+                  "    pm.expect(body.data).to.have.property(\"content\").that.is.an(\"array\");",
+                  "    pm.expect(body.data).to.have.property(\"pageNumber\");",
+                  "    pm.expect(body.data).to.have.property(\"pageSize\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff/test-results?page=0&size=10&sort=id,desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "test-results"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee Sample Collections (Paginated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Data contains pageable content\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"object\");",
+                  "    pm.expect(body.data).to.have.property(\"content\").that.is.an(\"array\");",
+                  "    pm.expect(body.data).to.have.property(\"pageNumber\");",
+                  "    pm.expect(body.data).to.have.property(\"pageSize\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/staff/sample-collections?page=0&size=10&sort=collectionId,desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "sample-collections"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "collectionId,desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard Stats (Employee Count Summary)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Stats data contains dashboard, monthlyStats, performanceMetrics\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.have.property(\"dashboard\");",
+                  "    pm.expect(body.data).to.have.property(\"monthlyStats\");",
+                  "    pm.expect(body.data).to.have.property(\"performanceMetrics\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Activities",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has standard wrapper\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"code\");",
+                  "    pm.expect(body).to.have.property(\"message\");",
+                  "    pm.expect(body).to.have.property(\"data\");",
+                  "    pm.expect(body).to.have.property(\"timestamp\");",
+                  "});",
+                  "",
+                  "pm.test(\"Recent activities data is an array\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.data).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard/recent-activities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "recent-activities"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    },
+    {
+      "key": "signup-id",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "expires_in",
+      "value": ""
+    },
+    {
+      "key": "staff_username",
+      "value": ""
+    },
+    {
+      "key": "admin_user_id",
+      "value": ""
+    },
+    {
+      "key": "timestamp",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}
