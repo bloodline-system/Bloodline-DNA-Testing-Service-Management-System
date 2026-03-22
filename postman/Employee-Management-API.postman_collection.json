@@ -83,7 +83,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"admin1234\",\r\n  \"rememberMe\": true\r\n}",
+              "raw": "{\r\n  \"username\": \"manager2\",\r\n  \"password\": \"manager2\",\r\n  \"rememberMe\": true\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
