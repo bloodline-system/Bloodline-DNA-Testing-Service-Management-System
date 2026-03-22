@@ -19,22 +19,6 @@ import java.util.NoSuchElementException;
 @Slf4j
 @RestControllerAdvice
 class GlobalExceptionHandler {
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
-        return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    ResponseEntity<ApiResponse<Void>> handleNoSuchElementException(NoSuchElementException ex, WebRequest request) {
-        return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex, WebRequest request) {
-        return ExceptionHandlerUtils.generateErrorResponse(ex, "Data integrity violation", request, HttpStatus.CONFLICT);
-    }
-
     @ExceptionHandler({
             SignUpNotValidException.class,
             OptFailException.class, AddRoleFailException.class, LoginNotValidException.class,
@@ -71,6 +55,7 @@ class GlobalExceptionHandler {
     ResponseEntity<ApiResponse<Void>> handleForbiddenException(RuntimeException ex, WebRequest request) {
         return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.FORBIDDEN);
     }
+
     /**
      * Handles validation errors.
      *
@@ -78,7 +63,8 @@ class GlobalExceptionHandler {
      * @return error response with status 400
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse<Map<String, String>>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, WebRequest request) {
+    ResponseEntity<ApiResponse<Map<String, String>>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+            WebRequest request) {
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error -> {
