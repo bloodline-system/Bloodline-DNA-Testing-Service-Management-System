@@ -7,6 +7,48 @@
 			"value": "",
 			"type": "default",
 			"enabled": true
+		},
+		{
+			"key": "username",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "password",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "expires_in",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "rememberMe",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "test_kit_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
 		}
 	],
 	"color": null,
