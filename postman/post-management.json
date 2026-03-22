@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Post Management API",
+    "name": "Manager Posts API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -23,9 +23,7 @@
       ],
       "request": {
         "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
           "raw": "{\"username\":\"admin\",\"password\":\"admin@123\",\"rememberMe\":true}"
@@ -56,8 +54,8 @@
             "exec": [
               "let json = {};",
               "try { json = pm.response.json(); } catch(e) {}",
-              "if (json && json.data && json.data.postId) {",
-              "  pm.environment.set('post_id', json.data.postId);",
+              "if (json && json.postId) {",
+              "  pm.environment.set('post_id', json.postId);",
               "}"
             ]
           }
@@ -71,7 +69,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\"postTitle\":\"Test\",\"postContent\":\"Test\",\"postCategory\":\"NEWS\",\"tags\":[\"TEST\"],\"postStatus\":\"DRAFT\"}"
+          "raw": "{\"postTitle\":\"Test Post\",\"postContent\":\"Test content\",\"featuredImageUrl\":\"\",\"postCategory\":\"NEWS\",\"tags\":[\"NEWS\",\"TIPS\"],\"postStatus\":\"DRAFT\"}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/manager/posts"
@@ -100,7 +98,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\"postTitle\":\"Updated\",\"postContent\":\"Updated\"}"
+          "raw": "{\"postTitle\":\"Updated Post\",\"postContent\":\"Updated content\",\"featuredImageUrl\":\"\",\"postCategory\":\"NEWS\",\"tags\":[\"NEWS\",\"TIPS\"],\"postStatus\":\"DRAFT\"}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}"
