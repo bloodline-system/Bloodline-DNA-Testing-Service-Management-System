@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<org.lombok-mapstruct-binding.version>0.2.0</org.lombok-mapstruct-binding.version>
 		<jwt.version>0.11.5</jwt.version>
@@ -227,8 +228,7 @@
 				<version>3.11.0</version>
 
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<release>${java.version}</release>
 
 					<annotationProcessorPaths>
 
@@ -252,6 +252,28 @@
 
 					</annotationProcessorPaths>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>enforce-java</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[21,)</version>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
