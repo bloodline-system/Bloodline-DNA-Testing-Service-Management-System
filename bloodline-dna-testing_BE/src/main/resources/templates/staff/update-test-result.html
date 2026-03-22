@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Update Test Result', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-edit-line me-2"></i>Update Test Result
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/staff/update-test-result}" th:object="${testResult}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="testResultId" th:value="${testResult.testResultId}"/>
+                        <input type="hidden" name="rawDataId" th:value="${testResult.rawTestId}"/>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="testDate" class="form-label">
+                                        <i class="ri-calendar-line me-2"></i>Result Date<span class="text-danger">*</span>
+                                    </label>
+                                    <input type="datetime-local"
+                                           class="form-control"
+                                           id="testDate"
+                                           th:field="*{testDate}"
+                                           required>
+                                    <div class="form-text">Select the date and time when the test was completed</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="resultStatus" class="form-label">
+                                        <i class="ri-flag-line me-2"></i>Result Status<span class="text-danger">*</span>
+                                    </label>
+                                    <select id="resultStatus"
+                                            name="resultStatus"
+                                            class="form-select"
+                                            required>
+                                        <option value="">Select Status</option>
+                                        <option th:each="status : ${T(com.dna_testing_system.dev.enums.ResultStatus).values()}"
+                                                th:value="${status}"
+                                                th:text="${status}"
+                                                th:selected="${status} == *{resultStatus}"></option>
+                                    </select>
+                                    <div class="form-text">Current status of the test result</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="resultSummary" class="form-label">
+                                <i class="ri-file-list-line me-2"></i>Result Summary<span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="resultSummary"
+                                   name="resultSummary"
+                                   th:field="*{resultSummary}"
+                                   placeholder="Enter a brief summary of the test results"
+                                   required>
+                            <div class="form-text">Provide a concise summary of the test findings</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="detailedResults" class="form-label">
+                                <i class="ri-file-text-line me-2"></i>Detailed Results<span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control"
+                                      id="detailedResults"
+                                      name="detailedResults"
+                                      th:field="*{detailedResults}"
+                                      rows="6"
+                                      placeholder="Enter comprehensive details of the test results, including findings, interpretations, and recommendations..."
+                                      required></textarea>
+                            <div class="form-text">Provide comprehensive details about the test results</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="reportFilePath" class="form-label">
+                                <i class="ri-file-pdf-line me-2"></i>Test Report (PDF)
+                            </label>
+                            <input type="file"
+                                   class="form-control"
+                                   id="reportFilePath"
+                                   name="reportFilePath"
+                                   accept="application/pdf">
+                            <div class="form-text">Upload a PDF report file (optional)</div>
+
+                            <div th:if="${testResult.reportFile != null and !#strings.isEmpty(testResult.reportFile)}"
+                                 class="alert alert-info mt-2">
+                                <i class="ri-file-pdf-line me-2"></i>
+                                <strong>Current Report:</strong>
+                                <a th:href="@{/files/view(filename=${#strings.substring(testResult.reportFile, testResult.reportFile.lastIndexOf('/')+1)})}"
+                                   target="_blank"
+                                   class="alert-link">
+                                    View Current Report <i class="ri-external-link-line ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/staff/list-test-results}" class="btn btn-outline-secondary">
+                                <i class="ri-arrow-left-line me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line me-2"></i>Save Updates
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+    <script>
+        // Initialize form validation and any other necessary JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        });
+    </script>
+</th:block>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Order Management', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <!-- Success/Error Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="ri-check-circle-line me-2"></i>Order status updated successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i>Failed to update order status. Please try again.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <!-- Order Management Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">DNA Testing Orders</div>
+                    <div class="ms-auto">
+                        <form th:action="@{/staff/search-orders}" method="get" class="d-inline-block me-2">
+                            <input type="text" name="query" placeholder="Search by Order ID..." class="form-control d-inline-block w-auto" required />
+                            <button type="submit" class="btn btn-primary btn-sm ms-1">Search</button>
+                            <a th:href="@{/staff/list-orders}" class="btn btn-outline-secondary btn-sm ms-1">Reset</a>
+                        </form>
+                        <form th:action="@{/staff/filter-orders}" method="get" class="d-inline-block">
+                            <select name="status" class="form-select form-select-sm d-inline-block w-auto" required>
+                                <option th:each="orderStatus : ${T(com.dna_testing_system.dev.enums.ServiceOrderStatus).values()}"
+                                        th:value="${orderStatus}"
+                                        th:text="${orderStatus}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm ms-1">Filter</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table text-nowrap table-bordered table-hover align-middle">
+                            <thead>
+                            <tr>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">Customer</th>
+                                <th scope="col">Order Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Total Amount</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="order : ${serviceOrders}">
+                                <td><strong th:text="${order.idServiceOrder}">ORD-001</strong></td>
+                                <td>
+                                    <div>
+                                        <strong th:text="${order.userName}">Customer Name</strong><br>
+                                        <small class="text-muted" th:text="${order.userEmail}">customer@email.com</small>
+                                    </div>
+                                </td>
+                                <td th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'MMM dd, yyyy') : ''}">Date</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${order.orderStatus.name() == 'PENDING'} ? 'bg-warning' :
+                                                          (${order.orderStatus.name() == 'CONFIRMED'} ? 'bg-info' :
+                                                          (${order.orderStatus.name() == 'IN_PROGRESS'} ? 'bg-primary' :
+                                                          (${order.orderStatus.name() == 'IN_REVIEW'} ? 'bg-secondary' :
+                                                          (${order.orderStatus.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger'))))"
+                                          th:text="${order.orderStatus.name().replace('_', ' ')}">Status</span>
+                                </td>
+                                <td th:text="${order.finalAmount}">$0.00</td>
+                                <td>
+                                    <a th:href="@{/staff/details-order(orderId=${order.idServiceOrder})}"
+                                       class="btn btn-sm btn-outline-primary me-1"
+                                       data-bs-toggle="tooltip"
+                                       title="View Details">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
+                                    <a th:href="@{/staff/update-order(orderId=${order.idServiceOrder})}"
+                                       class="btn btn-sm btn-outline-success"
+                                       data-bs-toggle="tooltip"
+                                       title="Update Status">
+                                        <i class="ri-edit-line"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${serviceOrders == null or #lists.isEmpty(serviceOrders)}">
+                                <td colspan="6" class="text-center text-muted">No orders found.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+    <script>
+        // Ensure links trigger full page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionLinks = document.querySelectorAll('a[data-bs-toggle="tooltip"]');
+            actionLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    window.location.href = this.href;
+                });
+            });
+        });
+    </script>
+</th:block>
+</html>

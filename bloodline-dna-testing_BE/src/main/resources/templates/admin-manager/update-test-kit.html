@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/common/meta :: common-meta"></head>
+
+<body>
+<div th:replace="fragments/manager/header :: header"></div>
+
+<div class="medical-container">
+    <div class="form-wrapper">
+        <div class="form-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-icon">
+                    <i class="bi bi-dna"></i>
+                </div>
+                <h2 class="sidebar-title">DNA Test Kit</h2>
+
+            </div>
+
+            <div class="form-progress">
+                <div class="progress-title">Form Completion</div>
+                <div class="progress-bar-custom">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+
+            <ul class="form-nav">
+                <li class="nav-item">
+                    <a href="#basic" class="nav-link active">
+                        <i class="bi bi-info-circle nav-icon"></i>
+                        Basic Information
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#pricing" class="nav-link">
+                        <i class="bi bi-currency-dollar nav-icon"></i>
+                        Pricing & Stock
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#details" class="nav-link">
+                        <i class="bi bi-file-medical nav-icon"></i>
+                        Medical Details
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="form-main">
+            <div class="form-header">
+                <div class="header-content">
+                    <div class="header-badge">
+                        <i class="bi bi-shield-check"></i>
+                        Medical Grade
+                    </div>
+                    <h1 class="header-title">Update Test Kit</h1>
+                    <p class="header-description">Modify DNA Test Kit Information with Medical Precision</p>
+                </div>
+            </div>
+
+            <div class="form-body">
+                <form th:action="@{/test-kits/update(kitId=${testKit.id})}" th:object="${testKit}" method="post" id="updateForm">
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="medical-section" id="basic">
+                        <div class="section-header">
+                            <div class="section-indicator">01</div>
+                            <h3 class="section-title">Basic Information</h3>
+                        </div>
+
+                        <div class="form-grid grid-2">
+                            <div class="form-group">
+                                <label for="kitName" class="form-label label-required">Kit Name</label>
+                                <div class="input-group-enhanced">
+                                    <input type="text" class="form-control" id="kitName" th:field="*{kitName}" placeholder="Enter kit name" required>
+                                    <div class="change-indicator"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="kitType" class="form-label label-required">Kit Type</label>
+                                <div class="input-group-enhanced">
+                                    <input type="text" class="form-control" id="kitType" th:field="*{kitType}" placeholder="e.g., Ancestry, Health, Paternity" required>
+                                    <div class="change-indicator"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sampleType" class="form-label label-required">Sample Type</label>
+                                <div class="input-group-enhanced">
+                                    <input type="text" class="form-control" id="sampleType" th:field="*{sampleType}" placeholder="e.g., Saliva, Blood, Cheek Swab" required>
+                                    <div class="change-indicator"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="producedBy" class="form-label label-required">Manufacturer</label>
+                                <div class="input-group-enhanced">
+                                    <input type="text" class="form-control" id="producedBy" th:field="*{producedBy}" placeholder="Company or lab name" required>
+                                    <div class="change-indicator"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="medical-section" id="pricing">
+                        <div class="section-header">
+                            <div class="section-indicator">02</div>
+                            <h3 class="section-title">Pricing & Inventory</h3>
+                        </div>
+
+                        <div class="form-grid grid-3">
+                            <div class="medical-card pricing-section">
+                                <div class="card-header">
+                                    <div class="card-icon">
+                                        <i class="bi bi-tag-fill"></i>
+                                    </div>
+                                    <h4 class="card-title">Base Price</h4>
+                                </div>
+                                <div class="form-group">
+                                    <label for="basePrice" class="form-label label-required">Base Price ($)</label>
+                                    <div class="input-group-enhanced">
+                                        <div class="input-prefix">$</div>
+                                        <input type="number" step="0.01" class="form-control" id="basePrice" th:field="*{basePrice}" placeholder="0.00" required>
+                                        <div class="change-indicator"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="medical-card pricing-section">
+                                <div class="card-header">
+                                    <div class="card-icon">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </div>
+                                    <h4 class="card-title">Current Price</h4>
+                                </div>
+                                <div class="form-group">
+                                    <label for="currentPrice" class="form-label label-required">Current Price ($)</label>
+                                    <div class="input-group-enhanced">
+                                        <div class="input-prefix">$</div>
+                                        <input type="number" step="0.01" class="form-control" id="currentPrice" th:field="*{currentPrice}" placeholder="0.00" required>
+                                        <div class="change-indicator"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="medical-card">
+                                <div class="card-header">
+                                    <div class="card-icon">
+                                        <i class="bi bi-box-seam"></i>
+                                    </div>
+                                    <h4 class="card-title">Stock Level</h4>
+                                </div>
+                                <div class="form-group">
+                                    <label for="quantityInStock" class="form-label label-required">Quantity</label>
+                                    <div class="input-group-enhanced">
+                                        <input type="number" class="form-control" id="quantityInStock" th:field="*{quantityInStock}" placeholder="0" required>
+                                        <div class="change-indicator"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="medical-section" id="details">
+                        <div class="section-header">
+                            <div class="section-indicator">03</div>
+                            <h3 class="section-title">Medical Details</h3>
+                        </div>
+
+                        <div class="form-grid grid-auto">
+                            <div class="medical-card">
+                                <div class="form-group">
+                                    <label for="kitDescription" class="form-label">Kit Description</label>
+                                    <div class="input-group-enhanced">
+                                        <textarea class="form-control form-textarea" id="kitDescription" th:field="*{kitDescription}" placeholder="Detailed description of the test kit, its purpose, capabilities, and medical applications..."></textarea>
+                                        <div class="change-indicator"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="medical-card">
+                                <div class="card-header">
+                                    <div class="card-icon">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                    <h4 class="card-title">Expiry Information</h4>
+                                </div>
+                                <div class="form-group">
+                                    <label for="expiryDate" class="form-label label-required">Expiry Date</label>
+                                    <div class="input-group-enhanced">
+                                        <input type="date" class="form-control" id="expiryDate" th:field="*{expiryDate}" th:min="${today}" required>
+                                        <div class="change-indicator"></div>
+                                    </div>
+                                </div>
+                                <div class="status-badge status-active">
+                                    <i class="bi bi-check-circle"></i>
+                                    Valid
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a th:href="@{/test-kits}" class="btn-medical btn-secondary-medical">
+                            <i class="bi bi-arrow-left"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn-medical btn-warning-medical" id="updateBtn">
+                            <i class="bi bi-check-circle btn-icon"></i>
+                            Update Test Kit
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/public/last-footer :: last-footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('updateForm');
+        const updateBtn = document.getElementById('updateBtn');
+        const formControls = document.querySelectorAll('.form-control');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const progressFill = document.querySelector('.progress-fill');
+
+        const originalValues = {};
+        formControls.forEach(input => {
+            originalValues[input.id] = input.value;
+        });
+
+        function updateProgress() {
+            const filledFields = Array.from(formControls).filter(input => input.value.trim() !== '').length;
+            const totalFields = formControls.length;
+            const progress = (filledFields / totalFields) * 100;
+            if(progressFill) {
+               progressFill.style.width = progress + '%';
+            }
+        }
+
+        formControls.forEach(input => {
+            input.addEventListener('input', function() {
+                const hasChanged = this.value !== originalValues[this.id];
+
+                if (hasChanged) {
+                    this.classList.add('changed');
+                } else {
+                    this.classList.remove('changed');
+                }
+
+                updateProgress();
+                updateButtonState();
+            });
+
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+
+        function updateButtonState() {
+            const hasChanges = Array.from(formControls).some(input =>
+                input.value !== originalValues[input.id]
+            );
+
+            if (hasChanges) {
+                updateBtn.classList.add('has-changes');
+                updateBtn.disabled = false;
+            } else {
+                updateBtn.classList.remove('has-changes');
+                updateBtn.disabled = true;
+            }
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                navLinks.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+
+                const targetId = this.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    targetSection.classList.add('section-highlight');
+                    setTimeout(() => {
+                        targetSection.classList.remove('section-highlight');
+                    }, 2000);
+                }
+            });
+        });
+
+        function validateForm() {
+            let isValid = true;
+            const requiredFields = document.querySelectorAll('[required]');
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('error');
+                    isValid = false;
+                } else {
+                    field.classList.remove('error');
+                }
+            });
+
+            const basePrice = document.getElementById('basePrice');
+            const currentPrice = document.getElementById('currentPrice');
+            const expiryDate = document.getElementById('expiryDate');
+            const quantityInStock = document.getElementById('quantityInStock');
+
+            if (parseFloat(basePrice.value) < 0) {
+                basePrice.classList.add('error');
+                isValid = false;
+            }
+            if (parseFloat(currentPrice.value) < 0) {
+                currentPrice.classList.add('error');
+                isValid = false;
+            }
+            if (parseInt(quantityInStock.value) < 0) {
+                quantityInStock.classList.add('error');
+                isValid = false;
+            }
+
+            const today = new Date();
+            const expiry = new Date(expiryDate.value);
+            if (expiry <= today) {
+                expiryDate.classList.add('error');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return false;
+            }
+
+            updateBtn.innerHTML = `
+                <div class="spinner-border spinner-border-sm me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                Updating...
+            `;
+            updateBtn.disabled = true;
+
+            setTimeout(() => {
+                form.submit();
+            }, 2000);
+        });
+
+        formControls.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                }
+                if (this.type === 'number' && parseFloat(this.value) < 0) {
+                    this.classList.add('error');
+                }
+                if (this.type === 'date') {
+                    const today = new Date();
+                    const inputDate = new Date(this.value);
+                    if (inputDate <= today) {
+                        this.classList.add('error');
+                    }
+                }
+            });
+        });
+
+        updateProgress();
+        updateButtonState();
+    });
+</script>
+</body>
+</html>

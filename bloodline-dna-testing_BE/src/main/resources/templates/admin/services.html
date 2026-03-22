@@ -1,0 +1,1511 @@
+<html
+    th:replace="~{layouts/admin-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Service Management', null, null)}"
+    xmlns:th="http://www.thymeleaf.org">
+
+
+<div id="content">
+    <!-- Service Management Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">DNA Testing Services</div>
+                    <div class="ms-auto">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal"
+                            data-bs-target="#addServiceTypeModal">
+                            <i class="ri-add-line me-1"></i> Add Service Type
+                        </a>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#addServiceModal">
+                            <i class="ri-add-line me-1"></i> Add New Service
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table text-nowrap table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Service Name</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Duration</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody> <!-- Paternity Testing -->
+                                <tr th:each="service : ${services}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-xs me-2 bg-primary-transparent avatar-rounded">
+                                                <i class="ri-heart-pulse-line"></i>
+                                            </span>
+                                            <span class="fw-semibold" th:text="${service.getServiceName()}">Service
+                                                Name</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${service.getServiceDescription()}" class="text-truncate"
+                                        style="max-width: 520px">Description</td>
+                                    <td th:text="${'$' + service.getCurrentPrice()}">Price</td>
+                                    <td th:text="${service.getExecutionTimeDays() + ' days'}">Duration</td>
+                                    <td>
+                                        <span
+                                            th:class="${service.getIsAvailable() ? 'badge bg-success-transparent' : 'badge bg-light text-dark'}"
+                                            th:text="${service.getIsAvailable() ? 'Active' : 'Inactive'}">Status</span>
+                                    </td>
+                                    <td>
+                                        <div class="hstack gap-2 flex-wrap">
+                                            <a class="text-info fs-14 lh-1 edit-service-btn" data-bs-toggle="modal"
+                                                data-bs-target="#editServiceModal" title="Edit"
+                                                th:onclick="'handleEditButtonClick(' +  ${service.id} + ')'">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                            <a href="javascript:void(0);" class="text-danger fs-14 lh-1"
+                                                data-bs-toggle="tooltip" title="Delete"
+                                                th:onclick="'deleteService(' + ${service.id} + ')'">
+                                                <i class="ri-delete-bin-5-line"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Replace the existing addServiceTypeModal with this Bootstrap-only version -->
+
+    <!-- Enhanced Service Type Management Modal (Bootstrap only) -->
+    <div class="modal fade" id="addServiceTypeModal" tabindex="-1" aria-labelledby="addServiceTypeModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header text-white">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+
+                    <!-- Top Section: Existing Service Types List -->
+                    <div class="mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0 text-primary fw-bold">
+                                <i class="ri-list-check-2 me-2"></i>Existing Service Types
+                            </h6>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                onclick="refreshServiceTypesList()">
+                                <i class="ri-refresh-line me-1"></i>Refresh
+                            </button>
+                        </div>
+
+                        <!-- Service Types List Container with Bootstrap styling -->
+                        <div class="card border-2">
+                            <div class="card-body p-0">
+                                <div id="serviceTypesListContainer" style="max-height: 350px; overflow-y: auto;">
+
+                                    <!-- Thymeleaf rendered service types -->
+                                    <div th:if="${serviceTypes != null and !serviceTypes.isEmpty()}">
+                                        <div th:each="type, iterStat : ${serviceTypes}"
+                                            class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                                            <div class="d-flex align-items-center flex-grow-1">
+                                                <div>
+                                                    <h6 class="mb-1 fw-semibold" th:text="${type.typeName}">Service Type
+                                                        Name</h6>
+                                                    <small class="text-muted">
+                                                        Status:
+                                                        <span class="fw-semibold"
+                                                            th:class="${type.isActive ? 'badge bg-success-transparent' : 'badge bg-light text-dark'}"
+                                                            th:text="${type.isActive ? 'Active' : 'Inactive'}">Active</span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="btn-group btn-group-sm ms-3" role="group">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary edit-service-type-btn"
+                                                    th:data-id="${type.id}" th:data-name="${type.typeName}"
+                                                    th:data-active="${type.isActive}" data-bs-toggle="tooltip"
+                                                    title="Edit Service Type">
+                                                    <i class="ri-edit-line"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-outline-danger delete-service-type-btn"
+                                                    th:data-id="${type.id}" th:data-name="${type.typeName}"
+                                                    data-bs-toggle="tooltip" title="Delete Service Type">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Empty state when no service types exist -->
+                                    <div th:if="${serviceTypes == null or serviceTypes.isEmpty()}"
+                                        class="text-center py-5">
+                                        <div class="display-1 text-muted mb-3">
+                                            <i class="ri-inbox-line"></i>
+                                        </div>
+                                        <h5 class="text-muted">No service types found</h5>
+                                        <p class="text-muted mb-0">Add your first service type below</p>
+                                    </div>
+
+                                    <!-- Sample data for demonstration when serviceTypes is null -->
+                                    <div th:unless="${serviceTypes != null}">
+                                        <div
+                                            class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                                            <div class="d-flex align-items-center flex-grow-1">
+                                                <span class="badge bg-success text-white fs-6 me-3 px-2 py-2">1</span>
+                                                <div>
+                                                    <h6 class="mb-1 fw-semibold">Standard Test</h6>
+                                                    <small class="text-muted">Status: <span
+                                                            class="text-success fw-semibold">Active</span></small>
+                                                </div>
+                                            </div>
+                                            <div class="btn-group btn-group-sm ms-3" role="group">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary edit-service-type-btn" data-id="1"
+                                                    data-name="Standard Test" data-active="true"
+                                                    data-bs-toggle="tooltip" title="Edit Service Type">
+                                                    <i class="ri-edit-line"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-outline-danger delete-service-type-btn" data-id="1"
+                                                    data-name="Standard Test" data-bs-toggle="tooltip"
+                                                    title="Delete Service Type">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                                            <div class="d-flex align-items-center flex-grow-1">
+                                                <span class="badge bg-success text-white fs-6 me-3 px-2 py-2">2</span>
+                                                <div>
+                                                    <h6 class="mb-1 fw-semibold">Premium Test</h6>
+                                                    <small class="text-muted">Status: <span
+                                                            class="text-success fw-semibold">Active</span></small>
+                                                </div>
+                                            </div>
+                                            <div class="btn-group btn-group-sm ms-3" role="group">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary edit-service-type-btn" data-id="2"
+                                                    data-name="Premium Test" data-active="true" data-bs-toggle="tooltip"
+                                                    title="Edit Service Type">
+                                                    <i class="ri-edit-line"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-outline-danger delete-service-type-btn" data-id="2"
+                                                    data-name="Premium Test" data-bs-toggle="tooltip"
+                                                    title="Delete Service Type">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center p-3">
+                                            <div class="d-flex align-items-center flex-grow-1">
+                                                <span class="badge bg-secondary text-white fs-6 me-3 px-2 py-2">3</span>
+                                                <div>
+                                                    <h6 class="mb-1 fw-semibold">Rush Service</h6>
+                                                    <small class="text-muted">Status: <span
+                                                            class="text-secondary fw-semibold">Inactive</span></small>
+                                                </div>
+                                            </div>
+                                            <div class="btn-group btn-group-sm ms-3" role="group">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary edit-service-type-btn" data-id="3"
+                                                    data-name="Rush Service" data-active="false"
+                                                    data-bs-toggle="tooltip" title="Edit Service Type">
+                                                    <i class="ri-edit-line"></i>
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-outline-danger delete-service-type-btn" data-id="3"
+                                                    data-name="Rush Service" data-bs-toggle="tooltip"
+                                                    title="Delete Service Type">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <hr class="my-4">
+
+                    <!-- Bottom Section: Add New Service Type Form -->
+                    <div class="card border-2">
+                        <div class="card-header bg-opacity-10">
+                            <h6 class="mb-0 fw-bold">
+                                <i class="ri-add-circle-line me-2"></i>Add New Service Type
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="addServiceTypeForm" th:action="@{/manager/service-types/add}" method="post">
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label for="typeName" class="form-label fw-semibold">
+                                            Service Type Name <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="typeName"
+                                            name="typeName"
+                                            placeholder="Enter service type name (e.g., Standard Test, Premium Test)"
+                                            required maxlength="100">
+                                        <div class="invalid-feedback">Service type name is required and must be less
+                                            than
+                                            100 characters</div>
+                                        <div class="form-text">This name must be unique in the system</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="typeStatus" class="form-label fw-semibold">
+                                            Status <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select form-select-lg" id="typeStatus" name="isActive"
+                                            required>
+                                            <option value="true" selected>Active</option>
+                                            <option value="false">Inactive</option>
+                                        </select>
+                                        <div class="invalid-feedback">Please select status</div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <button type="button" class="btn btn-primary btn-lg w-100"
+                                            onclick="submitServiceTypeForm()">
+                                            <i class="ri-save-line me-2"></i>Add Service Type
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Service Type Modal (separate modal for editing) -->
+    <div class="modal fade" id="editServiceTypeModal" tabindex="-1" aria-labelledby="editServiceTypeModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-white">
+                    <h5 class="modal-title" id="editServiceTypeModalLabel">
+                        <i class="ri-edit-line me-2"></i>Edit Service Type
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editServiceTypeForm">
+                        <input type="hidden" id="editServiceTypeId" name="id">
+
+                        <div class="mb-3">
+                            <label for="editTypeName" class="form-label fw-semibold">
+                                Service Type Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="editTypeName" name="typeName"
+                                placeholder="Enter service type name" required maxlength="100">
+                            <div class="invalid-feedback">Service type name is required and must be less than 100
+                                characters
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editTypeStatus" class="form-label fw-semibold">
+                                Status <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" id="editTypeStatus" name="isActive" required>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">Please select status</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="submitEditServiceTypeForm()">
+                        <i class="ri-save-line me-1"></i>Update Service Type
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simplified Add Service Type Modal -->
+    <!-- <div class="modal fade" id="addServiceTypeModal" tabindex="-1" aria-labelledby="addServiceTypeModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addServiceTypeModalLabel">Add New Service Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addServiceTypeForm" th:action="@{/manager/service-types/add}" method="post">
+                        <div class="mb-3">
+                            <label for="typeName" class="form-label">Service Type Name <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="typeName" name="typeName"
+                                placeholder="Enter service type name (e.g., Standard Test, Premium Test)" required
+                                maxlength="100">
+                            <div class="invalid-feedback">Service type name is required and must be less than 100
+                                characters
+                            </div>
+                            <div class="form-text">This name must be unique in the system</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="typeStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select class="form-select" id="typeStatus" name="isActive" required>
+                                <option value="true" selected>Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">Please select status</div>
+                            <div class="form-text">Active service types will be available for creating new services
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="submitServiceTypeForm()">
+                        <i class="ri-save-line me-1"></i>Add Service Type
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="ri-check-circle-line me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    -->
+
+
+    <!-- Add Service Modal -->
+    <div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addServiceModalLabel">Add New DNA Testing Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addServiceForm" th:action="@{/manager/services/add}" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="serviceName" class="form-label">Service Name</label>
+                                <input type="text" class="form-control" id="serviceName" name="serviceName"
+                                    placeholder="Enter service name" required maxlength="255">
+                                <div class="invalid-feedback">Service name cannot be blank and must be less than 255
+                                    characters</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="serviceCategory" class="form-label">Service Category</label>
+                                <select class="form-select" id="serviceCategory" name="serviceCategory" required>
+                                    <option value="">Select a category</option>
+                                    <option value="CIVIL">Civil</option>
+                                    <option value="ADMINISTRATIVE">Administrative</option>
+                                </select>
+                                <div class="invalid-feedback">Service category must be selected</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="serviceTypeId" class="form-label">Service Type</label>
+                                <select class="form-select" id="serviceTypeId" name="serviceTypeId" required>
+                                    <option value="">Select a service type</option>
+                                    <option th:if="${type.isActive}" th:each="type : ${serviceTypes}"
+                                        th:value="${type.id}" th:text="${type.typeName}">Service Type</option>
+                                </select>
+                                <div class="invalid-feedback">Service type must be selected</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="participants" class="form-label">Number of Participants</label>
+                                <input type="number" class="form-control" id="participants" name="participants"
+                                    placeholder="Number of participants" required min="1">
+                                <div class="invalid-feedback">At least one participant is required</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="executionTimeDays" class="form-label">Execution Time (Days)</label>
+                                <input type="number" class="form-control" id="executionTimeDays"
+                                    name="executionTimeDays" placeholder="Execution time in days" required min="1">
+                                <div class="invalid-feedback">Execution time must be at least 1 day</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="basePrice" class="form-label">Base Price ($)</label>
+                                <input type="number" class="form-control" id="basePrice" name="basePrice"
+                                    placeholder="Base price" required min="0.01" step="0.01">
+                                <div class="invalid-feedback">Base price must be greater than zero</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="currentPrice" class="form-label">Current Price ($)</label>
+                                <input type="number" class="form-control" id="currentPrice" name="currentPrice"
+                                    placeholder="Current price" required min="0.01" step="0.01">
+                                <div class="invalid-feedback">Current price must be greater than zero</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="isAvailable" class="form-label">Availability Status</label>
+                                <select class="form-select" id="isAvailable" name="isAvailable" required>
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                                <div class="invalid-feedback">Availability status must be specified</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="serviceIcon" class="form-label">Icon</label>
+                                <select class="form-select" id="serviceIcon" name="iconClass">
+                                    <option value="ri-heart-pulse-line">Heart Pulse</option>
+                                    <option value="ri-parent-line">Parent</option>
+                                    <option value="ri-group-line">Group (Family)</option>
+                                    <option value="ri-earth-line">Earth (Ancestry)</option>
+                                    <option value="ri-microscope-line">Microscope</option>
+                                    <option value="ri-file-copy-line">Copy (Twins)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="serviceDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="serviceDescription" name="serviceDescription" rows="4"
+                                placeholder="Enter service description" required></textarea>
+                            <div class="invalid-feedback">Service description cannot be blank</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Features</label>
+                            <div class="feature-assignments-container">
+                                <div class="feature-assignment card mb-2">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Feature Name</label>
+                                                <input type="text" class="form-control"
+                                                    name="featureAssignments[0].featureName"
+                                                    placeholder="Enter feature name (e.g., Comprehensive DNA Analysis)"
+                                                    required>
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Available</label>
+                                                <select class="form-select" name="featureAssignments[0].isAvailable"
+                                                    required>
+                                                    <option value="true">Yes</option>
+                                                    <option value="false">No</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button"
+                                                class="btn btn-sm btn-danger remove-feature">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" id="addFeatureBtn">Add
+                                Feature</button>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add Service</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> <!-- Edit Service Modal -->
+    <div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editServiceModalLabel">Edit DNA Testing Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editServiceForm" method="post">
+                        <input type="hidden" id="editServiceId" name="id">
+
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editServiceName" class="form-label">Service Name <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="editServiceName" name="serviceName"
+                                    placeholder="Enter service name" required maxlength="255">
+                                <div class="invalid-feedback">Service name is required and must be less than 255
+                                    characters</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editServiceCategory" class="form-label">Service Category <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="editServiceCategory" name="serviceCategory" required>
+                                    <option value="">Select a category</option>
+                                    <option value="CIVIL">Civil</option>
+                                    <option value="ADMINISTRATIVE">Administrative</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a service category</div>
+                            </div>
+                        </div>
+
+                        <!-- Service Details -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editTypeServiceId" class="form-label">Service Type <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="editTypeServiceId" name="serviceTypeId" required>
+                                    <option value="">Select a service type</option>
+                                    <option th:if="${type.isActive}" th:each="type : ${serviceTypes}"
+                                        th:value="${type.id}" th:text="${type.typeName}">
+                                        Service Type</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a service type</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editParticipants" class="form-label">Number of Participants <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="editParticipants" name="participants"
+                                    placeholder="Number of participants" required min="1" max="10">
+                                <div class="invalid-feedback">At least 1 participant is required</div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing and Timeline -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="editExecutionTimeDays" class="form-label">Execution Time (Days) <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="editExecutionTimeDays"
+                                    name="executionTimeDays" placeholder="Days" required min="1" max="365">
+                                <div class="invalid-feedback">Execution time must be between 1-365 days</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editBasePrice" class="form-label">Base Price ($) <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="editBasePrice" name="basePrice"
+                                    placeholder="0.00" required min="0.01" step="0.01">
+                                <div class="invalid-feedback">Base price must be greater than 0</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editCurrentPrice" class="form-label">Current Price ($) <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="editCurrentPrice" name="currentPrice"
+                                    placeholder="0.00" required min="0.01" step="0.01">
+                                <div class="invalid-feedback">Current price must be greater than 0</div>
+                            </div>
+                        </div>
+
+                        <!-- Status and Icon -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editIsAvailable" class="form-label">Availability Status <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="editIsAvailable" name="isAvailable" required>
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                                <div class="invalid-feedback">Please select availability status</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editServiceIcon" class="form-label">Service Icon</label>
+                                <select class="form-select" id="editServiceIcon" name="iconClass">
+                                    <option value="ri-heart-pulse-line">Heart Pulse (Default)</option>
+                                    <option value="ri-parent-line">Parent/Family</option>
+                                    <option value="ri-group-line">Group (Siblings)</option>
+                                    <option value="ri-earth-line">Earth (Ancestry)</option>
+                                    <option value="ri-microscope-line">Microscope (Health)</option>
+                                    <option value="ri-file-copy-line">Copy (Twins)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Descriptions -->
+                        <div class="mb-3">
+                            <label for="editServiceDescription" class="form-label">Service Description <span
+                                    class="text-danger">*</span></label>
+                            <textarea class="form-control" id="editServiceDescription" name="serviceDescription"
+                                rows="3" placeholder="Brief description of the service" required
+                                maxlength="500"></textarea>
+                            <div class="form-text">Maximum 500 characters</div>
+                            <div class="invalid-feedback">Service description is required</div>
+                        </div>
+
+                        <!-- Features Section -->
+                        <div class="mb-3">
+                            <label class="form-label">Service Features</label>
+                            <div class="edit-feature-assignments-container">
+                                <!-- Dynamic features will be added here -->
+
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="editAddFeatureBtn">
+                                <i class="ri-add-line me-1"></i>Add Feature
+                            </button>
+                            <div class="form-text">Add features that describe what this service includes</div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="submitEditForm()">
+                        <i class="ri-save-line me-1"></i>Update Service
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+    <script>
+        let selectedServiceId = null;
+
+        // Add these functions to your existing JavaScript section in services.html
+        // ...existing code...
+
+        // Handle edit and delete button clicks using event delegation
+        document.addEventListener('DOMContentLoaded', function () {
+            // Handle edit service type button clicks
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('.edit-service-type-btn')) {
+                    const button = e.target.closest('.edit-service-type-btn');
+                    const id = button.getAttribute('data-id');
+                    const name = button.getAttribute('data-name');
+                    const isActive = button.getAttribute('data-active') === 'true';
+
+                    editServiceType(id, name, isActive);
+                }
+
+                // Handle delete service type button clicks
+                if (e.target.closest('.delete-service-type-btn')) {
+                    const button = e.target.closest('.delete-service-type-btn');
+                    const id = button.getAttribute('data-id');
+                    const name = button.getAttribute('data-name');
+
+                    deleteServiceType(id, name);
+                }
+            });
+
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Edit Service Type function
+        function editServiceType(id, typeName, isActive) {
+            // Populate the edit form
+            document.getElementById('editServiceTypeId').value = id;
+            document.getElementById('editTypeName').value = typeName;
+            document.getElementById('editTypeStatus').value = isActive.toString();
+
+            // Show the edit modal
+            const editModal = new bootstrap.Modal(document.getElementById('editServiceTypeModal'));
+            editModal.show();
+        }
+
+        // Submit Edit Service Type Form
+        function submitEditServiceTypeForm() {
+            const form = document.getElementById('editServiceTypeForm');
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: 'Please fill in all required fields correctly.'
+                });
+                return;
+            }
+
+            const id = document.getElementById('editServiceTypeId').value;
+            const typeName = document.getElementById('editTypeName').value;
+            const isActive = document.getElementById('editTypeStatus').value;
+
+            // Show loading state
+            const submitBtn = document.querySelector('button[onclick="submitEditServiceTypeForm()"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ri-loader-2-line me-1"></i>Updating...';
+            submitBtn.disabled = true;
+
+            // Show loading dialog
+            Swal.fire({
+                title: 'Updating Service Type...',
+                text: 'Please wait while we update the service type.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('typeName', typeName);
+            formData.append('isActive', isActive);
+
+            fetch(`/manager/service-types/update/${id}`, {
+                method: 'PUT',
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Service type updated successfully!',
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Close edit modal
+                            const editModal = bootstrap.Modal.getInstance(document.getElementById('editServiceTypeModal'));
+                            if (editModal) editModal.hide();
+
+                            // Refresh the service types list
+                            refreshServiceTypesList();
+                        });
+                    } else {
+                        throw new Error('Failed to update service type');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating service type:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed',
+                        text: 'Error updating service type. Please try again.'
+                    });
+                })
+                .finally(() => {
+                    // Restore button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        }
+
+        // Delete Service Type function
+        function deleteServiceType(id, typeName) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You want to delete "${typeName}" service type?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Deleting...',
+                        text: 'Please wait while we delete the service type.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    });
+
+                    fetch(`/manager/service-types/delete/${id}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    `Service type "${typeName}" has been deleted.`,
+                                    'success'
+                                ).then(() => {
+                                    refreshServiceTypesList();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Failed to delete service type. Please try again.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error deleting service type:', error);
+                            Swal.fire(
+                                'Error!',
+                                'An error occurred while deleting the service type.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        }
+
+        // Refresh Service Types List 
+        function refreshServiceTypesList() {
+            // For now, reload the page to refresh the list
+            window.location.reload();
+        }
+
+        // Updated submitServiceTypeForm function
+        function submitServiceTypeForm() {
+            const form = document.getElementById('addServiceTypeForm');
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: 'Please fill in all required fields correctly.'
+                });
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('button[onclick="submitServiceTypeForm()"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ri-loader-2-line me-1"></i>Adding...';
+            submitBtn.disabled = true;
+
+            // Show loading dialog
+            Swal.fire({
+                title: 'Adding Service Type...',
+                text: 'Please wait while we add the new service type.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
+
+            // Submit form
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Service type added successfully!',
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Reset form
+                            form.reset();
+                            form.classList.remove('was-validated');
+                            // Refresh the service types list
+                            refreshServiceTypesList();
+                        });
+                    } else {
+                        throw new Error('Failed to add service type');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding service type:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Addition Failed',
+                        text: 'Error adding service type. Please try again.'
+                    });
+                })
+                .finally(() => {
+                    // Restore button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        }
+
+        // ...rest of your existing code...
+        // ...rest of your existing code...
+
+
+        // Add Service Type form submission
+        // function submitServiceTypeForm() {
+        //     const form = document.getElementById('addServiceTypeForm');
+
+        //     if (!form.checkValidity()) {
+        //         form.classList.add('was-validated');
+        //         Swal.fire({
+        //             icon: 'warning',
+        //             title: 'Validation Error',
+        //             text: 'Please fill in all required fields correctly.'
+        //         });
+        //         return;
+        //     }
+
+        //     // Show loading state
+        //     const submitBtn = document.querySelector('button[onclick="submitServiceTypeForm()"]');
+        //     const originalText = submitBtn.innerHTML;
+        //     submitBtn.innerHTML = '<i class="ri-loader-2-line spin me-1"></i>Adding...';
+        //     submitBtn.disabled = true;
+
+        //     // Submit form directly (Thymeleaf will handle the redirect and flash messages)
+        //     form.submit();
+        // }
+
+        // // Handle page load events
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     // Handle service type form submission
+        //     const addServiceTypeForm = document.getElementById('addServiceTypeForm');
+        //     if (addServiceTypeForm) {
+        //         addServiceTypeForm.addEventListener('submit', function (e) {
+        //             e.preventDefault();
+        //             submitServiceTypeForm();
+        //         });
+        //     }
+
+        //     // Auto-hide flash messages after 5 seconds
+        //     setTimeout(function () {
+        //         const alerts = document.querySelectorAll('.alert-dismissible');
+        //         alerts.forEach(alert => {
+        //             const alertInstance = new bootstrap.Alert(alert);
+        //             alertInstance.close();
+        //         });
+        //     }, 5000);
+
+        //     // Show success message if service type was added
+        //     const urlParams = new URLSearchParams(window.location.search);
+        //     if (urlParams.get('serviceTypeAdded') === 'true') {
+        //         Swal.fire({
+        //             icon: 'success',
+        //             title: 'Success!',
+        //             text: 'Service type added successfully!',
+        //             timer: 2000,
+        //             showConfirmButton: false
+        //         });
+        //     }
+        // });
+
+
+
+
+
+        function updateService() {
+            if (selectedServiceId === null) {
+                alert("Please select a service");
+                return;
+            }
+
+            alert("Selected Service ID: " + selectedServiceId);
+            const form = document.getElementById('editServiceForm');
+
+            form.action = "http://localhost:8080/manage/services/" + selectedServiceId;
+            form.method = 'post';
+            console.log("Form action:", form.action); // kiểm tra xem action đúng chưa
+            form.submit();
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Initialize edit button functionality
+            document.querySelectorAll('.text-info.fs-14.lh-1').forEach(button => {
+                button.addEventListener('click', function () {
+                    // Extract data and open edit modal
+                    handleEditButtonClick(selectedServiceId);
+                });
+            });
+
+            // Initialize feature management
+            initFeatureManagement();
+
+            // Form submission handling would go here
+            console.log('Services management page loaded');
+        });        // Feature management for add form (keeping existing functionality)
+        function initFeatureManagement() {
+            // Add feature functionality for add form
+            window.addFeatureRow = function (containerSelector, isEdit = false) {
+                const container = document.querySelector(containerSelector);
+                if (!container) return;
+
+                const featureRows = container.querySelectorAll('.feature-assignment');
+                const newIndex = featureRows.length;
+                const namePrefix = isEdit ? 'editFeatureAssignments' : 'featureAssignments';
+
+                const newRow = document.createElement('div');
+                newRow.className = 'feature-assignment card mb-2';
+                newRow.innerHTML = `
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Feature Name</label>
+                                <input type="text" class="form-control" name="${namePrefix}[${newIndex}].featureName" 
+                                       placeholder="Enter feature name" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Available</label>
+                                <select class="form-select" name="${namePrefix}[${newIndex}].isAvailable" required>
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-sm btn-danger remove-feature">Remove</button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(newRow);
+                newRow.querySelector('.remove-feature').addEventListener('click', function () {
+                    window.removeFeatureRow(this);
+                });
+            };
+
+            // Remove feature functionality for add form
+            window.removeFeatureRow = function (button) {
+                const featureRow = button.closest('.feature-assignment');
+                const container = featureRow.parentElement;
+
+                if (container.querySelectorAll('.feature-assignment').length > 1) {
+                    featureRow.remove();
+                    // Reindex remaining features
+                    const remainingFeatures = container.querySelectorAll('.feature-assignment');
+                    const isEdit = container.classList.contains('edit-feature-assignments-container');
+                    const namePrefix = isEdit ? 'editFeatureAssignments' : 'featureAssignments';
+
+                    remainingFeatures.forEach((feature, index) => {
+                        const featureNameInput = feature.querySelector('input[type="text"]');
+                        const availableSelect = feature.querySelector('select');
+                        if (featureNameInput) featureNameInput.name = `${namePrefix}[${index}].featureName`;
+                        if (availableSelect) availableSelect.name = `${namePrefix}[${index}].isAvailable`;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Minimum Required',
+                        text: 'At least one feature is required'
+                    });
+                }
+            };
+
+            // Add feature button handlers for add form
+            const addFeatureBtn = document.getElementById('addFeatureBtn');
+            if (addFeatureBtn) {
+                addFeatureBtn.addEventListener('click', function () {
+                    window.addFeatureRow('.feature-assignments-container');
+                });
+            }
+
+            // Remove feature button for initial feature in add form
+            document.querySelectorAll('.remove-feature').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    window.removeFeatureRow(this);
+                });
+            });
+        }
+        function deleteService(id) {
+            // Replace confirm() with SweetAlert2
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Deleting...',
+                        text: 'Please wait while we delete the service.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    });
+
+                    fetch(`http://localhost:8080/manager/services/delete/${id}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Service has been deleted successfully.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Failed to delete service. Please try again.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error deleting service:', error);
+                            Swal.fire(
+                                'Error!',
+                                'An error occurred while deleting the service.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        }
+        // function deleteService(id) {
+        //     if (confirm('Are you sure you want to delete this service?')) {
+        //         fetch(`http://localhost:8080/manager/services/delete/${id}`, {
+        //             method: 'DELETE'
+        //         })
+        //             .then(response => {
+        //                 if (response.ok) {
+        //                     alert('Service deleted successfully!');
+        //                     location.reload();
+        //                 } else {
+        //                     alert('Failed to delete service.');
+        //                 }
+        //             })
+        //             .catch(error => {
+        //                 console.error('Error deleting service:', error);
+        //             });
+        //     }
+        // }
+        //
+        // // Add this to your script section
+        // function handleEditFormSubmit(event) {
+        //     event.preventDefault();
+        //
+        //     const form = event.target;
+        //     const serviceId = document.getElementById('editServiceId').value;
+        //     const formData = new FormData(form);
+        //
+        //     // Ensure we have a valid service ID
+        //     if (!serviceId) {
+        //         console.error('No service ID found in the form');
+        //         alert('Error: Service ID is missing. Please try again.');
+        //         return;
+        //     }
+        //
+        //     // Send the form data with PUT method
+        //     fetch(`/manager/services/update/${serviceId}`, {
+        //         method: 'PUT',
+        //         body: formData
+        //     })
+        //         .then(response => {
+        //             if (!response.ok) {
+        //                 throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        //             }
+        //             return response.json();
+        //         })
+        //         .then(data => {
+        //             alert('Service updated successfully!');
+        //             // Close the modal
+        //             const modal = bootstrap.Modal.getInstance(document.getElementById('editServiceModal'));
+        //             if (modal) modal.hide();
+        //             // Reload the page to show updated data
+        //             location.reload();
+        //         })
+        //         .catch(error => {
+        //             console.error('Error updating service:', error);
+        //             alert('Error updating service. Please try again.');
+        //         });
+        // }        // Submit edit form function
+        function submitEditForm() {
+            const form = document.getElementById('editServiceForm');
+            const serviceId = selectedServiceId;
+
+            if (!serviceId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No service ID found. Please try again.'
+                });
+                return;
+            }
+
+            // Validate form
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: 'Please fill in all required fields correctly.'
+                });
+                return;
+            }
+
+            console.log(form.querySelectorAll('[name]'));
+
+            const formData = new FormData(document.getElementById('editServiceForm'));
+            for (let pair of formData.entries()) {
+                console.log(pair[0], pair[1]);
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('button[onclick="submitEditForm()"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ri-loader-2-line spin me-1"></i>Updating...';
+            submitBtn.disabled = true;
+
+            // Show loading dialog
+            Swal.fire({
+                title: 'Updating Service...',
+                text: 'Please wait while we update the service.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
+
+            fetch(`http://localhost:8080/manager/services/update/${serviceId}`, {
+                method: 'PUT',
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Service updated successfully!',
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('editServiceModal'));
+                            if (modal) modal.hide();
+                            // Reload page
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error('Failed to update service');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating service:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed',
+                        text: 'Error updating service. Please try again.'
+                    });
+                })
+                .finally(() => {
+                    // Restore button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        }
+
+        function handleEditButtonClick(serviceId) {
+            selectedServiceId = serviceId;
+
+            // Clear form and reset validation
+            const form = document.getElementById('editServiceForm');
+            form.classList.remove('was-validated');
+            form.reset();
+
+            // Handle hardcoded services (static data in HTML)
+            if (!serviceId || serviceId === '0') {
+                populateDefaultEditData();
+                return;
+            }
+
+            // Fetch service data from server
+            fetch(`http://localhost:8080/manager/services/${serviceId}`, {
+                method: 'GET',
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch service data');
+                    return response.json();
+                })
+                .then(data => {
+                    populateEditForm(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching service details:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Loading Error',
+                        text: 'Error loading service data. Please try again.'
+                    });
+                    populateDefaultEditData();
+                });
+        }
+
+        function populateEditForm(data) {
+            // Basic information
+            document.getElementById('editServiceId').value = data.id || '';
+            document.getElementById('editServiceName').value = data.serviceName || '';
+            document.getElementById('editServiceCategory').value = data.serviceCategory || '';
+            document.getElementById('editTypeServiceId').value = data.serviceTypeId || '';
+            document.getElementById('editParticipants').value = data.participants || 1;
+
+            // Pricing and timeline
+            document.getElementById('editExecutionTimeDays').value = data.executionTimeDays || '';
+            document.getElementById('editBasePrice').value = data.basePrice || '';
+            document.getElementById('editCurrentPrice').value = data.currentPrice || '';
+
+            // Status and appearance
+            document.getElementById('editIsAvailable').value = data.isAvailable ? 'true' : 'false';
+            document.getElementById('editServiceIcon').value = data.iconClass || 'ri-heart-pulse-line';
+
+            // Descriptions
+            document.getElementById('editServiceDescription').value = data.serviceDescription || '';
+
+            // Load features
+            loadEditFeatures(data.features || []);
+        }
+
+        function populateDefaultEditData() {
+            // Set default values for hardcoded services
+            document.getElementById('editServiceId').value = '0';
+            document.getElementById('editServiceName').value = '';
+            document.getElementById('editServiceCategory').value = 'CIVIL';
+            document.getElementById('editTypeServiceId').value = '1';
+            document.getElementById('editParticipants').value = 2;
+            document.getElementById('editExecutionTimeDays').value = '';
+            document.getElementById('editBasePrice').value = '';
+            document.getElementById('editCurrentPrice').value = '';
+            document.getElementById('editIsAvailable').value = 'true';
+            document.getElementById('editServiceIcon').value = 'ri-heart-pulse-line';
+            document.getElementById('editServiceDescription').value = '';
+
+            // Add default feature
+            addEditFeatureRow();
+        }
+
+        function loadEditFeatures(features) {
+            const container = document.querySelector('.edit-feature-assignments-container');
+            container.innerHTML = '';
+            console.log(features);
+            if (features && features.length > 0) {
+                features.forEach((feature, index) => {
+                    addEditFeatureRow(feature, index);
+                });
+            } else {
+                // Add at least one empty feature row
+                addEditFeatureRow();
+            }
+        }
+
+        function addEditFeatureRow(featureData = null, index = null) {
+            const container = document.querySelector('.edit-feature-assignments-container');
+            if (!container) return;
+
+            const currentFeatures = container.querySelectorAll('.feature-assignment');
+            const featureIndex = index !== null ? index : currentFeatures.length;
+
+            const featureNameValue = featureData ? featureData.featureName : '';
+            const isAvailableValue = featureData ? featureData.isAvailable : true;
+
+            const featureRow = document.createElement('div');
+            featureRow.className = 'feature-assignment card mb-2';
+            featureRow.innerHTML = `
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8 mb-2">
+                    <label class="form-label">Feature Name</label>
+                    <input type="text" class="form-control"
+                           name="editFeatureAssignments[${featureIndex}].featureName"
+                           id="editFeatureAssignments[${featureIndex}].featureName"
+                           value="${featureNameValue}"
+                           placeholder="e.g., High Accuracy Analysis, Fast Processing"
+                           required>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">Available</label>
+                    <select class="form-select" name="editFeatureAssignments[${featureIndex}].isAvailable"
+                     id="editFeatureAssignments[${featureIndex}].isAvailable"
+                     required>
+                        <option value="true" ${isAvailableValue ? 'selected' : ''}>Yes</option>
+                        <option value="false" ${!isAvailableValue ? 'selected' : ''}>No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-edit-feature">
+                    <i class="ri-delete-bin-line me-1"></i>Remove
+                </button>
+            </div>
+        </div>
+    `;
+
+            container.appendChild(featureRow);
+            console.log('Added feature row:', featureRow.innerHTML);
+
+
+            // Add remove event listener
+            featureRow.querySelector('.remove-edit-feature').addEventListener('click', function () {
+                removeEditFeatureRow(this);
+            });
+        }
+
+
+        function removeEditFeatureRow(button) {
+            const featureRow = button.closest('.feature-assignment');
+            const container = featureRow.parentElement;
+
+            // Keep at least one feature
+            if (container.querySelectorAll('.feature-assignment').length > 1) {
+                featureRow.remove();
+                reindexEditFeatures();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Minimum Required',
+                    text: 'At least one feature is required'
+                });
+            }
+        }
+
+        function reindexEditFeatures() {
+            const container = document.querySelector('.edit-feature-assignments-container');
+            const features = container.querySelectorAll('.feature-assignment');
+
+            features.forEach((feature, index) => {
+                const nameInput = feature.querySelector('input[type="text"]');
+                const availableSelect = feature.querySelector('select');
+
+                if (nameInput) nameInput.name = `editFeatureAssignments[${index}].featureName`;
+                if (availableSelect) availableSelect.name = `editFeatureAssignments[${index}].isAvailable`;
+            });
+        }
+
+        // Event listener for add feature button
+        document.addEventListener('DOMContentLoaded', function () {
+            const editAddFeatureBtn = document.getElementById('editAddFeatureBtn');
+            if (editAddFeatureBtn) {
+                editAddFeatureBtn.addEventListener('click', function () {
+                    addEditFeatureRow();
+                });
+            }
+        });    </script>
+</th:block>
+<!-- Page-specific scripts -->
+
+</html>

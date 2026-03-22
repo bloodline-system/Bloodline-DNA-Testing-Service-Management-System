@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Create Raw Data', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-add-line me-2"></i>Create Raw Data
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/staff/create-raw-data}" th:object="${rawData}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="testResultId" th:value="${testResultId}" />
+
+                        <div class="mb-3">
+                            <label for="collectionDate" class="form-label">
+                                <i class="ri-calendar-line me-2"></i>Collection Date
+                            </label>
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   id="collectionDate"
+                                   th:field="*{collectionDate}"
+                                   th:max="${today}"
+                                   required>
+                            <div class="form-text">Select the date and time when the data was collected</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dataFormat" class="form-label">
+                                <i class="ri-code-line me-2"></i>Data Format
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="dataFormat"
+                                   name="dataFormat"
+                                   th:field="*{dataFormat}"
+                                   placeholder="e.g., JSON, XML, CSV"
+                                   required>
+                            <div class="form-text">Specify the format of the raw data</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="rawDataContent" class="form-label">
+                                <i class="ri-file-text-line me-2"></i>Raw Data Content
+                            </label>
+                            <textarea class="form-control"
+                                      id="rawDataContent"
+                                      name="rawDataContent"
+                                      rows="5"
+                                      th:field="*{rawDataContent}"
+                                      placeholder="Enter the raw data content here..."
+                                      required></textarea>
+                            <div class="form-text">Enter the actual raw data content</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="filePath" class="form-label">
+                                <i class="ri-file-pdf-line me-2"></i>Raw Data File (PDF)
+                            </label>
+                            <input type="file"
+                                   class="form-control"
+                                   id="filePath"
+                                   name="filePath"
+                                   accept="application/pdf">
+                            <div class="form-text">Upload a PDF file containing the raw data (optional)</div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/staff/list-test-results}" class="btn btn-outline-secondary">
+                                <i class="ri-arrow-left-line me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line me-2"></i>Create Raw Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+    <script>
+        // Ensure proper page transitions
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionButtons = document.querySelectorAll('.btn');
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.href) {
+                        window.location.href = this.href;
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+</html>

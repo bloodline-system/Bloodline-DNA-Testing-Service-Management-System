@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-nav-layout="horizontal">
+
+<head>
+
+    <title>Order Details</title>
+    <th:block th:replace="~{fragments/public/head :: head}"></th:block>
+    <style>
+        :root {
+            --primary-color: #0162e8;
+            --primary-hover: #0151c7;
+            --light-gray: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+        }
+
+        .app-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 0;
+        }
+
+        .container.p-0 {
+            padding: 0 !important;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .main-sidebar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .main-menu-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+
+        .landing-logo-container {
+            flex-shrink: 0;
+        }
+
+        .horizontal-logo .header-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .horizontal-logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .main-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .main-menu li {
+            margin: 0;
+        }
+
+        .side-menu__item {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .side-menu__item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .slide-left,
+        .slide-right {
+            display: none;
+        }
+
+        /* Profile Dropdown */
+        .header-element {
+            margin-left: 2rem;
+        }
+
+        .header-link {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .header-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header-link img {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 0;
+            min-width: 220px;
+            margin-top: 0.5rem;
+        }
+
+        .main-header-profile {
+            padding: 1rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .main-header-profile h6 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            border: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-light);
+            color: var(--primary-blue);
+        }
+
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .border-block-end {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            padding-top: 110px;
+
+        }
+
+        .order-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), #0172ff);
+            color: white;
+            padding: 1.5rem;
+            border-bottom: none;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .info-section {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            min-width: 150px;
+            flex-shrink: 0;
+        }
+
+        .info-value {
+            color: var(--text-muted);
+            flex: 1;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.5rem;
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: var(--border-color);
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .info-row {
+                flex-direction: column;
+            }
+
+            .info-label {
+                min-width: auto;
+                margin-bottom: 0.25rem;
+            }
+        }
+
+        /* Feedback Section Styles */
+        .feedback-display {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .rating-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-label {
+            min-width: 120px;
+            font-weight: 500;
+        }
+
+        .rating-stars {
+            display: flex;
+            align-items: center;
+        }
+
+        .rating-stars i {
+            margin-right: 2px;
+        }
+
+        /* Star Rating Input Styles */
+        .star-rating {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .star-rating i {
+            font-size: 1.5rem;
+            color: #ddd !important;
+            cursor: pointer !important;
+            transition: color 0.2s ease;
+            pointer-events: auto !important;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .star-rating i:hover {
+            color: #ffc107 !important;
+        }
+
+        .star-rating i.fas.text-warning {
+            color: #ffc107 !important;
+        }
+
+        .star-rating i.far.text-muted {
+            color: #ddd !important;
+        }
+
+        .rating-input {
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .feedback-form-section {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Admin Response Section Styles */
+        .admin-response-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .admin-response-content {
+            background: #f8f9fd;
+            border: 1px solid #e0e6ff;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .response-header .fw-bold {
+            display: flex;
+            align-items: center;
+        }
+
+        .response-body {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e0e6ff;
+        }
+
+        .response-body p {
+            color: var(--text-dark);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 768px) {
+            .response-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body class="landing-body">
+    <div class="landing-page-wrapper">
+
+        <aside th:replace="~{fragments/user/profile-header :: profile-header}"></aside>
+        <div class="main-container">
+            <div class="container">
+                <div class="order-card">
+                    <div class="card-header">
+                        <h1><i class="fas fa-file-medical-alt me-2"></i>Order Details</h1>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="info-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-info-circle"></i>
+                                Order Information
+                            </h2>
+
+                            <div class="info-row">
+                                <div class="info-label">Order ID:</div>
+                                <div class="info-value" th:text="${orderDetails.idServiceOrder}"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Service:</div>
+                                <div class="info-value" th:text="${orderDetails.medicalServiceName}"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Appointment Date:</div>
+                                <div class="info-value" th:text="${orderDetails.appointmentDate}"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Collection Type:</div>
+                                <div class="info-value" th:text="${orderDetails.collectionType}"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Collection Address:</div>
+                                <div class="info-value" th:text="${orderDetails.collectionAddress}"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Total Amount:</div>
+                                <div class="info-value fw-bold" th:text="${orderDetails.finalAmount}"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Payment Method:</div>
+                                <div class="info-value" th:text="${orderDetails.payments.getPaymentMethod()}"></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Status:</div>
+                                <div class="info-value">
+                                    <span class="status-badge bg-primary text-white"
+                                        th:text="${orderDetails.orderStatus}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2 class="section-title">
+                            <i class="fas fa-vial"></i>
+                            Test Kits
+                        </h2>
+
+                        <div class="table-container">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Kit Name</th>
+                                        <th>Kit Type</th>
+                                        <th>Sample Type</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Total Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="kit : ${orderTestKits}">
+                                        <td th:text="${kit.kitName}"></td>
+                                        <td th:text="${kit.kitType}"></td>
+                                        <td th:text="${kit.sampleType}"></td>
+                                        <td th:text="${kit.quantityOrdered}"></td>
+                                        <td th:text="${kit.unitPrice}"></td>
+                                        <td class="fw-bold" th:text="${kit.totalPrice}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h2 class="section-title">
+                            <i class="fas fa-users"></i>
+                            Participants
+                        </h2>
+
+                        <div class="table-container">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Last Name</th>
+                                        <th>First Name</th>
+                                        <th>Gender</th>
+                                        <th>Date of Birth</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="participant : ${orderParticipants}">
+                                        <td th:text="${participant.lastName}"></td>
+                                        <td th:text="${participant.firstName}"></td>
+                                        <td th:text="${participant.gender}"></td>
+                                        <td th:text="${participant.dateBirth}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Payment Total:</div>
+                            <div class="info-value" th:text="${paymentTotal}"></div>
+                        </div>
+                        <!-- Feedback Section - Only show if order is completed -->
+                        <div th:if="${orderDetails.orderStatus == T(com.dna_testing_system.dev.enums.ServiceOrderStatus).COMPLETED}"
+                            class="mt-4">
+                            <h2 class="section-title">
+                                <i class="fas fa-comment"></i>
+                                Service Feedback
+                            </h2>
+
+                            <!-- Check if feedback already exists for this order -->
+                            <div th:if="${existingFeedback != null}" class="info-section">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Thank you for your feedback! You submitted a review on
+                                    <span
+                                        th:text="${existingFeedback.createdAt != null ? #temporals.format(existingFeedback.createdAt, 'MMM dd, yyyy ''at'' HH:mm') : 'Not responded'}"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="feedback-display">
+                                            <h6 class="fw-bold mb-2">Your Ratings:</h6>
+                                            <div class="rating-item">
+                                                <span class="rating-label">Service Quality:</span>
+                                                <div class="rating-stars">
+                                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                                        <i class="fas fa-star"
+                                                            th:class="${i <= existingFeedback.serviceQualityRating} ? 'fas fa-star text-warning' : 'far fa-star text-muted'"></i>
+                                                    </th:block>
+                                                    <span th:text="${existingFeedback.serviceQualityRating} + '/5'"
+                                                        class="ms-2"></span>
+                                                </div>
+                                            </div>
+                                            <div class="rating-item">
+                                                <span class="rating-label">Staff Behavior:</span>
+                                                <div class="rating-stars">
+                                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                                        <i class="fas fa-star"
+                                                            th:class="${i <= existingFeedback.staffBehaviorRating} ? 'fas fa-star text-warning' : 'far fa-star text-muted'"></i>
+                                                    </th:block>
+                                                    <span th:text="${existingFeedback.staffBehaviorRating} + '/5'"
+                                                        class="ms-2"></span>
+                                                </div>
+                                            </div>
+                                            <div class="rating-item">
+                                                <span class="rating-label">Timeliness:</span>
+                                                <div class="rating-stars">
+                                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                                        <i class="fas fa-star"
+                                                            th:class="${i <= existingFeedback.timelinessRating} ? 'fas fa-star text-warning' : 'far fa-star text-muted'"></i>
+                                                    </th:block>
+                                                    <span th:text="${existingFeedback.timelinessRating} + '/5'"
+                                                        class="ms-2"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div
+                                            th:if="${existingFeedback.feedbackTitle != null and !#strings.isEmpty(existingFeedback.feedbackTitle)}">
+                                            <h6 class="fw-bold">Feedback Title:</h6>
+                                            <p th:text="${existingFeedback.feedbackTitle}"></p>
+                                        </div>
+                                        <div
+                                            th:if="${existingFeedback.feedbackContent != null and !#strings.isEmpty(existingFeedback.feedbackContent)}">
+                                            <h6 class="fw-bold">Your Comments:</h6>
+                                            <p th:text="${existingFeedback.feedbackContent}"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Admin Response Section -->
+                                <div th:if="${existingFeedback.responseContent != null and !#strings.isEmpty(existingFeedback.responseContent)}"
+                                    class="mt-4 admin-response-section">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-reply me-2"></i>
+                                        <strong>Response from Administration</strong>
+                                    </div>
+                                    <div class="admin-response-content">
+                                        <div class="response-header mb-2">
+                                            <span class="fw-bold text-primary">
+                                                <i class="fas fa-user-shield me-1"></i>
+                                                <span
+                                                    th:text="${existingFeedback.respondedByName ?: 'Administrator'}"></span>
+                                            </span>
+                                            <span class="text-muted ms-2">
+                                                <i class="fas fa-clock me-1"></i>
+                                                responded on <span
+                                                    th:text="${existingFeedback.respondedAt != null ? #temporals.format(existingFeedback.respondedAt, 'MMM dd, yyyy ''at'' HH:mm') : 'Not responded'}"></span>
+                                            </span>
+                                        </div>
+                                        <div class="response-body">
+                                            <p th:text="${existingFeedback.responseContent}" class="mb-0"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pending Response Notification -->
+                                <div th:if="${existingFeedback.responseRequired == true and (existingFeedback.responseContent == null or #strings.isEmpty(existingFeedback.responseContent))}"
+                                    class="mt-4 admin-response-section">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-clock me-2"></i>
+                                        <strong>Response Pending</strong>
+                                    </div>
+                                    <div class="admin-response-content">
+                                        <p class="text-muted mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            You requested a response from our administration team. We will get back to
+                                            you soon!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Feedback Form - Only show if no feedback exists -->
+                            <div th:unless="${existingFeedback != null}" class="info-section">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Your order has been completed! Please take a moment to share your experience with
+                                    our service.
+                                </div>
+
+                                <form th:action="@{/user/feedback/create}" method="post" id="feedbackForm">
+                                    <input type="hidden" name="customerId" th:value="${userProfile.getUserId()}" />
+                                    <input type="hidden" name="serviceId" th:value="${orderDetails.serviceId}" />
+                                    <input type="hidden" name="orderId" th:value="${orderDetails.idServiceOrder}" />
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-3">Rate Our Service</h6>
+
+                                            <!-- Service Quality Rating -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Service Quality <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="rating-input" data-rating="serviceQualityRating">
+                                                    <input type="hidden" name="serviceQualityRating"
+                                                        id="serviceQualityRating" required />
+                                                    <div class="star-rating">
+                                                        <i class="far fa-star" data-value="1"></i>
+                                                        <i class="far fa-star" data-value="2"></i>
+                                                        <i class="far fa-star" data-value="3"></i>
+                                                        <i class="far fa-star" data-value="4"></i>
+                                                        <i class="far fa-star" data-value="5"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Staff Behavior Rating -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Staff Behavior <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="rating-input" data-rating="staffBehaviorRating">
+                                                    <input type="hidden" name="staffBehaviorRating"
+                                                        id="staffBehaviorRating" required />
+                                                    <div class="star-rating">
+                                                        <i class="far fa-star" data-value="1"></i>
+                                                        <i class="far fa-star" data-value="2"></i>
+                                                        <i class="far fa-star" data-value="3"></i>
+                                                        <i class="far fa-star" data-value="4"></i>
+                                                        <i class="far fa-star" data-value="5"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Timeliness Rating -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Timeliness <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="rating-input" data-rating="timelinessRating">
+                                                    <input type="hidden" name="timelinessRating" id="timelinessRating"
+                                                        required />
+                                                    <div class="star-rating">
+                                                        <i class="far fa-star" data-value="1"></i>
+                                                        <i class="far fa-star" data-value="2"></i>
+                                                        <i class="far fa-star" data-value="3"></i>
+                                                        <i class="far fa-star" data-value="4"></i>
+                                                        <i class="far fa-star" data-value="5"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold mb-3">Additional Comments</h6>
+
+                                            <!-- Feedback Title -->
+                                            <div class="mb-3">
+                                                <label for="feedbackTitle" class="form-label fw-semibold">Title
+                                                    (Optional)</label>
+                                                <input type="text" class="form-control" id="feedbackTitle"
+                                                    name="feedbackTitle" placeholder="Brief title for your feedback"
+                                                    maxlength="255">
+                                            </div>
+
+                                            <!-- Feedback Content -->
+                                            <div class="mb-3">
+                                                <label for="feedbackContent" class="form-label fw-semibold">Comments
+                                                    (Optional)</label>
+                                                <textarea class="form-control" id="feedbackContent"
+                                                    name="feedbackContent" rows="4"
+                                                    placeholder="Tell us about your experience..."></textarea>
+                                            </div>
+
+                                            <!-- Response Required -->
+                                            <div class="mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="responseRequired" name="responseRequired" value="true">
+                                                    <label class="form-check-label" for="responseRequired">
+                                                        I would like a response from the administration
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-paper-plane me-2"></i>
+                                            Submit Feedback
+                                        </button>
+
+                                        <!-- Debug button -->
+                                        <button type="button" class="btn btn-warning" onclick="debugForm()">
+                                            <i class="fas fa-bug me-2"></i>
+                                            Debug Form
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-start mt-4">
+                            <a th:href="@{/user/order-history}" class="btn btn-primary back-button">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Order History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/public/last-footer :: last-footer}"></div>
+
+    <div th:replace="~{fragments/public/script :: scripts}"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Feedback script loaded');
+
+            // Wait a bit to ensure all elements are rendered
+            setTimeout(function () {
+                // Star rating functionality
+                const ratingInputs = document.querySelectorAll('.rating-input');
+                console.log('Found rating inputs:', ratingInputs.length);
+
+                ratingInputs.forEach(function (ratingInput) {
+                    const stars = ratingInput.querySelectorAll('.star-rating i');
+                    const hiddenInput = ratingInput.querySelector('input[type="hidden"]');
+                    const ratingName = ratingInput.getAttribute('data-rating');
+
+                    console.log('Setting up rating for:', ratingName, 'with', stars.length, 'stars');
+
+                    stars.forEach(function (star, index) {
+                        // Remove any existing event listeners
+                        star.style.pointerEvents = 'auto';
+                        star.style.cursor = 'pointer';
+
+                        star.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            const rating = parseInt(star.getAttribute('data-value'));
+                            console.log('Star clicked:', rating, 'for', ratingName);
+                            hiddenInput.value = rating;
+
+                            // Update star display - clear all classes first
+                            stars.forEach(function (s, i) {
+                                s.className = ''; // Clear all classes
+                                if (i < rating) {
+                                    s.className = 'fas fa-star text-warning';
+                                    s.style.color = '#ffc107';
+                                } else {
+                                    s.className = 'far fa-star text-muted';
+                                    s.style.color = '#ddd';
+                                }
+                            });
+
+                            console.log('Hidden input value set to:', hiddenInput.value);
+                        }); // Use capture phase
+
+                        star.addEventListener('mouseover', function (e) {
+                            const rating = parseInt(star.getAttribute('data-value'));
+
+                            stars.forEach(function (s, i) {
+                                if (i < rating) {
+                                    s.style.color = '#ffc107';
+                                } else {
+                                    s.style.color = '#ddd';
+                                }
+                            });
+                        });
+                    });
+
+                    // Reset on mouse leave
+                    ratingInput.addEventListener('mouseleave', function () {
+                        const currentRating = parseInt(hiddenInput.value) || 0;
+
+                        stars.forEach(function (s, i) {
+                            if (i < currentRating) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ddd';
+                            }
+                        });
+                    });
+                });
+
+                // Form validation
+                const feedbackForm = document.getElementById('feedbackForm');
+                if (feedbackForm) {
+                    console.log('Feedback form found');
+
+                    // Debug form data before submit
+                    feedbackForm.addEventListener('submit', function (e) {
+                        console.log('Form submit event triggered');
+
+                        // Log all form data
+                        const formData = new FormData(feedbackForm);
+                        console.log('Form data:');
+                        for (let [key, value] of formData.entries()) {
+                            console.log(key, value);
+                        }
+
+                        const serviceQuality = document.getElementById('serviceQualityRating').value;
+                        const staffBehavior = document.getElementById('staffBehaviorRating').value;
+                        const timeliness = document.getElementById('timelinessRating').value;
+
+                        console.log('Rating values:', {
+                            serviceQuality: serviceQuality,
+                            staffBehavior: staffBehavior,
+                            timeliness: timeliness
+                        });
+
+                        if (!serviceQuality || !staffBehavior || !timeliness) {
+                            e.preventDefault();
+                            alert('Vui lòng đánh giá đầy đủ cả 3 tiêu chí (Chất lượng dịch vụ, Thái độ nhân viên, và Tính đúng giờ).');
+                            return false;
+                        }
+
+                        console.log('Form validation passed, submitting...');
+                        console.log('Form action:', feedbackForm.action);
+                        console.log('Form method:', feedbackForm.method);
+
+                        // Show loading state
+                        const submitBtn = feedbackForm.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang gửi...';
+                            submitBtn.disabled = true;
+                        }
+
+                        // Allow form to submit naturally
+                        return true;
+                    });
+                } else {
+                    console.log('Feedback form not found');
+                }
+            }, 500); // Wait 500ms for page to fully load
+        });
+
+        // Debug function
+        function debugForm() {
+            const feedbackForm = document.getElementById('feedbackForm');
+            if (!feedbackForm) {
+                alert('Form not found!');
+                return;
+            }
+
+            console.log('=== FORM DEBUG ===');
+            console.log('Form element:', feedbackForm);
+            console.log('Form action:', feedbackForm.action);
+            console.log('Form method:', feedbackForm.method);
+
+            const formData = new FormData(feedbackForm);
+            console.log('Form data:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            const serviceQuality = document.getElementById('serviceQualityRating').value;
+            const staffBehavior = document.getElementById('staffBehaviorRating').value;
+            const timeliness = document.getElementById('timelinessRating').value;
+
+            console.log('Rating values:', {
+                serviceQuality: serviceQuality,
+                staffBehavior: staffBehavior,
+                timeliness: timeliness
+            });
+
+            if (!serviceQuality || !staffBehavior || !timeliness) {
+                alert('Vui lòng đánh giá đầy đủ cả 3 tiêu chí trước khi submit!');
+            } else {
+                alert('Form ready to submit! Check console for details.');
+            }
+        }
+    </script>
+</body>
+
+</html>

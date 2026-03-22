@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: dev
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dnatestingnotification@gmail.com
+    password: ugltgfcsfppohwam
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  websocket:
+    sockjs:
+      enabled: true
+      client-library-url: https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js
+  thymeleaf:
+    cache: false
+  datasource:
+    url: jdbc:mysql://localhost:3307/bloodline?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    springframework.web: DEBUG
+    springframework.web.socket: DEBUG
+    springframework.security: DEBUG
+    
+application:
+  base-url: "http://localhost:8080/index"

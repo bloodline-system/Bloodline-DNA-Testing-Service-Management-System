@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html
+    th:replace="~{layouts/admin-layout :: layout(~{::#content}, ~{::script}, 'Advanced Analytics', ~{::breadcrumbs}, ~{::actionButtons})}"
+    xmlns:th="http://www.thymeleaf.org" data-nav-layout="vertical" data-theme-mode="light" data-header-styles="light"
+    data-menu-styles="light" loader="disable" data-vertical-style="overlay" class="mdl-js"
+    data-toggled="icon-overlay-close">
+
+<body>
+    <!-- Breadcrumbs -->
+    <div id="breadcrumbs">
+        <li class="breadcrumb-item"><a th:href="@{/admin/analytics}">Analytics</a></li>
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="actionButtons">
+        <div class="dropdown me-2">
+            <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="ri-calendar-line me-1"></i>Time Range
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="?period=today">Today</a></li>
+                <li><a class="dropdown-item" href="?period=week">This Week</a></li>
+                <li><a class="dropdown-item" href="?period=month">This Month</a></li>
+                <li><a class="dropdown-item" href="?period=quarter">This Quarter</a></li>
+                <li><a class="dropdown-item" href="?period=year">This Year</a></li>
+            </ul>
+        </div>
+        <button class="btn btn-outline-light" onclick="exportAnalytics()">
+            <i class="ri-download-line me-1"></i>Export Report
+        </button>
+    </div>
+
+    <div id="content">
+        <!-- Key Performance Indicators -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card bg-gradient-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h4 class="mb-0" th:text="${analytics.totalRevenue ?: '$0'}">$0</h4>
+                                <p class="mb-0">Total Revenue</p>
+                                <small class="opacity-75">
+                                    <i class="ri-arrow-up-line"></i>
+                                    <span th:text="${analytics.revenueGrowth ?: '0%'}">12%</span> vs last period
+                                </small>
+                            </div>
+                            <i class="ri-money-dollar-circle-line fs-40 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card bg-gradient-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h4 class="mb-0" th:text="${analytics.totalOrders ?: '0'}">0</h4>
+                                <p class="mb-0">Total Orders</p>
+                                <small class="opacity-75">
+                                    <i class="ri-arrow-up-line"></i>
+                                    <span th:text="${analytics.ordersGrowth ?: '0%'}">8%</span> vs last period
+                                </small>
+                            </div>
+                            <i class="ri-shopping-cart-line fs-40 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card bg-gradient-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h4 class="mb-0" th:text="${analytics.activeUsers ?: '0'}">0</h4>
+                                <p class="mb-0">Active Users</p>
+                                <small class="opacity-75">
+                                    <i class="ri-arrow-up-line"></i>
+                                    <span th:text="${analytics.usersGrowth ?: '0%'}">15%</span> vs last period
+                                </small>
+                            </div>
+                            <i class="ri-user-line fs-40 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card bg-gradient-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <h4 class="mb-0" th:text="${analytics.avgOrderValue ?: '$0'}">$0</h4>
+                                <p class="mb-0">Avg Order Value</p>
+                                <small class="opacity-75">
+                                    <i class="ri-arrow-up-line"></i>
+                                    <span th:text="${analytics.aovGrowth ?: '0%'}">5%</span> vs last period
+                                </small>
+                            </div>
+                            <i class="ri-bar-chart-line fs-40 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row mb-4">
+            <!-- Revenue Trend -->
+            <div class="col-xl-8 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Revenue Trend</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                Last 30 Days
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
+                                <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
+                                <li><a class="dropdown-item" href="#">Last 90 Days</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Status Distribution -->
+            <div class="col-xl-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order Status Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="orderStatusChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row mb-4">
+            <!-- User Activity -->
+            <div class="col-xl-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">User Activity Heatmap</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="userActivityChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Performance -->
+            <div class="col-xl-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Service Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="servicePerformanceChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tables -->
+        <div class="row mb-4">
+            <!-- Top Performing Services -->
+            <div class="col-xl-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Top Performing Services</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Orders</th>
+                                        <th>Revenue</th>
+                                        <th>Growth</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="service : ${topServices}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="badge bg-primary me-2" style="width: 8px; height: 8px;">
+                                                </div>
+                                                <span th:text="${service.serviceName}">Paternity Test</span>
+                                            </div>
+                                        </td>
+                                        <td th:text="${service.orderCount}">1,234</td>
+                                        <td
+                                            th:text="'$' + ${#numbers.formatDecimal(service.revenue, 0, 'COMMA', 2, 'POINT')}">
+                                            $123,400</td>
+                                        <td><span class="text-success">+12%</span></td>
+                                    </tr>
+                                    <tr th:if="${topServices == null or topServices.isEmpty()}">
+                                        <td colspan="4" class="text-center">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Geographic Distribution -->
+            <div class="col-xl-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Geographic Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Region</th>
+                                        <th>Users</th>
+                                        <th>Orders</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="geo : ${geographicData}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="badge bg-primary me-2" style="width: 8px; height: 8px;">
+                                                </div>
+                                                <span th:text="${geo.region}">Region</span>
+                                            </div>
+                                        </td>
+                                        <td>1,200</td>
+                                        <td th:text="${geo.orderCount}">2,345</td>
+                                        <td
+                                            th:text="'$' + ${#numbers.formatDecimal(geo.revenue, 0, 'COMMA', 2, 'POINT')}">
+                                            $234,500</td>
+                                    </tr>
+                                    <tr th:if="${geographicData == null or geographicData.isEmpty()}">
+                                        <td colspan="4" class="text-center">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Performance Metrics -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">System Performance Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center mb-3">
+                                    <canvas id="cpuGauge" width="150" height="150"></canvas>
+                                    <h6 class="mt-2">CPU Usage</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center mb-3">
+                                    <canvas id="memoryGauge" width="150" height="150"></canvas>
+                                    <h6 class="mt-2">Memory Usage</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center mb-3">
+                                    <canvas id="diskGauge" width="150" height="150"></canvas>
+                                    <h6 class="mt-2">Disk Usage</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center mb-3">
+                                    <canvas id="networkGauge" width="150" height="150"></canvas>
+                                    <h6 class="mt-2">Network I/O</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeCharts();
+            startRealTimeUpdates();
+        });
+
+        function initializeCharts() {
+            // Use the data provided by the server if available
+            const revenueChartData = /*[[${revenueChartData}]]*/ null;
+            const orderStatusChartData = /*[[${orderStatusChartData}]]*/ null;
+            const userActivityChartData = /*[[${userActivityChartData}]]*/ null;
+            const servicePerformanceChartData = /*[[${servicePerformanceChartData}]]*/ null;
+
+            createRevenueChart(revenueChartData);
+            createOrderStatusChart(orderStatusChartData);
+            createUserActivityChart(userActivityChartData);
+            createServicePerformanceChart(servicePerformanceChartData);
+            createSystemGauges();
+        }
+
+        function createRevenueChart(serverData) {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+
+            // Use server data if available, otherwise use default data
+            const chartData = serverData ? JSON.parse(serverData) : {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000, 35000, 32000, 40000, 38000, 45000, 50000],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createOrderStatusChart(serverData) {
+            const ctx = document.getElementById('orderStatusChart').getContext('2d');
+
+            // Use server data if available, otherwise use default data
+            const chartData = serverData ? JSON.parse(serverData) : {
+                labels: ['Completed', 'Processing', 'Pending', 'Cancelled'],
+                datasets: [{
+                    data: [65, 20, 10, 5],
+                    backgroundColor: [
+                        '#28a745',
+                        '#17a2b8',
+                        '#ffc107',
+                        '#dc3545'
+                    ]
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createUserActivityChart(serverData) {
+            const ctx = document.getElementById('userActivityChart').getContext('2d');
+
+            // Use server data if available, otherwise use default data
+            const chartData = serverData ? JSON.parse(serverData) : {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Active Users',
+                    data: [1200, 1900, 1500, 1700, 2100, 1800, 1400],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function createServicePerformanceChart(serverData) {
+            const ctx = document.getElementById('servicePerformanceChart').getContext('2d');
+
+            // Use server data if available, otherwise use default data
+            const chartData = serverData ? JSON.parse(serverData) : {
+                labels: ['Paternity', 'Ancestry', 'Sibling', 'Health', 'Maternity'],
+                datasets: [{
+                    label: 'Performance Score',
+                    data: [90, 85, 88, 75, 92],
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    pointBackgroundColor: 'rgb(255, 99, 132)'
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function createSystemGauges() {
+            // Get system metrics data from the model if available
+            const systemMetrics = /*[[${systemMetrics}]]*/ null;
+
+            const cpuUsage = systemMetrics ? systemMetrics.cpuUsage : 25;
+            const memoryUsage = systemMetrics ? systemMetrics.memoryUsage : 65;
+            const diskUsage = systemMetrics ? systemMetrics.diskUsage : 78;
+            const networkUsage = systemMetrics ? systemMetrics.networkUsage : 35;
+
+            createGauge('cpuGauge', cpuUsage, 'CPU');
+            createGauge('memoryGauge', memoryUsage, 'Memory');
+            createGauge('diskGauge', diskUsage, 'Disk');
+            createGauge('networkGauge', networkUsage, 'Network');
+        }
+
+        function createGauge(canvasId, value, label) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [value, 100 - value],
+                        backgroundColor: [
+                            value > 80 ? '#dc3545' : value > 60 ? '#ffc107' : '#28a745',
+                            '#e9ecef'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    cutout: '80%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'gaugeText',
+                    beforeDraw: function (chart) {
+                        const width = chart.width;
+                        const height = chart.height;
+                        const ctx = chart.ctx;
+
+                        ctx.restore();
+                        const fontSize = (height / 80).toFixed(2);
+                        ctx.font = fontSize + "em sans-serif";
+                        ctx.textBaseline = "middle";
+                        ctx.fillStyle = "#333";
+
+                        const text = value + "%";
+                        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        const textY = height / 2;
+
+                        ctx.fillText(text, textX, textY);
+                        ctx.save();
+                    }
+                }]
+            });
+        }
+
+        function startRealTimeUpdates() {
+            // Update system metrics every 10 seconds
+            setInterval(function () {
+                updateSystemMetrics();
+            }, 10000);
+        }
+
+        function updateSystemMetrics() {
+            // In a real application, this would fetch real-time data from the server via AJAX
+            console.log('Updating system metrics...');
+
+            // Simulate metric updates
+            const metrics = {
+                cpu: Math.floor(Math.random() * 30) + 15,
+                memory: Math.floor(Math.random() * 40) + 50,
+                disk: Math.floor(Math.random() * 20) + 70,
+                network: Math.floor(Math.random() * 50) + 15
+            };
+
+            // Update gauge charts would go here
+            // For demo purposes, we'll just log the values
+            console.log('New metrics:', metrics);
+        }
+
+        function exportAnalytics() {
+            // Get current period
+            const urlParams = new URLSearchParams(window.location.search);
+            const period = urlParams.get('period') || 'month';
+
+            // In a real application, this would generate and download a report
+            alert('Exporting analytics report for period: ' + period);
+
+            // This would be an AJAX call to a server endpoint that generates and returns a report file
+            // window.location.href = '/admin/analytics/export?period=' + period;
+        }
+    </script>
+
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(45deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .bg-gradient-info {
+            background: linear-gradient(45deg, #3182ce 0%, #63b3ed 100%);
+        }
+
+        .bg-gradient-warning {
+            background: linear-gradient(45deg, #ed8936 0%, #fbb040 100%);
+        }
+
+        .table-responsive {
+            max-height: 400px;
+        }
+
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+    </style>
+</body>
+
+</html>

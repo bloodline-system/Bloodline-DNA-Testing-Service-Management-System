@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="scripts">
+    <script>
+        if (localStorage.valexdarktheme) {
+            document.querySelector("html").setAttribute("data-theme-mode", "dark")
+        }
+        if (localStorage.valexrtl) {
+            document.querySelector("html").setAttribute("dir", "rtl")
+            document.querySelector("#style")?.setAttribute("href", "/assets/libs/bootstrap/css/bootstrap.rtl.min.css");
+        }
+    </script>
+    <!-- Popper JS -->
+    <script th:src="@{/assets/libs/@popperjs/core/umd/popper.min.js}"></script>
+
+    <!-- Bootstrap JS -->
+    <script th:src="@{/assets/libs/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+    <!-- Defaultmenu JS -->
+    <script th:src="@{/assets/js/defaultmenu.min.js}"></script>
+
+    <!-- Node Waves JS-->
+    <script th:src="@{/assets/libs/node-waves/waves.min.js}"></script>
+
+    <!-- Sticky JS -->
+    <script th:src="@{/assets/js/sticky.js}"></script>
+
+    <!-- Simplebar JS -->
+    <script th:src="@{/assets/libs/simplebar/simplebar.min.js}"></script>
+    <script th:src="@{/assets/js/simplebar.js}"></script>
+
+    <!-- Color Picker JS -->
+    <script th:src="@{/assets/libs/@simonwep/pickr/pickr.es5.min.js}"></script>
+
+    <!-- Apex Charts JS -->
+    <script th:src="@{/assets/libs/apexcharts/apexcharts.min.js}"></script>
+
+    <!-- JSVector Maps JS -->
+    <script th:src="@{/assets/libs/jsvectormap/js/jsvectormap.min.js}"></script>
+
+    <!-- JSVector Maps MapsJS -->
+    <script th:src="@{/assets/libs/jsvectormap/maps/world-merc.js}"></script>
+    <script th:src="@{/assets/js/us-merc-en.js}"></script>
+
+    <!-- Chartjs Chart JS -->
+    <script th:src="@{/assets/js/index.js}"></script>
+
+    <!-- Custom-Switcher JS -->
+    <script th:src="@{/assets/js/custom-switcher.min.js}"></script>
+
+</div>
+</body>
+</html>

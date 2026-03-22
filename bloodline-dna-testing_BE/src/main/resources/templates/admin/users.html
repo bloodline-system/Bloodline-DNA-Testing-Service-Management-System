@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/admin-layout :: layout(~{::#main-content}, ~{::#page-scripts}, ${pageTitle}, ${breadcrumbs}, ~{::#action-buttons})}">
+
+<div id="main-content">
+    <!-- Alert messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- User Statistics Cards -->
+    <div class="row mb-4" th:if="${userStats}">
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Total Users</span>
+                                <h4 class="fw-semibold mb-0" th:text="${userStats.totalUsers}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-primary-transparent">
+                                <i class="ri-user-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Active Users</span>
+                                <h4 class="fw-semibold mb-0" th:text="${userStats.activeUsers}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-success-transparent">
+                                <i class="ri-check-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Administrators</span>
+                                <h4 class="fw-semibold mb-0" th:text="${userStats.adminUsers}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-info-transparent">
+                                <i class="ri-admin-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Managers</span>
+                                <h4 class="fw-semibold mb-0" th:text="${userStats.managerUsers}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-warning-transparent">
+                                <i class="ri-user-star-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">Customers</span>
+                                <h4 class="fw-semibold mb-0" th:text="${userStats.customerUsers}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-secondary-transparent">
+                                <i class="ri-group-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="mb-2">
+                                <span class="d-block fs-12 text-muted mb-1">New This Month</span>
+                                <h4 class="fw-semibold mb-0" th:text="${monthlyStats?.newUsers ?: 0}">0</h4>
+                            </div>
+                        </div>
+                        <div class="lh-1">
+                            <span class="avatar avatar-md bg-primary-transparent">
+                                <i class="ri-user-add-line fs-16"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card custom-card">
+        <div class="card-header">
+            <div class="card-title">User Management</div>
+        </div>
+        <div class="card-body">
+            <!-- Filter Form -->
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label for="searchInput" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchInput" name="search" th:value="${searchTerm}"
+                           placeholder="Search by name, username, or email...">
+                </div>
+                <div class="col-md-2">
+                    <label for="roleFilter" class="form-label">Role</label>
+                    <select class="form-select" id="roleFilter" name="role">
+                        <option value="all" th:selected="${selectedRole == 'all'}">All Roles</option>
+                        <option value="ADMIN" th:selected="${selectedRole == 'ADMIN'}">Administrator</option>
+                        <option value="MANAGER" th:selected="${selectedRole == 'MANAGER'}">Manager</option>
+                        <option value="STAFF" th:selected="${selectedRole == 'STAFF'}">Staff</option>
+                        <option value="CUSTOMER" th:selected="${selectedRole == 'CUSTOMER'}">Customer</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="statusFilter" class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter" name="status">
+                        <option value="all" th:selected="${selectedStatus == 'all'}">All Status</option>
+                        <option value="active" th:selected="${selectedStatus == 'active'}">Active</option>
+                        <option value="inactive" th:selected="${selectedStatus == 'inactive'}">Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortByFilter" class="form-label">Sort By</label>
+                    <select class="form-select" id="sortByFilter" name="sortBy">
+                        <option value="createdAt" th:selected="${sortBy == 'createdAt'}">Date Created</option>
+                        <option value="firstName" th:selected="${sortBy == 'firstName'}">First Name</option>
+                        <option value="lastName" th:selected="${sortBy == 'lastName'}">Last Name</option>
+                        <option value="username" th:selected="${sortBy == 'username'}">Username</option>
+                        <option value="email" th:selected="${sortBy == 'email'}">Email</option>
+                        <option value="role" th:selected="${sortBy == 'role'}">Role</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortDirFilter" class="form-label">Sort Direction</label>
+                    <select class="form-select" id="sortDirFilter" name="sortDir">
+                        <option value="desc" th:selected="${sortDir == 'desc'}">Descending</option>
+                        <option value="asc" th:selected="${sortDir == 'asc'}">Ascending</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="ri-search-line me-1"></i>Filter
+                    </button>
+                </div>
+            </form>
+
+            <!-- Bulk Actions Panel -->
+            <div class="card" id="bulkActionsPanel" style="display: none;">
+                <div class="card-body bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span id="selectedCount">0 users selected</span>
+                        <div class="btn-group">
+                            <form id="bulkActivateForm" th:action="@{/admin/users/bulk-activate}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-success" onclick="return submitBulkForm('activate')">
+                                    <i class="ri-check-line me-1"></i>Activate
+                                </button>
+                            </form>
+                            <form id="bulkDeactivateForm" th:action="@{/admin/users/bulk-deactivate}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-warning" onclick="return submitBulkForm('deactivate')">
+                                    <i class="ri-close-line me-1"></i>Deactivate
+                                </button>
+                            </form>
+                            <form id="bulkDeleteForm" th:action="@{/admin/users/bulk-delete}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return submitBulkForm('delete')">
+                                    <i class="ri-delete-bin-line me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" class="form-check-input" id="selectAll">
+                        </th>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(users)}">
+                        <td colspan="8" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="ri-user-line fs-48 d-block mb-2"></i>
+                                No users found matching your criteria.
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:each="user : ${users}">
+                        <td>
+                            <input type="checkbox" class="form-check-input user-checkbox" th:value="${user.userId}">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-2">
+                                    <img th:if="${user.profileImageUrl != null and !#strings.isEmpty(user.profileImageUrl)}"
+                                         th:src="@{${user.profileImageUrl}}" alt="Profile"
+                                         class="avatar-img rounded-circle">
+                                    <span th:unless="${user.profileImageUrl != null and !#strings.isEmpty(user.profileImageUrl)}"
+                                          class="avatar-initials rounded-circle bg-primary text-white"
+                                          th:text="${user.firstName != null and !#strings.isEmpty(user.firstName) ? #strings.substring(user.firstName, 0, 1) : 'U'}">U</span>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold" th:text="${(user.firstName ?: '') + ' ' + (user.lastName ?: '')}">John Doe</div>
+                                    <small class="text-muted" th:text="${user.username}">johndoe</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${user.email}">john@example.com</td>
+                        <td th:text="${user.phoneNumber ?: '-'}">+1234567890</td>
+                        <td>
+                                <span class="badge"
+                                      th:classappend="${user.role == 'ADMIN' ? 'bg-danger-transparent text-danger' :
+                                        (user.role == 'MANAGER' ? 'bg-warning-transparent text-warning' :
+                                        (user.role == 'STAFF' ? 'bg-info-transparent text-info' :
+                                        'bg-primary-transparent text-primary'))}"
+                                      th:text="${user.role ?: 'CUSTOMER'}">CUSTOMER</span>
+                        </td>
+                        <td>
+                                <span class="badge"
+                                      th:classappend="${user.active ? 'bg-success-transparent text-success' : 'bg-secondary-transparent text-secondary'}"
+                                      th:text="${user.active ? 'Active' : 'Inactive'}">Active</span>
+                        </td>
+                        <td>
+                            <div th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Dec 25, 2024</div>
+                            <small class="text-muted" th:text="${#temporals.format(user.createdAt, 'HH:mm')}">10:30</small>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-light view-user-btn"
+                                        th:data-user-id="${user.userId}"
+                                        th:data-first-name="${user.firstName ?: ''}"
+                                        th:data-last-name="${user.lastName ?: ''}"
+                                        th:data-username="${user.username ?: ''}"
+                                        th:data-email="${user.email ?: ''}"
+                                        th:data-phone="${user.phoneNumber ?: ''}"
+                                        th:data-role="${user.role ?: 'CUSTOMER'}"
+                                        th:data-active="${user.active ?: false}"
+                                        th:data-registered="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy') : ''}"
+                                        title="View Details">
+                                    <i class="ri-eye-line"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown"
+                                        title="More Actions">
+                                    <i class="ri-more-2-line"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item edit-user-btn" href="#"
+                                           th:data-user-id="${user.userId}"
+                                           th:data-first-name="${user.firstName ?: ''}"
+                                           th:data-last-name="${user.lastName ?: ''}"
+                                           th:data-username="${user.username ?: ''}"
+                                           th:data-email="${user.email ?: ''}"
+                                           th:data-phone="${user.phoneNumber ?: ''}"
+                                           th:data-role="${user.role ?: 'CUSTOMER'}"
+                                           th:data-active="${user.active ?: false}">
+                                        <i class="ri-edit-line me-2"></i>Edit User</a></li>
+                                    <li><a class="dropdown-item toggle-status-btn" href="#"
+                                           th:data-user-id="${user.userId}"
+                                           th:data-active="${user.active}">
+                                        <i th:class="${user.active ? 'ri-lock-line' : 'ri-lock-unlock-line'} + ' me-2'"></i>
+                                        <span th:text="${user.active ? 'Deactivate' : 'Activate'}">Activate</span>
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger delete-user-btn" href="#"
+                                           th:data-user-id="${user.userId}">
+                                        <i class="ri-delete-bin-line me-2"></i>Delete User</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
+                <div class="text-muted">
+                    Showing <span th:text="${(currentPage * size) + 1}">1</span> to
+                    <span th:text="${((currentPage + 1) * size) > totalElements ? totalElements : ((currentPage + 1) * size)}
+">20</span> of
+                    <span th:text="${totalElements}">100</span> users
+                </div>
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/users(page=${currentPage - 1}, size=${size}, role=${selectedRole}, search=${searchTerm})}">
+                            <i class="ri-arrow-left-line"></i>
+                        </a>
+                    </li>
+                    <th:block th:each="pageNum : ${#numbers.sequence(
+    (currentPage - 2 > 0 ? currentPage - 2 : 0),
+    ((currentPage + 2) > (totalPages - 1) ? (totalPages - 1) : (currentPage + 2))
+)}">
+                        <li class="page-item" th:classappend="${pageNum == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/users(page=${pageNum}, size=${size}, role=${selectedRole}, search=${searchTerm})}"
+                               th:text="${pageNum + 1}">1</a>
+                        </li>
+                    </th:block>
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/users(page=${currentPage + 1}, size=${size}, role=${selectedRole}, search=${searchTerm})}">
+                            <i class="ri-arrow-right-line"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- View User Modal -->
+    <div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewUserModalLabel">User Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">First Name</label>
+                                <p id="viewFirstName" class="form-control-plaintext">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Last Name</label>
+                                <p id="viewLastName" class="form-control-plaintext">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Username</label>
+                                <p id="viewUsername" class="form-control-plaintext">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Email</label>
+                                <p id="viewEmail" class="form-control-plaintext">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Phone</label>
+                                <p id="viewPhone" class="form-control-plaintext">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Role</label>
+                                <p id="viewRole" class="form-control-plaintext">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Status</label>
+                                <p id="viewStatus" class="form-control-plaintext">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Registered</label>
+                                <p id="viewRegistered" class="form-control-plaintext">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editUserForm" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editUserId" name="userId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editFirstName" class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" id="editFirstName" name="firstName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editLastName" class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" id="editLastName" name="lastName" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editUsername" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="editUsername" name="username" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editEmail" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="editEmail" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editPhone" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="editPhone" name="phone">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editRole" class="form-label">Role *</label>
+                                    <select class="form-select" id="editRole" name="role" required>
+                                        <option value="">Select Role</option>
+                                        <option value="ADMIN">Administrator</option>
+                                        <option value="MANAGER">Manager</option>
+                                        <option value="STAFF">Staff</option>
+                                        <option value="CUSTOMER">Customer</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editActive" name="active" value="true">
+                                <label class="form-check-label" for="editActive">
+                                    Active User
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/admin/users}" method="post" id="addUserForm">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="lastName" class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username *</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="role" class="form-label">Role *</label>
+                                    <select class="form-select" id="role" name="role" required>
+                                        <option value="">Select Role</option>
+                                        <option value="ADMIN">Administrator</option>
+                                        <option value="MANAGER">Manager</option>
+                                        <option value="CUSTOMER">Customer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="phone" name="phoneNumber">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password *</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="form-text">Password must be at least 8 characters long.</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="active" name="isActive" value="true" checked>
+                                <label class="form-check-label" for="active">
+                                    Active User
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="action-buttons">
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="ri-user-add-line me-1"></i>Add User
+        </button>
+        <button type="button" class="btn btn-success" onclick="window.location.reload()">
+            <i class="ri-refresh-line me-1"></i>Refresh
+        </button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="ri-download-line me-1"></i>Export
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportUsers('csv')">
+                    <i class="ri-file-text-line me-2"></i>Export as CSV</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportUsers('excel')">
+                    <i class="ri-file-excel-line me-2"></i>Export as Excel</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportUsers('pdf')">
+                    <i class="ri-file-pdf-line me-2"></i>Export as PDF</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUserManagement();
+        });
+
+        function initializeUserManagement() {
+            // Select all functionality
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    const userCheckboxes = document.querySelectorAll('.user-checkbox');
+                    userCheckboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    updateBulkActionsPanel();
+                });
+            }
+
+            // Individual checkbox handlers
+            const userCheckboxes = document.querySelectorAll('.user-checkbox');
+            userCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateBulkActionsPanel();
+                });
+            });
+
+            // View user modal event handler
+            document.addEventListener('click', function(e) {
+                const viewButton = e.target.closest('.view-user-btn');
+                if (viewButton) {
+                    e.preventDefault();
+                    const userData = {
+                        userId: viewButton.dataset.userId || '',
+                        firstName: viewButton.dataset.firstName || '',
+                        lastName: viewButton.dataset.lastName || '',
+                        username: viewButton.dataset.username || '',
+                        email: viewButton.dataset.email || '',
+                        phone: viewButton.dataset.phone || '',
+                        role: viewButton.dataset.role || '',
+                        active: viewButton.dataset.active || 'false',
+                        registered: viewButton.dataset.registered || ''
+                    };
+                    viewUserDetails(userData);
+                    const viewModal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+                    viewModal.show();
+                }
+            });
+
+            // Edit user modal event handler
+            document.addEventListener('click', function(e) {
+                const editButton = e.target.closest('.edit-user-btn');
+                if (editButton) {
+                    e.preventDefault();
+                    const userData = {
+                        userId: editButton.dataset.userId || '',
+                        firstName: editButton.dataset.firstName || '',
+                        lastName: editButton.dataset.lastName || '',
+                        username: editButton.dataset.username || '',
+                        email: editButton.dataset.email || '',
+                        phone: editButton.dataset.phone || '',
+                        role: editButton.dataset.role || '',
+                        active: editButton.dataset.active || 'false'
+                    };
+                    editUserDetails(userData);
+                    const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                    editModal.show();
+                }
+            });
+
+            // Toggle status event handler
+            document.addEventListener('click', function(e) {
+                const toggleButton = e.target.closest('.toggle-status-btn');
+                if (toggleButton) {
+                    e.preventDefault();
+                    const userId = toggleButton.dataset.userId;
+                    const isActive = toggleButton.dataset.active === 'true';
+                    toggleUserStatus(userId, isActive);
+                }
+            });
+
+            // Delete user event handler
+            document.addEventListener('click', function(e) {
+                const deleteButton = e.target.closest('.delete-user-btn');
+                if (deleteButton) {
+                    e.preventDefault();
+                    const userId = deleteButton.dataset.userId;
+                    deleteUser(userId);
+                }
+            });
+
+            // Auto-submit form when filters change
+            const filterInputs = document.querySelectorAll('#roleFilter, #statusFilter, #sortByFilter, #sortDirFilter');
+            filterInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            });
+
+            // Submit form on Enter key in search input
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    this.form.submit();
+                }
+            });
+        }
+
+        function updateBulkActionsPanel() {
+            const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
+            const panel = document.getElementById('bulkActionsPanel');
+            const countSpan = document.getElementById('selectedCount');
+
+            if (checkedBoxes.length > 0) {
+                panel.style.display = 'block';
+                countSpan.textContent = checkedBoxes.length + ' user' + (checkedBoxes.length === 1 ? '' : 's') + ' selected';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        function viewUserDetails(userData) {
+            document.getElementById('viewFirstName').textContent = userData.firstName || '-';
+            document.getElementById('viewLastName').textContent = userData.lastName || '-';
+            document.getElementById('viewUsername').textContent = userData.username || '-';
+            document.getElementById('viewEmail').textContent = userData.email || '-';
+            document.getElementById('viewPhone').textContent = userData.phone || '-';
+            document.getElementById('viewRole').textContent = userData.role || '-';
+            document.getElementById('viewStatus').innerHTML = userData.active === 'true' ?
+                '<span class="badge bg-success-transparent text-success">Active</span>' :
+                '<span class="badge bg-secondary-transparent text-secondary">Inactive</span>';
+            document.getElementById('viewRegistered').textContent = userData.registered || '-';
+        }
+
+        function editUserDetails(userData) {
+            const form = document.getElementById('editUserForm');
+            form.action = '/admin/users/' + userData.userId + '/update';
+
+            document.getElementById('editUserId').value = userData.userId || '';
+            document.getElementById('editFirstName').value = userData.firstName || '';
+            document.getElementById('editLastName').value = userData.lastName || '';
+            document.getElementById('editUsername').value = userData.username || '';
+            document.getElementById('editEmail').value = userData.email || '';
+            document.getElementById('editPhone').value = userData.phone || '';
+            document.getElementById('editRole').value = userData.role || '';
+            document.getElementById('editActive').checked = userData.active === 'true';
+        }
+
+        function toggleUserStatus(userId, isActive) {
+            const action = isActive ? 'deactivate' : 'activate';
+            if (confirm(`Are you sure you want to ${action} this user?`)) {
+                fetch(`/admin/users/${userId}/toggle-status`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            showAlert('success', `User ${action}d successfully`);
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showAlert('danger', `Failed to ${action} user`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'An error occurred while updating user status');
+                    });
+            }
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                fetch(`/admin/users/${userId}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            showAlert('success', 'User deleted successfully');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showAlert('danger', 'Failed to delete user');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('danger', 'An error occurred while deleting user');
+                    });
+            }
+        }
+
+        function submitBulkForm(action) {
+            const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
+            const userIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+            if (userIds.length === 0) {
+                alert('Please select users first.');
+                return false;
+            }
+
+            const actionNames = {
+                'activate': 'activate',
+                'deactivate': 'deactivate',
+                'delete': 'delete'
+            };
+
+            if (confirm(`Are you sure you want to ${actionNames[action]} ${userIds.length} user(s)?`)) {
+                const form = document.getElementById(`bulk${action.charAt(0).toUpperCase() + action.slice(1)}Form`);
+
+                // Clear existing hidden inputs
+                const existingInputs = form.querySelectorAll('input[name="userIds"]');
+                existingInputs.forEach(input => input.remove());
+
+                // Add new hidden inputs for selected user IDs
+                userIds.forEach(userId => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'userIds';
+                    input.value = userId;
+                    form.appendChild(input);
+                });
+
+                return true;
+            }
+
+            return false;
+        }
+
+        function exportUsers(format) {
+            alert('Export functionality will be implemented for ' + format + ' format.');
+        }
+
+        function showAlert(type, message) {
+            const alertContainer = document.querySelector('#main-content');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.insertBefore(alert, alertContainer.firstChild);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert && alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</div>
+
+</html>

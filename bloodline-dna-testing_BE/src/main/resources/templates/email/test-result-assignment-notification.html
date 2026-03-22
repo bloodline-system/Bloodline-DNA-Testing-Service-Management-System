@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>New Test Result Analysis Assignment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #27ae60;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-radius: 0 0 5px 5px;
+        }
+        .assignment-details {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .button:hover {
+            background-color: #2ecc71;
+        }
+        .priority-high {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .priority-medium {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .priority-low {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-analysis {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        .divider {
+            border-bottom: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        .analysis-icon {
+            color: #27ae60;
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .info-item {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #27ae60;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 12px;
+            text-transform: uppercase;
+            display: block;
+        }
+        .info-value {
+            color: #555;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://bloodlinedna.com/images/logo.png" alt="Bloodline DNA Testing" class="logo" />
+        <h1>🧬 New Test Result Analysis Assignment</h1>
+    </div>
+    <div class="content">
+        <h2>Hello <span th:text="${staffMember.getUserProfile().getFirstName()}">Dr. Smith</span>,</h2>
+        <p>You have been assigned a new DNA test result analysis task. Please review the assignment details below and begin the analysis process:</p>
+
+        <div class="assignment-details">
+            <h3><span class="analysis-icon">📊</span>Analysis Assignment Details:</h3>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Order Number:</span>
+                    <span class="info-value" th:text="${order.getId()}">ORD12345</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Assignment Date:</span>
+                    <span class="info-value" th:text="${#temporals.format(testResult.createdAt, 'dd/MM/yyyy HH:mm')}">June 27, 2025</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Test Type:</span>
+                    <span class="info-value" th:text="${order?.service?.serviceType?.typeName ?: 'N/A'}">Paternity Test</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Analysis Status:</span>
+                    <span class="status-badge status-pending">Pending Analysis</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Customer Name:</span>
+                    <span class="info-value" th:text="${order.getCustomer() != null ? order.getCustomer().getUserProfile().getFirstName() + ' ' + order.getCustomer().getUserProfile().getLastName() : 'N/A'}">John Doe</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Sample Collection Date:</span>
+                    <span class="info-value" th:text="${order.appointmentDate != null ? #temporals.format(order.appointmentDate, 'dd/MM/yyyy') : 'N/A'}">June 25, 2025</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>📋 Analysis Protocol:</h3>
+        <ol>
+            <li><strong>Sample Verification:</strong> Verify sample integrity and chain of custody documentation</li>
+            <li><strong>Quality Assessment:</strong> Evaluate DNA quality and quantity for analysis suitability</li>
+            <li><strong>Data Processing:</strong> Perform genetic analysis using approved laboratory protocols</li>
+            <li><strong>Result Interpretation:</strong> Analyze data patterns and generate preliminary findings</li>
+            <li><strong>Quality Control:</strong> Review results for accuracy and consistency</li>
+            <li><strong>Report Generation:</strong> Prepare comprehensive analysis report with conclusions</li>
+            <li><strong>System Update:</strong> Update analysis status and upload results to the system</li>
+        </ol>
+
+        <p>Please access the laboratory analysis system to begin your work and view detailed sample information:</p>
+
+        <p style="text-align: center;">
+            <a th:href="${baseUrl + '/staff/test-results/' + testResult.id}" class="button">Start Analysis</a>
+        </p>
+
+        <div class="divider"></div>
+
+        <h3>📞 Support & Resources:</h3>
+        <p><strong>Laboratory Supervisor:</strong> <a href="mailto:lab.supervisor@bloodlinedna.com">lab.supervisor@bloodlinedna.com</a> | (555) 123-4567</p>
+        <p><strong>Technical Support:</strong> <a href="mailto:tech.support@bloodlinedna.com">tech.support@bloodlinedna.com</a> | (555) 123-4568</p>
+        <p><strong>Quality Assurance:</strong> <a href="mailto:qa@bloodlinedna.com">qa@bloodlinedna.com</a> | (555) 123-4569</p>
+
+        <div class="assignment-details" style="background-color: #fff3cd; border-color: #ffc107;">
+            <h4>⚠️ Important Reminders:</h4>
+            <ul style="margin: 0; padding-left: 20px;">
+                <li>Follow all laboratory safety protocols and standard operating procedures</li>
+                <li>Ensure proper documentation of all analysis steps</li>
+                <li>Report any anomalies or quality issues immediately</li>
+                <li>Maintain strict confidentiality of all test results</li>
+                <li>Update analysis status regularly in the system</li>
+            </ul>
+        </div>
+
+        <p>Thank you for your expertise and attention to detail in providing accurate DNA analysis results.</p>
+
+        <p>Best regards,<br/>
+            <strong>Bloodline DNA Testing Laboratory</strong><br/>
+            Analysis Department</p>
+    </div>
+    <div class="footer">
+        <p>This is an automated notification for laboratory staff. Please do not reply to this email.</p>
+        <p>© 2025 Bloodline DNA Testing Laboratory - All Rights Reserved</p>
+        <p><a href="https://bloodlinedna.com/privacy-policy">Privacy Policy</a> | <a href="https://bloodlinedna.com/laboratory-protocols">Laboratory Protocols</a> | <a href="https://bloodlinedna.com/quality-standards">Quality Standards</a></p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layouts/admin-layout :: layout(~{::#main-content}, ~{::#page-scripts}, ${pageTitle}, ${breadcrumbs}, ~{::#action-buttons})}">
+
+<div id="main-content">
+    <!-- Alert for errors -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${feedback}">
+        <!-- Feedback Summary Card -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="ri-message-2-line me-2"></i>Feedback Details
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge bg-primary-transparent fs-12" th:text="'#' + ${feedback.id}">Feedback
+                                ID</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-muted">Customer Information</label>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="avatar avatar-md me-3">
+                                            <span class="avatar-initials rounded-circle bg-primary text-white fs-16"
+                                                th:text="${#strings.substring((feedback.customerName != null ? feedback.customerName : 'N'), 0, 1)}
+">C</span>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold fs-15"
+                                                th:text="${feedback.customerName ?: 'Unknown Customer'}">Customer Name
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-muted">Service Information</label>
+                                    <div class="fw-semibold" th:text="${feedback.serviceName ?: 'Unknown Service'}">
+                                        Service Name</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-muted">Submission Date</label>
+                                    <div>
+                                        <span
+                                            th:text="${#temporals.format(feedback.createdAt, 'MMMM dd, yyyy')}">Date</span>
+                                        <span class="text-muted">at</span>
+                                        <span th:text="${#temporals.format(feedback.createdAt, 'HH:mm')}">Time</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-muted">Response Status</label>
+                                    <div>
+                                        <span class="badge bg-warning fs-12"
+                                            th:if="${feedback.responseRequired and feedback.respondedAt == null}">
+                                            <i class="ri-time-line me-1"></i>Response Needed
+                                        </span>
+                                        <span class="badge bg-success fs-12" th:if="${feedback.respondedAt != null}">
+                                            <i class="ri-check-line me-1"></i>Responded
+                                        </span>
+                                        <span class="badge bg-secondary fs-12" th:unless="${feedback.responseRequired}">
+                                            <i class="ri-close-line me-1"></i>No Response Required
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3" th:if="${feedback.respondedAt != null}">
+                                    <label class="form-label fw-semibold text-muted">Response Info</label>
+                                    <div>
+                                        <div class="fw-semibold">Responded by: <span
+                                                th:text="${feedback.respondedByName ?: 'Unknown'}">Admin</span></div>
+                                        <div class="text-muted">
+                                            <span
+                                                th:text="${#temporals.format(feedback.respondedAt, 'MMMM dd, yyyy')}">Date</span>
+                                            <span>at</span>
+                                            <span
+                                                th:text="${#temporals.format(feedback.respondedAt, 'HH:mm')}">Time</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <!-- Ratings Summary -->
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="ri-star-line me-2"></i>Ratings Summary
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3" th:if="${feedback.overallRating != null}">
+                            <label class="form-label fw-semibold">Overall Rating</label>
+                            <div class="d-flex align-items-center">
+                                <div class="rating-stars me-2">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i class="ri-star-fill text-warning" th:if="${i <= feedback.overallRating}"></i>
+                                        <i class="ri-star-line text-muted"
+                                            th:unless="${i <= feedback.overallRating}"></i>
+                                    </th:block>
+                                </div>
+                                <span class="fw-semibold fs-18" th:text="${feedback.overallRating} + '/5'">4.5/5</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" th:if="${feedback.serviceQualityRating != null}">
+                            <label class="form-label fw-semibold">Service Quality</label>
+                            <div class="d-flex align-items-center">
+                                <div class="rating-stars me-2">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i class="ri-star-fill text-info"
+                                            th:if="${i <= feedback.serviceQualityRating}"></i>
+                                        <i class="ri-star-line text-muted"
+                                            th:unless="${i <= feedback.serviceQualityRating}"></i>
+                                    </th:block>
+                                </div>
+                                <span class="fw-semibold" th:text="${feedback.serviceQualityRating} + '/5'">5/5</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" th:if="${feedback.staffBehaviorRating != null}">
+                            <label class="form-label fw-semibold">Staff Behavior</label>
+                            <div class="d-flex align-items-center">
+                                <div class="rating-stars me-2">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i class="ri-star-fill text-success"
+                                            th:if="${i <= feedback.staffBehaviorRating}"></i>
+                                        <i class="ri-star-line text-muted"
+                                            th:unless="${i <= feedback.staffBehaviorRating}"></i>
+                                    </th:block>
+                                </div>
+                                <span class="fw-semibold" th:text="${feedback.staffBehaviorRating} + '/5'">4/5</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-0" th:if="${feedback.timelinessRating != null}">
+                            <label class="form-label fw-semibold">Timeliness</label>
+                            <div class="d-flex align-items-center">
+                                <div class="rating-stars me-2">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i class="ri-star-fill text-orange" th:if="${i <= feedback.timelinessRating}"
+                                            style="color: #ff9500 !important;"></i>
+                                        <i class="ri-star-line text-muted"
+                                            th:unless="${i <= feedback.timelinessRating}"></i>
+                                    </th:block>
+                                </div>
+                                <span class="fw-semibold" th:text="${feedback.timelinessRating} + '/5'">5/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Content -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="ri-chat-3-line me-2"></i>Customer Feedback
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3" th:if="${feedback.feedbackTitle}">
+                            <label class="form-label fw-semibold">Feedback Title</label>
+                            <h5 class="text-primary" th:text="${feedback.feedbackTitle}">Feedback Title</h5>
+                        </div>
+
+                        <div th:if="${feedback.feedbackContent}">
+                            <label class="form-label fw-semibold">Feedback Content</label>
+                            <div class="border rounded p-3 bg-light">
+                                <p class="mb-0" th:text="${feedback.feedbackContent}">Feedback content will be displayed
+                                    here...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="ri-reply-line me-2"></i>Response Management
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Existing Response -->
+                        <div th:if="${feedback.respondedAt != null}" class="mb-4">
+                            <label class="form-label fw-semibold">Admin Response</label>
+                            <div class="alert alert-success">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>Response by:</strong> <span
+                                            th:text="${feedback.respondedByName ?: 'Unknown Admin'}">Admin Name</span>
+                                    </div>
+                                    <small class="text-muted">
+                                        <span
+                                            th:text="${#temporals.format(feedback.respondedAt, 'MMMM dd, yyyy HH:mm')}">Response
+                                            Date</span>
+                                    </small>
+                                </div>
+                                <div th:text="${feedback.responseContent ?: 'No response content available'}">Response
+                                    content...</div>
+                            </div>
+                        </div>
+
+                        <!-- Response Form -->
+                        <div th:if="${feedback.responseRequired and feedback.respondedAt == null}">
+                            <div class="alert alert-warning">
+                                <i class="ri-alert-line me-2"></i>This feedback requires a response from the
+                                administration.
+                            </div>
+
+                            <form th:action="@{/admin/feedback/{id}/respond(id=${feedback.id})}" method="post">
+                                <div class="mb-3">
+                                    <label for="responseContent" class="form-label fw-semibold">
+                                        Your Response <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea class="form-control" id="responseContent" name="responseContent" rows="6"
+                                        placeholder="Type your response to the customer..." required></textarea>
+                                    <div class="form-text">Provide a helpful and professional response to address the
+                                        customer's concerns and feedback.</div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ri-send-plane-line me-1"></i>Submit Response
+                                    </button>
+                                    <a th:href="@{/admin/feedback}" class="btn btn-secondary">
+                                        <i class="ri-arrow-left-line me-1"></i>Back to Feedback List
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- No Response Needed -->
+                        <div th:if="${!feedback.responseRequired and feedback.respondedAt == null}">
+                            <div class="alert alert-info">
+                                <i class="ri-information-line me-2"></i>This feedback does not require a response from
+                                the administration.
+                            </div>
+                        </div>
+
+                        <!-- Already Responded -->
+                        <div th:if="${feedback.responseRequired and feedback.respondedAt != null}">
+                            <div class="alert alert-success">
+                                <i class="ri-check-line me-2"></i>This feedback has been successfully responded to.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="action-buttons">
+    <div class="d-flex gap-2">
+        <a th:href="@{/admin/feedback}" class="btn btn-secondary">
+            <i class="ri-arrow-left-line me-1"></i>Back to Feedback List
+        </a>
+        <button type="button" class="btn btn-success" onclick="window.location.reload()">
+            <i class="ri-refresh-line me-1"></i>Refresh
+        </button>
+        <button type="button" class="btn btn-info" th:if="${feedback.responseRequired and feedback.respondedAt == null}"
+            onclick="document.getElementById('responseContent').focus()">
+            <i class="ri-reply-line me-1"></i>Jump to Response
+        </button>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Auto-hide flash messages after 5 seconds
+            setTimeout(function () {
+                const alerts = document.querySelectorAll('.alert-dismissible');
+                alerts.forEach(alert => {
+                    const alertInstance = new bootstrap.Alert(alert);
+                    alertInstance.close();
+                });
+            }, 5000);
+
+            // Form validation
+            const responseForm = document.querySelector('form[action*="/respond"]');
+            if (responseForm) {
+                responseForm.addEventListener('submit', function (e) {
+                    const responseContent = document.getElementById('responseContent').value.trim();
+                    if (!responseContent) {
+                        e.preventDefault();
+                        document.getElementById('responseContent').classList.add('is-invalid');
+                        document.getElementById('responseContent').focus();
+                        return false;
+                    }
+                    document.getElementById('responseContent').classList.remove('is-invalid');
+                });
+            }
+        });
+    </script>
+</div>
+
+</html>

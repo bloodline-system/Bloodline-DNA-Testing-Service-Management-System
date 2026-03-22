@@ -1,0 +1,190 @@
+
+<html lang="en" dir="ltr" data-nav-layout="horizontal" data-nav-style="menu-click" data-menu-position="fixed"
+      data-theme-mode="light" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/public/head :: head">
+</head>
+<body class="landing-body">
+
+<div class="landing-page-wrapper">
+    <!-- Start::app-sidebar -->
+    <aside th:replace="fragments/user/profile-header :: profile-header "></aside>
+    <!-- End::app-sidebar -->
+
+    <!-- Start::app-content -->
+    <div class="main-content landing-main" style="padding-top: 50px;">
+        <div class="edit-container">
+            <!-- Header -->
+            <div class="edit-header">
+                <h2 class="edit-title">
+                    <i class="fas fa-user-edit me-2"></i>Edit Profile
+                </h2>
+
+                <!-- Avatar Preview -->
+                <div class="avatar-section">
+                    <img th:src="${userEditProfile.profileImageUrl != null and !#strings.isEmpty(userEditProfile.profileImageUrl)}
+            ? @{${userEditProfile.profileImageUrl}}
+            : @{/images/default-avatar.png}"
+                         alt="Avatar" class="avatar-preview" id="avatarPreview"/>
+
+                    <div class="avatar-change-btn" onclick="document.getElementById('file').click()">
+                        <i class="fas fa-camera" style="font-size: 12px;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Body -->
+            <div class="form-body">
+                <form th:action="@{/user/profile/update}" th:object="${userEditProfile}" method="post"
+                      enctype="multipart/form-data" id="profileForm">
+                    <th:block th:if="${_csrf != null}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    </th:block>
+
+
+                    <div class="row-form">
+                        <!-- First Name -->
+                        <div class="form-group">
+                            <label class="form-label" for="firstName">
+                                <i class="fas fa-user label-icon"></i>First Name
+                            </label>
+                            <input id="firstName" type="text" th:field="*{firstName}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''"
+                                   placeholder="Enter your first name"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}"
+                                 th:errors="*{firstName}"></div>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="form-group">
+                            <label class="form-label" for="lastName">
+                                <i class="fas fa-user-tag label-icon"></i>Last Name
+                            </label>
+                            <input id="lastName" type="text" th:field="*{lastName}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''"
+                                   placeholder="Enter your last name"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}"
+                                 th:errors="*{lastName}"></div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label class="form-label" for="email">
+                            <i class="fas fa-envelope label-icon"></i>Email Address
+                        </label>
+                        <input id="email" type="email" th:field="*{email}"
+                               class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                               placeholder="Enter your email address"/>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    </div>
+
+                    <div class="row-form">
+                        <!-- Date of Birth -->
+                        <div class="form-group">
+                            <label class="form-label" for="dateOfBirth">
+                                <i class="fas fa-birthday-cake label-icon"></i>Date of Birth
+                            </label>
+                            <input id="dateOfBirth" type="date" th:field="*{dateOfBirth}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'is-invalid' : ''"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('dateOfBirth')}"
+                                 th:errors="*{dateOfBirth}"></div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label class="form-label" for="phoneNumber">
+                                <i class="fas fa-phone label-icon"></i>Phone Number
+                            </label>
+                            <input id="phoneNumber" type="text" th:field="*{phoneNumber}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"
+                                   placeholder="Enter your phone number"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('phoneNumber')}"
+                                 th:errors="*{phoneNumber}"></div>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label class="form-label" for="password">
+                            <i class="fas fa-lock label-icon"></i>Password
+                        </label>
+                        <input id="password" type="password" th:field="*{password}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                               placeholder="Enter new password (leave blank to keep current)"/>
+                        <div class="password-hint">Leave blank to keep your current password</div>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}"
+                             th:errors="*{password}"></div>
+                    </div>
+
+                    <!-- Avatar Upload -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-image label-icon"></i>Profile Picture
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input id="file" type="file" name="file" class="file-input" accept="image/*"/>
+                            <div class="file-input-display" id="fileDisplay">
+                                <div class="file-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="file-text">
+                                    Click to select or drag and drop an image
+                                </div>
+                                <div class="file-selected" id="fileSelected" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <button type="submit" form="profileForm" class="btn-modern btn-primary-modern" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    Update Profile
+                </button>
+                <button type="button" class="btn-secondary-modern btn-modern">
+                    <a th:href="@{/user/profile}">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div th:replace="fragments/public/last-footer :: last-footer"></div>
+</div>
+
+<div class="scrollToTop">
+    <span class="arrow"><i class="ri-arrow-up-s-fill fs-20"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById('file');
+        const avatarPreview = document.getElementById('avatarPreview');
+
+        if (fileInput && avatarPreview) {
+            fileInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file && file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        avatarPreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+<div th:replace="fragments/public/script :: scripts"></div>
+
+</body>
+</html>

@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/manager-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Order Management', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div id="content">
+    <!-- Success/Error Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="ri-check-circle-line me-2"></i>Order status updated successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i>Failed to update order status. Please try again.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Order Statistics Cards - Flexbox Layout -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-3 justify-content-between">
+                <!-- All Orders -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-file-list-3-line text-primary fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">All Orders</h6>
+                            <h4 class="mb-0 text-primary fw-bold" th:text="${totalOrders}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-time-line text-warning fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Pending</h6>
+                            <h4 class="mb-0 text-warning fw-bold" th:text="${statusCounts['pending'] ?: 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmed -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-check-line text-info fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Confirmed</h6>
+                            <h4 class="mb-0 text-info fw-bold" th:text="${statusCounts['confirmed'] ?: 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- In Progress -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-play-circle-line text-primary fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">In Progress</h6>
+                            <h4 class="mb-0 text-primary fw-bold" th:text="${statusCounts['in-progress'] ?: 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- In Review -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-search-eye-line text-secondary fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">In Review</h6>
+                            <h4 class="mb-0 text-secondary fw-bold" th:text="${statusCounts['in-review'] ?: 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-checkbox-circle-line text-success fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Completed</h6>
+                            <h4 class="mb-0 text-success fw-bold" th:text="${statusCounts['completed'] ?: 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancelled -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-close-circle-line text-danger fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Cancelled</h6>
+                            <h4 class="mb-0 text-danger fw-bold" th:text="${statusCounts['cancelled'] ?: 0}">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Management Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">DNA Testing Orders</div>
+                    <div class="ms-auto">
+                        <button class="btn btn-sm btn-outline-secondary me-2" onclick="location.reload()">
+                            <i class="ri-refresh-line me-1"></i> Refresh
+                        </button>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary" id="exportBtn">
+                                <i class="ri-download-line me-1"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Horizontal Navigation Tabs -->
+                    <div class="order-tabs-container">
+                        <ul class="nav nav-tabs order-nav-tabs" id="orderTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="all-tab" data-bs-toggle="tab"
+                                        data-status="all" type="button" role="tab">
+                                    All Orders
+                                    <span class="badge bg-secondary ms-2" th:text="${totalOrders}">0</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pending-tab" data-bs-toggle="tab"
+                                        data-status="pending" type="button" role="tab">
+                                    Pending
+                                    <span class="badge bg-warning ms-2" th:text="${statusCounts['pending'] ?: 0}">0</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="confirmed-tab" data-bs-toggle="tab"
+                                        data-status="confirmed" type="button" role="tab">
+                                    Confirmed
+                                    <span class="badge bg-info ms-2" th:text="${statusCounts['confirmed'] ?: 0}">0</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="in-progress-tab" data-bs-toggle="tab"
+                                        data-status="in-progress" type="button" role="tab">
+                                    In Progress
+                                    <span class="badge bg-primary ms-2" th:text="${statusCounts['in-progress'] ?: 0}">0</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="in-review-tab" data-bs-toggle="tab"
+                                        data-status="in-review" type="button" role="tab">
+                                    In Review
+                                    <span class="badge bg-secondary ms-2" th:text="${statusCounts['in-review'] ?: 0}">0</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="completed-tab" data-bs-toggle="tab"
+                                        data-status="completed" type="button" role="tab">
+                                    Completed
+                                    <span class="badge bg-success ms-2" th:text="${statusCounts['completed'] ?: 0}">0</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab"
+                                        data-status="cancelled" type="button" role="tab">
+                                    Cancelled
+                                    <span class="badge bg-danger ms-2" th:text="${statusCounts['cancelled'] ?: 0}">0</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Content Area -->
+                    <div class="order-content-area p-4">
+                        <!-- Search and Filter Bar -->
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" class="form-control"
+                                           placeholder="Search orders by ID, customer name..." id="searchInput">
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        <i class="ri-search-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="dateFilter">
+                                    <option>All Time</option>
+                                    <option>Today</option>
+                                    <option>This Week</option>
+                                    <option>This Month</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Orders Table -->
+                        <div class="table-responsive">
+                            <table class="table text-nowrap table-bordered table-hover align-middle" id="ordersTable">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Order ID</th>
+                                    <th scope="col">Customer</th>
+                                    <th scope="col">Order Date</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Total Amount</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody id="ordersTableBody">
+                                <tr th:each="order : ${orders}"
+                                    th:attr="data-status=${order.orderStatus.name().toLowerCase().replace('_', '-')},
+                                            data-order-id=${order.id},
+                                            data-customer-name=${order.customerName},
+                                            data-customer-email=${order.email},
+                                            data-customer-phone=${order.phoneNumber ?: 'N/A'},
+                                            data-service-name=${order.serviceName ?: 'N/A'},
+                                            data-service-type=${order.serviceType ?: 'N/A'},
+                                            data-service-category=${order.serviceCategory ?: 'N/A'},
+                                            data-participants=${order.participants ?: 'N/A'},
+                                            data-execution-time=${order.executionTimeDays ?: 'N/A'},
+                                            data-collection-type=${order.collectionType ?: 'N/A'},
+                                            data-collection-address=${order.collectionAddress ?: 'N/A'},
+                                            data-total-amount=${order.totalAmount},
+                                            data-discount-amount=${order.discountAmount ?: 0},
+                                            data-final-amount=${order.finalAmount ?: order.totalAmount},
+                                            data-payment-status=${order.paymentStatus ?: 'N/A'},
+                                            data-created-at=${order.createdAt},
+                                            data-appointment-date=${order.appointmentDate ?: 'N/A'},
+                                            data-collection-staff=${order.collectionStaffName ?: 'Not assigned'},
+                                            data-collection-staff-email=${order.collectionStaffEmail ?: 'N/A'},
+                                            data-collection-staff-phone=${order.collectionStaffPhone ?: 'N/A'},
+                                            data-analysis-staff=${order.analysisStaffName ?: 'Not assigned'},
+                                            data-analysis-staff-email=${order.analysisStaffEmail ?: 'N/A'},
+                                            data-analysis-staff-phone=${order.analysisStaffPhone ?: 'N/A'},
+                                            data-test-result-status=${order.testingResultStatus ?: 'Pending'},
+                                            data-test-result-summary=${order.testingResultSummary ?: 'No results available'},
+                                            data-detailed-results=${order.detailedResults ?: 'No detailed results available'},
+                                            data-analyzed-by=${order.testingResultAnalyzedBy ?: 'N/A'},
+                                            data-analysis-date=${order.testingResultAnalysisDate ?: 'N/A'},
+                                            data-raw-data-id=${order.rawData?.id ?: 'null'},
+                                            data-raw-data-format=${order.rawData?.dataFormat ?: 'null'},
+                                            data-raw-data-content=${order.rawData?.rawDataContent ?: 'null'},
+                                            data-raw-data-filepath=${order.rawData?.filePath ?: 'null'},
+                                            data-raw-data-collected-at=${order.rawData?.collectedAt ?: 'null'},
+                                            data-raw-data-created-at=${order.rawData?.createdAt ?: 'null'}">
+                                    <td>
+                                        <strong th:text="${order.id}">ORD-001</strong>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong th:text="${order.customerName}">Customer Name</strong><br>
+                                            <small class="text-muted" th:text="${order.email}">customer@email.com</small>
+                                        </div>
+                                    </td>
+                                    <td th:text="${#temporals.format(order.createdAt, 'MMM dd, yyyy')}">Date</td>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${order.orderStatus.name() == 'PENDING'} ? 'bg-warning' :
+                                                              (${order.orderStatus.name() == 'CONFIRMED'} ? 'bg-info' :
+                                                              (${order.orderStatus.name() == 'PROCESSING'} ? 'bg-primary' :
+                                                              (${order.orderStatus.name() == 'IN_REVIEW'} ? 'bg-secondary' :
+                                                              (${order.orderStatus.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger'))))"
+                                              th:text="${order.orderStatus.name().replace('_', ' ')}">Status</span>
+                                    </td>
+                                    <td th:text="${'$' + order.totalAmount}">$0.00</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1"
+                                                th:attr="data-order-id=${order.id}"
+                                                onclick="viewOrderDetail(this)">
+                                            <i class="ri-eye-line"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success"
+                                                th:attr="data-order-id=${order.id}"
+                                                onclick="updateOrderStatus(this.dataset.orderId)">
+                                            <i class="ri-edit-line"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailsModalLabel">
+                        <i class="ri-file-list-3-line me-2"></i>Order Details
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="orderDetailsContent">
+                    <!-- Order details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Close
+                    </button>
+                    <button type="button" class="btn btn-primary" id="downloadReportBtn" style="display: none;">
+                        <i class="ri-download-line me-1"></i>Download Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Modal -->
+    <div class="modal fade" id="rawDataModal" tabindex="-1" aria-labelledby="rawDataModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rawDataModalLabel">
+                        <i class="ri-database-2-line me-2"></i>Raw Test Data
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="rawDataContent">
+                    <!-- Raw data content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Close
+                    </button>
+                    <button type="button" class="btn btn-primary" id="downloadRawDataBtn" style="display: none;">
+                        <i class="ri-download-line me-1"></i>Download Raw Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Order Status Modal -->
+    <div class="modal fade" id="updateOrderStatusModal" tabindex="-1" aria-labelledby="updateOrderStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="updateOrderStatusForm" th:action="@{/manager/order-management/update-status}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateOrderStatusModalLabel">
+                            <i class="ri-edit-line me-2"></i>Update Order Status
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="updateOrderId" name="orderId">
+
+                        <div class="mb-3">
+                            <label for="currentOrderInfo" class="form-label fw-semibold">Current Order</label>
+                            <div class="alert alert-info" id="currentOrderInfo">
+                                <!-- Order info will be populated here -->
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newOrderStatus" class="form-label fw-semibold">
+                                New Status <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" id="newOrderStatus" name="status" required>
+                                <option value="">Select new status</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="in-review">In Review</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a new status</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="statusUpdateNotes" class="form-label fw-semibold">Notes (Optional)</label>
+                            <textarea class="form-control" id="statusUpdateNotes" name="notes" rows="3"
+                                      placeholder="Add any notes about this status update..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="ri-close-line me-1"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line me-1"></i>Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Get orders data from Thymeleaf
+        const ordersData = /*[[${orders}]]*/ [];
+
+        class OrderManager {
+            constructor() {
+                this.currentStatus = 'all';
+                this.orders = ordersData || [];
+                this.filteredOrders = [...this.orders];
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.renderOrders();
+            }
+
+            bindEvents() {
+                // Tab navigation with null checks
+                const tabElements = document.querySelectorAll('[data-status]');
+                tabElements.forEach(tab => {
+                    if (tab) {
+                        tab.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const status = e.target.getAttribute('data-status') || e.target.closest('[data-status]').getAttribute('data-status');
+                            if (status) {
+                                this.switchTab(status);
+                            }
+                        });
+                    }
+                });
+
+                // Search functionality
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        this.searchOrders(e.target.value);
+                    });
+                }
+
+                // Filter functionality
+                const dateFilter = document.getElementById('dateFilter');
+                if (dateFilter) {
+                    dateFilter.addEventListener('change', () => {
+                        this.applyFilters();
+                    });
+                }
+
+                // Form submission with loading state
+                const form = document.getElementById('updateOrderStatusForm');
+                if (form) {
+                    form.addEventListener('submit', (e) => {
+                        this.handleFormSubmission(e);
+                    });
+                }
+            }
+
+            switchTab(status) {
+                if (!status) return;
+
+                this.currentStatus = status;
+
+                // Update active tab with null checks
+                const allTabs = document.querySelectorAll('[data-status]');
+                allTabs.forEach(tab => {
+                    if (tab && tab.classList) {
+                        tab.classList.remove('active');
+                    }
+                });
+
+                const targetTab = document.querySelector(`[data-status="${status}"]`);
+                if (targetTab && targetTab.classList) {
+                    targetTab.classList.add('active');
+                }
+
+                this.filterOrders();
+                this.renderOrders();
+            }
+
+            filterOrders() {
+                if (this.currentStatus === 'all') {
+                    this.filteredOrders = [...this.orders];
+                } else {
+                    this.filteredOrders = this.orders.filter(order => {
+                        if (!order || !order.orderStatus) return false;
+                        const orderStatus = order.orderStatus.toLowerCase().replace('_', '-');
+                        return orderStatus === this.currentStatus;
+                    });
+                }
+            }
+
+            searchOrders(query) {
+                if (!query) {
+                    this.filterOrders();
+                } else {
+                    this.filteredOrders = this.orders.filter(order => {
+                        if (!order) return false;
+
+                        const searchableFields = [
+                            order.id ? order.id.toString() : '',
+                            order.customerName || '',
+                            order.email || ''
+                        ];
+
+                        return searchableFields.some(field =>
+                            field.toLowerCase().includes(query.toLowerCase())
+                        );
+                    });
+
+                    if (this.currentStatus !== 'all') {
+                        const statusFilter = this.currentStatus;
+                        this.filteredOrders = this.filteredOrders.filter(order => {
+                            if (!order || !order.orderStatus) return false;
+                            const orderStatus = order.orderStatus.toLowerCase().replace('_', '-');
+                            return orderStatus === statusFilter;
+                        });
+                    }
+                }
+
+                this.renderOrders();
+            }
+
+            applyFilters() {
+                this.filterOrders();
+                // Date filtering can be implemented here if needed
+                this.renderOrders();
+            }
+
+            renderOrders() {
+                const tbody = document.getElementById('ordersTableBody');
+                if (!tbody) return;
+
+                const rows = tbody.querySelectorAll('tr');
+
+                rows.forEach(row => {
+                    if (!row) return;
+
+                    const rowStatus = row.getAttribute('data-status');
+                    const shouldShow = this.currentStatus === 'all' || rowStatus === this.currentStatus;
+
+                    if (shouldShow && this.isRowMatchingFilters(row)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            isRowMatchingFilters(row) {
+                if (!row) return false;
+
+                const searchInput = document.getElementById('searchInput');
+                const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+
+                if (searchQuery) {
+                    const rowText = row.textContent ? row.textContent.toLowerCase() : '';
+                    if (!rowText.includes(searchQuery)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            handleFormSubmission(e) {
+                const form = e.target;
+                if (!form) return;
+
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="ri-loader-2-line me-1"></i>Updating...';
+                    submitBtn.disabled = true;
+                }
+
+                // Show loading dialog
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Updating Order Status...',
+                        text: 'Please wait while we update the order status.',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    });
+                }
+
+                // Form will submit normally, no need to prevent default
+            }
+        }
+
+        // Enhanced view order detail function using data attributes
+        function viewOrderDetail(button) {
+            if (!button) return;
+
+            // Get the row element
+            const row = button.closest('tr');
+            if (!row) return;
+
+            // Extract data from data attributes
+            const orderData = {
+                id: row.getAttribute('data-order-id'),
+                customerName: row.getAttribute('data-customer-name'),
+                email: row.getAttribute('data-customer-email'),
+                phoneNumber: row.getAttribute('data-customer-phone'),
+                serviceName: row.getAttribute('data-service-name'),
+                serviceType: row.getAttribute('data-service-type'),
+                serviceCategory: row.getAttribute('data-service-category'),
+                participants: row.getAttribute('data-participants'),
+                executionTimeDays: row.getAttribute('data-execution-time'),
+                collectionType: row.getAttribute('data-collection-type'),
+                collectionAddress: row.getAttribute('data-collection-address'),
+                totalAmount: row.getAttribute('data-total-amount'),
+                discountAmount: row.getAttribute('data-discount-amount'),
+                finalAmount: row.getAttribute('data-final-amount'),
+                paymentStatus: row.getAttribute('data-payment-status'),
+                createdAt: row.getAttribute('data-created-at'),
+                appointmentDate: row.getAttribute('data-appointment-date'),
+                orderStatus: row.getAttribute('data-status'),
+                collectionStaff: {
+                    name: row.getAttribute('data-collection-staff'),
+                    email: row.getAttribute('data-collection-staff-email'),
+                    phone: row.getAttribute('data-collection-staff-phone')
+                },
+                analysisStaff: {
+                    name: row.getAttribute('data-analysis-staff'),
+                    email: row.getAttribute('data-analysis-staff-email'),
+                    phone: row.getAttribute('data-analysis-staff-phone')
+                },
+                testingResult: {
+                    status: row.getAttribute('data-test-result-status'),
+                    summary: row.getAttribute('data-test-result-summary'),
+                    detailedResults: row.getAttribute('data-detailed-results'),
+                    analyzedBy: row.getAttribute('data-analyzed-by'),
+                    analysisDate: row.getAttribute('data-analysis-date')
+                },
+                rawData: {
+                    id: row.getAttribute('data-raw-data-id'),
+                    dataFormat: row.getAttribute('data-raw-data-format'),
+                    rawDataContent: row.getAttribute('data-raw-data-content'),
+                    filePath: row.getAttribute('data-raw-data-filepath'),
+                    collectedAt: row.getAttribute('data-raw-data-collected-at'),
+                    createdAt: row.getAttribute('data-raw-data-created-at')
+                }
+            };
+
+            // Populate modal with detailed information
+            populateOrderDetailsModal(orderData);
+
+            // Show modal
+            const modalElement = document.getElementById('orderDetailsModal');
+            if (modalElement && typeof bootstrap !== 'undefined') {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            }
+        }
+
+        function populateOrderDetailsModal(orderData) {
+            const modalContent = document.getElementById('orderDetailsContent');
+            const downloadBtn = document.getElementById('downloadReportBtn');
+
+            // Show download button if order is completed and has results
+            if (orderData.orderStatus === 'completed' && orderData.testingResult.status !== 'Pending') {
+                downloadBtn.style.display = 'inline-block';
+                downloadBtn.onclick = () => downloadTestingReport(orderData.id);
+            } else {
+                downloadBtn.style.display = 'none';
+            }
+
+            modalContent.innerHTML = `
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="ri-file-info-line me-2"></i>Order Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Order ID:</label>
+                                    <span class="info-value fw-bold">${orderData.id}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Order Date:</label>
+                                    <span class="info-value">${formatDate(orderData.createdAt)}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Service:</label>
+                                    <span class="info-value">${orderData.serviceName}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Service Type:</label>
+                                    <span class="info-value">${orderData.serviceType}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Service Category:</label>
+                                    <span class="info-value">${orderData.serviceCategory}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Status:</label>
+                                    <span class="badge ${getStatusBadgeClass(orderData.orderStatus)}">${orderData.orderStatus.replace('-', ' ').toUpperCase()}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Appointment Date:</label>
+                                    <span class="info-value">${orderData.appointmentDate}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Customer:</label>
+                                    <span class="info-value">${orderData.customerName}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Email:</label>
+                                    <span class="info-value">${orderData.email}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Phone:</label>
+                                    <span class="info-value">${orderData.phoneNumber}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Participants:</label>
+                                    <span class="info-value">${orderData.participants}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Execution Time:</label>
+                                    <span class="info-value">${orderData.executionTimeDays} days</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Collection Type:</label>
+                                    <span class="info-value">${orderData.collectionType}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Collection Address:</label>
+                                    <span class="info-value">${orderData.collectionAddress}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3 pt-3 border-top">
+                            <div class="col-md-12">
+                                <h6 class="text-success mb-3"><i class="ri-money-dollar-circle-line me-2"></i>Payment Information</h6>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="info-group mb-2">
+                                            <label class="info-label">Total Amount:</label>
+                                            <span class="info-value fw-bold">$${orderData.totalAmount}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="info-group mb-2">
+                                            <label class="info-label">Discount:</label>
+                                            <span class="info-value text-success">$${orderData.discountAmount}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="info-group mb-2">
+                                            <label class="info-label">Final Amount:</label>
+                                            <span class="info-value fw-bold text-primary">$${orderData.finalAmount}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="info-group mb-2">
+                                            <label class="info-label">Payment Status:</label>
+                                            <span class="badge ${getPaymentStatusBadgeClass(orderData.paymentStatus)}">${orderData.paymentStatus}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${generateStaffInfoSection(orderData)}
+
+                ${generateTestingResultsSection(orderData)}
+
+                ${generateRawDataSection(orderData)}
+            `;
+        }
+
+            function generateStaffInfoSection(orderData) {
+                if (orderData.collectionStaff.name === 'Not assigned' && orderData.analysisStaff.name === 'Not assigned') {
+                    return `
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="ri-user-line me-2"></i>Staff Assignment</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="ri-alert-line me-2"></i>No staff assigned to this order yet.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                }
+
+                return `
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="ri-team-line me-2"></i>Assigned Staff</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-primary"><i class="ri-test-tube-line me-2"></i>Collection Staff</h6>
+                                <div class="staff-card">
+                                    <div class="d-flex align-items-center">
+                                        <div class="staff-avatar me-3">
+                                            <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <i class="ri-user-line fs-18"></i>
+                                            </div>
+                                        </div>
+                                        <div class="staff-info">
+                                            <h6 class="mb-1">${orderData.collectionStaff.name}</h6>
+                                            <small class="text-muted">Sample Collection</small><br>
+                                            <small class="text-muted">${orderData.collectionStaff.email}</small><br>
+                                            <small class="text-muted">${orderData.collectionStaff.phone}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-success"><i class="ri-file-chart-line me-2"></i>Analysis Staff</h6>
+                                <div class="staff-card">
+                                    <div class="d-flex align-items-center">
+                                        <div class="staff-avatar me-3">
+                                            <div class="avatar-placeholder bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <i class="ri-user-line fs-18"></i>
+                                            </div>
+                                        </div>
+                                        <div class="staff-info">
+                                            <h6 class="mb-1">${orderData.analysisStaff.name}</h6>
+                                            <small class="text-muted">Analysis & Reporting</small><br>
+                                            <small class="text-muted">${orderData.analysisStaff.email}</small><br>
+                                            <small class="text-muted">${orderData.analysisStaff.phone}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }
+
+            function generateTestingResultsSection(orderData) {
+                if (!orderData.testingResult || orderData.testingResult.status === 'Pending') {
+                    return `
+                    <div class="card mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0"><i class="ri-test-tube-line me-2"></i>Testing Results</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="ri-information-line me-2"></i>Testing results not available yet.
+                                ${orderData.orderStatus === 'completed' ? 'Results may be processing.' : 'Testing is still in progress.'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                }
+
+                const result = orderData.testingResult;
+                return `
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="ri-file-chart-line me-2"></i>Testing Results</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Test Type:</label>
+                                    <span class="info-value">${orderData.serviceName}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Result Status:</label>
+                                    <span class="badge ${getTestResultStatusBadgeClass(result.status)}">${result.status}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Analyzed By:</label>
+                                    <span class="info-value">${result.analyzedBy}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Analysis Date:</label>
+                                    <span class="info-value">${formatDate(result.analysisDate)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${result.summary && result.summary !== 'No results available' ? `
+                            <div class="mt-3">
+                                <label class="info-label">Summary:</label>
+                                <div class="result-summary p-3 bg-light rounded">
+                                    ${result.summary}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${result.detailedResults && result.detailedResults !== 'No detailed results available' ? `
+                            <div class="mt-3">
+                                <label class="info-label">Detailed Results:</label>
+                                <div class="detailed-results p-3 bg-light rounded">
+                                    ${result.detailedResults}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            }
+
+            function generateRawDataSection(orderData) {
+                const rawData = orderData.rawData;
+
+                // Check if raw data exists and is not null
+                if (!rawData || rawData.id === 'null' || rawData.id === null) {
+                    return `
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h6 class="mb-0"><i class="ri-database-2-line me-2"></i>Raw Test Data</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="ri-alert-line me-2"></i>No raw test data available for this order.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                }
+
+                return `
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h6 class="mb-0"><i class="ri-database-2-line me-2"></i>Raw Test Data</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Data ID:</label>
+                                    <span class="info-value fw-bold">${rawData.id}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Data Format:</label>
+                                    <span class="info-value">${rawData.dataFormat || 'N/A'}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">File Path:</label>
+                                    <span class="info-value">${rawData.filePath || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Collected At:</label>
+                                    <span class="info-value">${formatDate(rawData.collectedAt)}</span>
+                                </div>
+                                <div class="info-group mb-3">
+                                    <label class="info-label">Created At:</label>
+                                    <span class="info-value">${formatDate(rawData.createdAt)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="info-label">Raw Data Content:</label>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewRawDataContent('${rawData.rawDataContent || 'null'}', '${rawData.dataFormat || 'Unknown'}', '${rawData.id}')">
+                                    <i class="ri-eye-line me-1"></i>View Full Content
+                                </button>
+                            </div>
+                            <div class="raw-data-preview p-3 bg-light rounded" style="max-height: 200px; overflow-y: auto;">
+                                <pre class="mb-0"><code>${truncateText(rawData.rawDataContent || 'No content available', 500)}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }
+
+            function viewRawDataContent(content, format, dataId) {
+                const modal = document.getElementById('rawDataModal');
+                const modalContent = document.getElementById('rawDataContent');
+                const downloadBtn = document.getElementById('downloadRawDataBtn');
+
+                if (content === 'null' || !content) {
+                    modalContent.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="ri-alert-line me-2"></i>No raw data content available.
+                    </div>
+                `;
+                    downloadBtn.style.display = 'none';
+                } else {
+                    modalContent.innerHTML = `
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Data Format: <span class="badge bg-primary">${format}</span></h6>
+                                <small class="text-muted">Data ID: ${dataId}</small>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="raw-data-content" style="max-height: 500px; overflow-y: auto;">
+                                <pre class="p-3 mb-0"><code>${content}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                    downloadBtn.style.display = 'inline-block';
+                    downloadBtn.onclick = () => downloadRawData(content, format, dataId);
+                }
+
+                if (typeof bootstrap !== 'undefined') {
+                    const rawDataModal = new bootstrap.Modal(modal);
+                    rawDataModal.show();
+                }
+            }
+
+            function downloadRawData(content, format, dataId) {
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `raw_data_${dataId}.${format.toLowerCase()}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+
+            function truncateText(text, maxLength) {
+                if (!text || text === 'null') return 'No content available';
+                if (text.length <= maxLength) return text;
+                return text.substring(0, maxLength) + '...';
+            }
+
+            // Helper functions
+            function formatDate(dateString) {
+                if (!dateString || dateString === 'N/A' || dateString === 'null') return 'N/A';
+                try {
+                    return new Date(dateString).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } catch (e) {
+                    return dateString;
+                }
+            }
+
+            function getStatusBadgeClass(status) {
+                const statusClasses = {
+                    'pending': 'bg-warning',
+                    'confirmed': 'bg-info',
+                    'processing': 'bg-primary',
+                    'in-progress': 'bg-primary',
+                    'in-review': 'bg-secondary',
+                    'completed': 'bg-success',
+                    'cancelled': 'bg-danger'
+                };
+                return statusClasses[status] || 'bg-secondary';
+            }
+
+            function getPaymentStatusBadgeClass(status) {
+                const statusClasses = {
+                    'PENDING': 'bg-warning',
+                    'PAID': 'bg-success',
+                    'FAILED': 'bg-danger',
+                    'REFUNDED': 'bg-info',
+                    'CANCELLED': 'bg-secondary'
+                };
+                return statusClasses[status] || 'bg-secondary';
+            }
+
+            function getTestResultStatusBadgeClass(status) {
+                const statusClasses = {
+                    'PENDING': 'bg-warning',
+                    'PROCESSING': 'bg-info',
+                    'COMPLETED': 'bg-success',
+                    'INVALID': 'bg-danger',
+                    'CANCELLED': 'bg-secondary',
+                    'DELIVERED': 'bg-primary'
+                };
+                return statusClasses[status] || 'bg-secondary';
+            }
+
+            function downloadTestingReport(orderId) {
+                window.open(`/manager/order-management/download-report/${orderId}`, '_blank');
+            }
+
+            function updateOrderStatus(orderId) {
+                if (!orderId || !ordersData) return;
+
+                const order = ordersData.find(o => o && o.id && o.id.toString() === orderId.toString());
+                if (order) {
+                    const orderIdInput = document.getElementById('updateOrderId');
+                    const orderInfo = document.getElementById('currentOrderInfo');
+
+                    if (orderIdInput) {
+                        orderIdInput.value = orderId;
+                    }
+
+                    if (orderInfo) {
+                        orderInfo.innerHTML = `
+                        <strong>Order ID:</strong> ${order.id || 'N/A'}<br>
+                        <strong>Customer:</strong> ${order.customerName || 'N/A'}<br>
+                        <strong>Current Status:</strong> <span class="badge bg-info">${order.orderStatus ? order.orderStatus.replace('_', ' ') : 'N/A'}</span>
+                    `;
+                    }
+
+                    // Reset form validation
+                    const form = document.getElementById('updateOrderStatusForm');
+                    if (form) {
+                        form.classList.remove('was-validated');
+                        form.reset();
+                        if (orderIdInput) {
+                            orderIdInput.value = orderId; // Reset this again after form reset
+                        }
+                    }
+
+                    // Show modal
+                    const modalElement = document.getElementById('updateOrderStatusModal');
+                    if (modalElement && typeof bootstrap !== 'undefined') {
+                        const modal = new bootstrap.Modal(modalElement);
+                        modal.show();
+                    }
+                }
+            }
+
+            // Initialize order management when DOM is loaded
+            document.addEventListener('DOMContentLoaded', function () {
+                try {
+                    window.orderManager = new OrderManager();
+
+                    // Initialize tooltips
+                    if (typeof bootstrap !== 'undefined') {
+                        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        tooltipTriggerList.map(function (tooltipTriggerEl) {
+                            return new bootstrap.Tooltip(tooltipTriggerEl);
+                        });
+                    }
+
+                    // Auto-dismiss alerts after 5 seconds
+                    setTimeout(() => {
+                        const alerts = document.querySelectorAll('.alert');
+                        alerts.forEach(alert => {
+                            if (alert && typeof bootstrap !== 'undefined') {
+                                try {
+                                    const alertInstance = new bootstrap.Alert(alert);
+                                    alertInstance.close();
+                                } catch (e) {
+                                    // Ignore error if alert is already closed
+                                }
+                            }
+                        });
+                    }, 5000);
+
+                    // Add custom CSS
+                    const style = document.createElement('style');
+                    style.textContent = `
+                    .info-group {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    .info-label {
+                        font-weight: 600;
+                        color: #495057;
+                        min-width: 120px;
+                    }
+                    .info-value {
+                        color: #6c757d;
+                    }
+                    .staff-card {
+                        border: 1px solid #e9ecef;
+                        border-radius: 8px;
+                        padding: 15px;
+                        background-color: #f8f9fa;
+                    }
+                    .result-summary, .detailed-results {
+                        border-left: 4px solid #007bff;
+                    }
+                    .raw-data-preview, .raw-data-content {
+                        font-family: 'Courier New', monospace;
+                        font-size: 12px;
+                        line-height: 1.4;
+                    }
+                    .raw-data-preview {
+                        border-left: 4px solid #6c757d;
+                    }
+                    .avatar-placeholder {
+                        flex-shrink: 0;
+                    }
+                `;
+                    document.head.appendChild(style);
+
+                    console.log('Order management page loaded with enhanced order details and raw data support');
+                } catch (error) {
+                    console.error('Error initializing order management:', error);
+                }
+            });
+            /*]]>*/
+    </script>
+</th:block>
+
+</html>

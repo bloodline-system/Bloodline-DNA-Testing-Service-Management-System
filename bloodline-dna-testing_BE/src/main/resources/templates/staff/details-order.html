@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Order Details', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-file-list-3-line me-2"></i>Order Details
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Order Info -->
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h5 class="fw-bold text-primary mb-3">
+                                <i class="ri-information-line me-2"></i>Order Information
+                            </h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th class="bg-light" style="width: 200px;">Order ID</th>
+                                            <td><strong class="text-primary" th:text="${serviceOrderByCustomerResponse.idServiceOrder}"></strong></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Customer</th>
+                                            <td>
+                                                <div th:text="${serviceOrderByCustomerResponse.userName}"></div>
+                                                <small class="text-muted" th:text="${serviceOrderByCustomerResponse.userEmail}"></small>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Phone Number</th>
+                                            <td th:text="${serviceOrderByCustomerResponse.userPhoneNumber}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Medical Service</th>
+                                            <td th:text="${serviceOrderByCustomerResponse.medicalServiceName}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Appointment Date</th>
+                                            <td th:text="${#temporals.format(serviceOrderByCustomerResponse.appointmentDate, 'MMM dd, yyyy HH:mm')}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Collection Type</th>
+                                            <td th:text="${serviceOrderByCustomerResponse.collectionType}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Collection Address</th>
+                                            <td th:text="${serviceOrderByCustomerResponse.collectionAddress}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Total Amount</th>
+                                            <td class="text-success fw-bold" th:text="${serviceOrderByCustomerResponse.finalAmount}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-light">Status</th>
+                                            <td>
+                                                <span class="badge"
+                                                      th:classappend="${serviceOrderByCustomerResponse.orderStatus.name() == 'PENDING'} ? 'bg-warning' :
+                                                                  (${serviceOrderByCustomerResponse.orderStatus.name() == 'CONFIRMED'} ? 'bg-info' :
+                                                                  (${serviceOrderByCustomerResponse.orderStatus.name() == 'IN_PROGRESS'} ? 'bg-primary' :
+                                                                  (${serviceOrderByCustomerResponse.orderStatus.name() == 'IN_REVIEW'} ? 'bg-secondary' :
+                                                                  (${serviceOrderByCustomerResponse.orderStatus.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger'))))"
+                                                      th:text="${serviceOrderByCustomerResponse.orderStatus}">Status</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="col-lg-4">
+                            <div class="card h-100 border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="ri-settings-4-line me-2"></i>Quick Actions
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <a th:href="@{/staff/update-order(orderId=${serviceOrderByCustomerResponse.idServiceOrder})}"
+                                           class="btn btn-primary">
+                                            <i class="ri-edit-line me-2"></i>Update Status
+                                        </a>
+                                        <a th:href="@{/staff/list-orders}"
+                                           class="btn btn-outline-secondary">
+                                            <i class="ri-arrow-left-line me-2"></i>Back to List
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Kits -->
+                    <div class="mt-4">
+                        <h5 class="fw-bold text-primary mb-3">
+                            <i class="ri-test-tube-line me-2"></i>Test Kits
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th>Kit Name</th>
+                                    <th>Kit Type</th>
+                                    <th>Sample Type</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total Price</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="kit : ${orderTestKits}">
+                                    <td th:text="${kit.kitName}"></td>
+                                    <td th:text="${kit.kitType}"></td>
+                                    <td th:text="${kit.sampleType}"></td>
+                                    <td th:text="${kit.quantityOrdered}"></td>
+                                    <td class="text-end" th:text="${kit.unitPrice}"></td>
+                                    <td class="text-end text-success fw-bold" th:text="${kit.totalPrice}"></td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(orderTestKits)}">
+                                    <td colspan="6" class="text-center text-muted">No test kits available</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Participants -->
+                    <div class="mt-4">
+                        <h5 class="fw-bold text-primary mb-3">
+                            <i class="ri-group-line me-2"></i>Participants
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Gender</th>
+                                    <th>Date of Birth</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="participant : ${orderParticipants}">
+                                    <td th:text="${participant.firstName}"></td>
+                                    <td th:text="${participant.lastName}"></td>
+                                    <td th:text="${participant.gender}"></td>
+                                    <td th:text="${#temporals.format(participant.dateBirth, 'MMM dd, yyyy')}"></td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(orderParticipants)}">
+                                    <td colspan="4" class="text-center text-muted">No participants available</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+    <script>
+        // Ensure buttons trigger full page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionButtons = document.querySelectorAll('.btn');
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.href) {
+                        window.location.href = this.href;
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+</html>

@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-nav-layout="horizontal">
+<head>
+    <th:block th:replace="~{fragments/public/head :: head}"></th:block>
+
+    <title>Book Medical Service</title>
+
+    <style>
+        :root {
+            --primary-blue: #0162e8;
+            --primary-blue-light: #4a8bff;
+            --primary-blue-dark: #0147c7;
+            --success-color: #10b981;
+            --success-light: #d1fae5;
+            --bg-light: #f8fafc;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+        }
+        .app-sidebar {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 80px;
+           background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+           z-index: 1000;
+           padding: 0;
+       }
+
+       .container.p-0 {
+           padding: 0 !important;
+           max-width: 100%;
+           width: 100%;
+       }
+
+       .main-sidebar {
+           height: 100%;
+           display: flex;
+           align-items: center;
+       }
+
+       .main-menu-container {
+           width: 100%;
+           height: 100%;
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           padding: 0 2rem;
+       }
+
+       .landing-logo-container {
+           flex-shrink: 0;
+       }
+
+       .horizontal-logo .header-logo {
+           display: flex;
+           align-items: center;
+           text-decoration: none;
+       }
+
+       .horizontal-logo img {
+           height: 40px;
+           width: auto;
+       }
+
+       .main-menu {
+           display: flex;
+           list-style: none;
+           margin: 0;
+           padding: 0;
+           align-items: center;
+           gap: 2rem;
+       }
+
+       .main-menu li {
+           margin: 0;
+       }
+
+       .side-menu__item {
+           color: rgba(255, 255, 255, 0.9);
+           text-decoration: none;
+           padding: 0.5rem 1rem;
+           border-radius: 8px;
+           transition: all 0.3s ease;
+           font-weight: 500;
+       }
+
+       .side-menu__item:hover {
+           background: rgba(255, 255, 255, 0.1);
+           color: white;
+       }
+
+       .slide-left, .slide-right {
+           display: none;
+       }
+
+       /* Profile Dropdown */
+       .header-element {
+           margin-left: 2rem;
+       }
+
+       .header-link {
+           display: flex;
+           align-items: center;
+           padding: 0.5rem;
+           border-radius: 50%;
+           transition: all 0.3s ease;
+           text-decoration: none;
+       }
+
+       .header-link:hover {
+           background: rgba(255, 255, 255, 0.1);
+       }
+
+       .header-link img {
+           border: 2px solid rgba(255, 255, 255, 0.3);
+       }
+
+       .dropdown-menu {
+           border: none;
+           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+           border-radius: 12px;
+           padding: 0;
+           min-width: 220px;
+           margin-top: 0.5rem;
+       }
+
+       .main-header-profile {
+           padding: 1rem;
+           border-radius: 12px 12px 0 0;
+       }
+
+       .main-header-profile h6 {
+           margin: 0;
+           font-size: 1rem;
+       }
+
+       .dropdown-item {
+           padding: 0.75rem 1rem;
+           border: none;
+           color: var(--text-primary);
+           transition: all 0.3s ease;
+       }
+
+       .dropdown-item:hover {
+           background: var(--bg-light);
+           color: var(--primary-blue);
+       }
+
+       .dropdown-item i {
+           margin-right: 0.5rem;
+           width: 20px;
+           text-align: center;
+       }
+
+       .border-block-end {
+           border-bottom: 1px solid var(--border-color);
+       }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top:110px;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(1, 98, 232, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.1; transform: scale(1.1); }
+        }
+
+        .header-section h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-subtitle {
+            margin-top: 0.8rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .form-section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .form-section-title i {
+            color: var(--primary-blue);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label i {
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(1, 98, 232, 0.1);
+            background: white;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            transition: all 0.3s ease;
+            margin: 2rem auto 0;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(1, 98, 232, 0.3);
+        }
+
+        .success-container {
+            background: linear-gradient(135deg, var(--success-light) 0%, #ecfdf5 100%);
+            border: 2px solid var(--success-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            animation: success-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes success-pulse {
+            0%, 100% { opacity: 0.5; transform: scale(0.8); }
+            50% { opacity: 0.2; transform: scale(1.2); }
+        }
+
+        .success-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 auto 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--success-color);
+            margin: 0;
+        }
+
+        .success-subtitle {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .order-details {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        .order-details h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .detail-value.highlight {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            min-width: 250px;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-next:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+
+        .form-helper {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .required-indicator {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: var(--bg-light);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .step.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .step.completed {
+            background: var(--success-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header-section h1 {
+                font-size: 1.8rem;
+            }
+            .form-container, .success-container {
+                padding: 1.5rem;
+            }
+            .btn-submit, .btn-next {
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body class="landing-body">
+<div class="landing-page-wrapper">
+
+<aside th:replace="~{fragments/user/profile-header :: profile-header}"></aside>
+<div class="main-container">
+    <div class="header-section">
+        <h1>
+            <div class="header-icon">
+                <i class="fas fa-calendar-plus"></i>
+            </div>
+            Book Medical Service
+        </h1>
+        <div class="header-subtitle">
+            Fill in the information to schedule your test
+        </div>
+    </div>
+
+    <div class="step-indicator">
+        <div class="step active">
+            <i class="fas fa-edit"></i>
+            Booking Information
+        </div>
+        <div class="step">
+            <i class="fas fa-users"></i>
+            Participant Information
+        </div>
+        <div class="step">
+            <i class="fas fa-check-circle"></i>
+            Complete
+        </div>
+    </div>
+
+    <div class="form-container" th:if="${serviceOrderByCustomerResponse == null}">
+        <div class="form-section-title">
+            <i class="fas fa-clipboard-list"></i>
+            Booking Information
+        </div>
+
+        <form th:action="@{/user/order-service}" th:object="${serviceOrderRequestByCustomer}" method="post">
+            <input type="hidden" th:field="*{username}" />
+            <input type="hidden" th:field="*{idMedicalService}" />
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-calendar-alt"></i>
+                    Appointment Date <span class="required-indicator">*</span>
+                </label>
+                <input type="datetime-local" class="form-control" th:field="*{appointmentDate}" th:min="${today}" required/>
+                <div class="form-helper">
+                    <i class="fas fa-info-circle"></i>
+                    Select the date you want to perform the test
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Sample Collection Address
+                </label>
+                <input type="text" class="form-control" th:field="*{collectionAddress}"
+                       placeholder="Enter the address where you want to collect the sample"/>
+                <div class="form-helper">
+                    <i class="fas fa-info-circle"></i>
+                    Leave blank if you will come directly to the healthcare facility
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-vial"></i>
+                    Collection Type <span class="required-indicator">*</span>
+                </label>
+                <select class="form-select" th:field="*{collectionType}" required>
+                    <option value="">-- Select Collection Type --</option>
+                    <option th:each="type : ${collectionTypes}"
+                            th:value="${type}"
+                            th:text="${type.description}">
+                    </option>
+                </select>
+                <div class="form-helper">
+                    <i class="fas fa-info-circle"></i>
+                    Choose the appropriate sample collection method
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-vial"></i>
+                    Payment Method <span class="required-indicator">*</span>
+                </label>
+                <select class="form-select" th:field="*{paymentMethod}" required>
+                    <option value="">-- Select Collection Type --</option>
+                    <option th:each="type : ${T(com.dna_testing_system.dev.enums.PaymentMethod).values()}"
+                            th:value="${type}"
+                            th:text="${type.description}">
+                    </option>
+                </select>
+                <div class="form-helper">
+                    <i class="fas fa-info-circle"></i>
+                    Choose the appropriate payment method
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i>
+                Book Service
+            </button>
+        </form>
+    </div>
+
+    <div th:if="${serviceOrderByCustomerResponse != null}" class="success-container">
+        <div class="success-header">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="success-title">Service Booked Successfully!</h2>
+            <p class="success-subtitle">Your order has been created successfully</p>
+        </div>
+
+        <div class="order-details">
+            <h3>
+                <i class="fas fa-receipt"></i>
+                Order Information
+            </h3>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-barcode"></i>
+                    Order ID:
+                </div>
+                <div class="detail-value highlight" th:text="${serviceOrderByCustomerResponse.idServiceOrder}"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-stethoscope"></i>
+                    Service Name:
+                </div>
+                <div class="detail-value" th:text="${serviceOrderByCustomerResponse.medicalServiceName}"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-calendar-alt"></i>
+                    Appointment Date:
+                </div>
+                <div class="detail-value" th:text="${serviceOrderByCustomerResponse.appointmentDate}"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-vial"></i>
+                    Collection Type:
+                </div>
+                <div class="detail-value" th:text="${serviceOrderByCustomerResponse.collectionType}"></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-vial"></i>
+                    Payment Method:
+                </div>
+                <div class="detail-value" th:text="${paymentMethod}"></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Collection Address:
+                </div>
+                <div class="detail-value" th:text="${serviceOrderByCustomerResponse.collectionAddress}"></div>
+            </div>
+        </div>
+
+        <a th:href="@{'/user/participant-information'(orderId=${serviceOrderByCustomerResponse.idServiceOrder})}" class="btn-next">
+            <i class="fas fa-arrow-right"></i>
+            Add Participant Information
+        </a>
+    </div>
+</div>
+    <div th:replace="~{fragments/public/last-footer :: last-footer}"></div>
+
+</div>
+
+<div th:replace="~{fragments/public/script :: scripts}"></div>
+
+</body>
+</html>

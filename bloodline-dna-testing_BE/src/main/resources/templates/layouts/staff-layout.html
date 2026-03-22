@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+      th:fragment="layout(content, scripts, pageTitle, breadcrumbs, actionButtons)" dir="ltr" data-nav-layout="vertical"
+      data-theme-mode="light" data-header-styles="light" data-menu-styles="light" loader="disable"
+      data-vertical-style="overlay" class="mdl-js" data-toggled="icon-overlay-close" style="">
+<head th:replace="~{fragments/common/meta :: common-meta}"></head>
+<body class="app sidebar-mini ltr">
+<!-- Main Wrapper -->
+<div class="page">
+    <!-- Header -->
+    <div th:replace="~{fragments/staff/header :: header}"></div>
+    <!-- End Header -->
+
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/staff/sidebar :: sidebar}"></div>
+    <!-- End Sidebar -->
+
+    <!-- Main Content -->
+    <div class="main-content app-content">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+                <div class="my-auto">
+                    <h5 class="page-title fs-21 mb-1" th:text="${pageTitle} ?: 'Dashboard'">Dashboard</h5>
+                    <nav th:if="${breadcrumbs}">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a th:href="@{/staff/dashboard}">Dashboard</a></li>
+                            <th:block th:each="crumb, iterStat : ${breadcrumbs}">
+                                <li th:if="${iterStat.last}" class="breadcrumb-item active"
+                                    th:text="${crumb.name}">Current Page
+                                </li>
+                            </th:block>
+                        </ol>
+                    </nav>
+                </div>
+                <div th:if="${actionButtons}" class="d-flex my-xl-auto right-content align-items-center">
+                    <th:block th:replace="${actionButtons}"></th:block>
+                </div>
+            </div>
+            <!-- End Page Header -->
+
+            <!-- Main Content -->
+            <div th:replace="${content}"></div>
+            <!-- End Main Content -->
+        </div>
+    </div>
+    <!-- End Main Content -->
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/staff/footer :: footer}"></div>
+    <!-- End Footer -->
+</div>
+<!-- End Main Wrapper -->
+<!-- Back-to-top -->
+<a href="#top" id="back-to-top"><i class="ri-arrow-up-line"></i></a>
+
+<th:block th:replace="${scripts} ?: _"></th:block>
+
+<!-- Keep only necessary scripts for layout, remove staff-specific JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.2/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

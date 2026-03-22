@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-nav-layout="horizontal">
+
+<head>
+    <th:block th:replace="~{fragments/public/head :: head}"></th:block>
+
+    <title>DNA Services - Navigation Hub</title>
+
+    <style>
+        :root {
+            --primary-blue: #0162e8;
+            --light-gray: #f8f9fa;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+        }
+
+        .app-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 0;
+        }
+
+        .container.p-0 {
+            padding: 0 !important;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .main-sidebar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .main-menu-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+
+        .landing-logo-container {
+            flex-shrink: 0;
+        }
+
+        .horizontal-logo .header-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .horizontal-logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .main-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .main-menu li {
+            margin: 0;
+        }
+
+        .side-menu__item {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .side-menu__item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .slide-left,
+        .slide-right {
+            display: none;
+        }
+
+        /* Profile Dropdown */
+        .header-element {
+            margin-left: 2rem;
+        }
+
+        .header-link {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .header-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header-link img {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 0;
+            min-width: 220px;
+            margin-top: 0.5rem;
+        }
+
+        .main-header-profile {
+            padding: 1rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .main-header-profile h6 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            border: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-light);
+            color: var(--primary-blue);
+        }
+
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .border-block-end {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue) !important;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #ffffff 0%, var(--light-gray) 100%);
+            padding-top: 110px;
+            margin-bottom: 3rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .service-card {
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .service-card:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 8px 25px rgba(1, 98, 232, 0.15);
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-blue), #0146c7);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .service-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .service-description {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .service-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .service-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .service-links a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            transition: all 0.2s ease;
+        }
+
+        .service-links a:hover {
+            color: #0146c7;
+            transform: translateX(5px);
+        }
+
+        .service-links a i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .quick-actions {
+            background-color: var(--light-gray);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 3rem;
+            padding-bottom: 150px;
+        }
+
+        .quick-actions h3 {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0146c7;
+            border-color: #0146c7;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background-color: var(--light-gray);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), transparent);
+            border: none;
+            margin: 3rem 0;
+        }
+
+        /* Floating Notification Styles */
+        .floating-notification-wrapper {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+        }
+
+        .floating-notification-bell {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(1, 98, 232, 0.3);
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .floating-notification-bell:hover {
+            background: #0146c7;
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(1, 98, 232, 0.4);
+        }
+
+        .floating-notification-bell i {
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            min-width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        .notification-pulse {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            opacity: 0;
+            z-index: -1;
+        }
+
+        .notification-pulse.active {
+            animation: ripple 1.5s ease-out;
+        }
+
+        .notification-popup-panel {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            max-height: 500px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e9ecef;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10000;
+            overflow: hidden;
+            display: none;
+        }
+
+        .notification-popup-panel.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            display: block;
+        }
+
+        .notification-popup-header {
+            background: linear-gradient(135deg, var(--primary-blue), #0146c7);
+            color: white;
+            padding: 1.25rem;
+        }
+
+        .notification-popup-header h6 {
+            color: white;
+            margin: 0;
+        }
+
+        .notification-popup-header .badge {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white;
+            font-size: 0.7rem;
+        }
+
+        .btn-close-popup {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-close-popup:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .notification-popup-divider {
+            height: 1px;
+            background: #e9ecef;
+        }
+
+        .notification-popup-content {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .notification-popup-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .notification-popup-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .notification-popup-content::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 4px;
+        }
+
+        .notification-popup-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f8f9fa;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .notification-popup-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-popup-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-popup-item.new-notification {
+            background: linear-gradient(90deg, rgba(1, 98, 232, 0.05), transparent);
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        .notification-popup-footer {
+            padding: 1rem;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .notification-popup-footer a {
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .notification-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .floating-notification-wrapper {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .floating-notification-bell {
+                width: 50px;
+                height: 50px;
+            }
+
+            .floating-notification-bell i {
+                font-size: 1.25rem;
+            }
+
+            .notification-popup-panel {
+                width: 320px;
+                right: -20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="landing-body">
+    <div class="landing-page-wrapper">
+
+        <aside th:replace="~{fragments/user/profile-header :: profile-header}"></aside>
+
+        <div class="hero-section">
+            <div class="container">
+                <h1 class="hero-title">DNA Service Navigation</h1>
+                <p class="hero-subtitle">Access your DNA testing services, order kits, and manage your genetic health
+                    journey</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <!-- Customer Order Service -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+                        <h3 class="service-title">Customer Order Service</h3>
+                        <p class="service-description">Browse available DNA services, book medical consultations, and
+                            track your service orders.</p>
+                        <ul class="service-links">
+                            <li><a th:href="@{/user/list-service}"><i class="fas fa-list"></i>View Available
+                                    Services</a></li>
+                            <!--                        <li><a th:href="@{/user/order-service(medicalServiceId=1)}"><i class="fas fa-calendar-plus"></i>Book DNA Medical Service</a></li>-->
+                            <!--                        <li><a th:href="@{/user/detail(orderId=1)}"><i class="fas fa-eye"></i>View Service Order Details</a></li>-->
+                        </ul>
+                    </div>
+                </div>
+
+                <!--            &lt;!&ndash; Order Test Kit &ndash;&gt;-->
+                <!--            <div class="col-md-6 col-lg-4">-->
+                <!--                <div class="service-card">-->
+                <!--                    <div class="service-icon">-->
+                <!--                        <i class="fas fa-box"></i>-->
+                <!--                    </div>-->
+                <!--                    <h3 class="service-title">Order Test Kit</h3>-->
+                <!--                    <p class="service-description">Browse and order DNA test kits for home collection. Get your genetic testing started.</p>-->
+                <!--                    <ul class="service-links">-->
+                <!--                        <li><a th:href="@{/user/list-kit}"><i class="fas fa-boxes"></i>View Available Test Kits</a></li>-->
+                <!--                        <li><a th:href="@{/user/order-kit(kitTestId=1, orderId=1)}"><i class="fas fa-shopping-cart"></i>Order Test Kit</a></li>-->
+                <!--                    </ul>-->
+                <!--                </div>-->
+                <!--            </div>-->
+
+                <!-- Participant Information -->
+                <!--            <div class="col-md-6 col-lg-4">-->
+                <!--                <div class="service-card">-->
+                <!--                    <div class="service-icon">-->
+                <!--                        <i class="fas fa-user-plus"></i>-->
+                <!--                    </div>-->
+                <!--                    <h3 class="service-title">Participant Information</h3>-->
+                <!--                    <p class="service-description">Manage participant details and information for DNA testing procedures.</p>-->
+                <!--                    <ul class="service-links">-->
+                <!--                        <li><a th:href="@{/user/participant-information(orderId=1)}"><i class="fas fa-user-edit"></i>Enter Participant Information</a></li>-->
+                <!--                    </ul>-->
+                <!--                </div>-->
+                <!--            </div>-->
+
+                <!-- Order Management -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-file-medical"></i>
+                        </div>
+                        <h3 class="service-title">Order Management</h3>
+                        <p class="service-description">View detailed order information and track your complete order
+                            history.</p>
+                        <ul class="service-links">
+                            <li><a th:href="@{/user/order-details(orderId=1)}"><i class="fas fa-receipt"></i>View Full
+                                    Order Details</a></li>
+                            <li><a th:href="@{/user/order-history}"><i class="fas fa-history"></i>View Order History</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="section-divider">
+
+            <div class="quick-actions">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h3>Need Help Getting Started?</h3>
+                        <p class="mb-0 text-muted">Our support team is here to guide you through your DNA testing
+                            journey. Get personalized assistance with ordering, testing, and understanding your results.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <a href="#" class="btn btn-primary me-2">Contact Support</a>
+                        <a href="#" class="btn btn-outline-primary">View FAQ's</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Floating Notification Bell -->
+    <div class="floating-notification-wrapper">
+        <!-- Notification Bell Icon -->
+        <div class="floating-notification-bell" id="notificationBell">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationBadge"
+                th:if="${notifications != null and !notifications.isEmpty()}"
+                th:text="${#lists.size(notifications)}">0</span>
+            <span class="notification-pulse" id="notificationPulse"></span>
+        </div>
+
+        <!-- Notification Popup Panel -->
+        <div class="notification-popup-panel" id="notificationPanel">
+            <div class="notification-popup-header">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fs-15 fw-semibold">Notifications</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill bg-primary pt-1" id="markAllReadBtn"
+                            style="cursor: pointer;">Mark All Read</span>
+                        <button class="btn-close-popup" id="closeNotificationPanel">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="dropdown-title-text subtext mb-0 op-6 pb-0 fs-12" id="notificationSubtext">
+                    You have <span id="unreadCount"
+                        th:text="${notifications != null ? #lists.size(notifications) : 0}">0</span> unread
+                    notifications
+                </p>
+            </div>
+
+            <div class="notification-popup-divider"></div>
+
+            <div class="notification-popup-content">
+                <ul class="list-unstyled mb-0" id="floatingNotificationList">
+                    <li th:each="noti : ${notifications}" class="notification-popup-item">
+                        <div class="d-flex">
+                            <span class="avatar avatar-sm me-2 avatar-rounded flex-shrink-0 bg-info">
+                                <i class="fas fa-bell fs-14"></i>
+                            </span>
+                            <div class="ms-2 flex-grow-1">
+                                <h6 class="notification-label text-dark mb-1 fs-13" th:text="${noti.subject}">
+                                    Notification Title</h6>
+                                <div class="notification-subtext mb-1 fs-12" th:text="${noti.messageContent}">
+                                    Notification content</div>
+                                <div class="notification-time fs-11 text-muted"
+                                    th:text="${#temporals.format(noti.createdAt, 'dd/MM/yyyy HH:mm')}">27/06/2025 14:30
+                                </div>
+                            </div>
+                            <div class="ms-auto">
+                                <i class="fas fa-chevron-right text-muted fs-10"></i>
+                            </div>
+                        </div>
+                    </li>
+                    <li th:if="${notifications == null or #lists.isEmpty(notifications)}"
+                        class="notification-popup-item text-center text-muted" id="noNotificationsMsg">
+                        <div class="py-3">
+                            <i class="fas fa-bell-slash fs-24 mb-2 text-muted"></i>
+                            <p class="mb-0">No notifications yet</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="notification-popup-footer">
+                <a href="#" class="text-primary fs-12 fw-semibold text-decoration-none">VIEW ALL NOTIFICATIONS</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add WebSocket and Notification Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.2/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <div th:replace="~{fragments/public/last-footer :: last-footer}"></div>
+    <div th:replace="~{fragments/public/script :: scripts}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Floating Notification System JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Elements
+            const notificationBell = document.getElementById('notificationBell');
+            const notificationPanel = document.getElementById('notificationPanel');
+            const notificationBadge = document.getElementById('notificationBadge');
+            const notificationPulse = document.getElementById('notificationPulse');
+            const closePanel = document.getElementById('closeNotificationPanel');
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+            const floatingNotificationList = document.getElementById('floatingNotificationList');
+            const unreadCount = document.getElementById('unreadCount');
+            const noNotificationsMsg = document.getElementById('noNotificationsMsg');
+            const notificationSubtext = document.getElementById('notificationSubtext');
+
+            let isPanelOpen = false;
+            let stompClient = null;
+            let currentUsername = '[[${#authentication.name}]]';
+            let notificationCount = parseInt(unreadCount ? unreadCount.textContent : '0') || 0;
+
+            // Debug: Check if elements are found
+            console.log('Elements found:', {
+                bell: !!notificationBell,
+                panel: !!notificationPanel,
+                badge: !!notificationBadge,
+                pulse: !!notificationPulse,
+                closeBtn: !!closePanel,
+                markAllBtn: !!markAllReadBtn,
+                list: !!floatingNotificationList,
+                count: !!unreadCount
+            });
+
+            // Toggle notification panel
+            function toggleNotificationPanel() {
+                isPanelOpen = !isPanelOpen;
+                if (isPanelOpen) {
+                    notificationPanel.style.display = 'block';
+                    notificationPanel.classList.add('show');
+                    // Remove shake animation and pulse when opened
+                    notificationBell.classList.remove('notification-shake');
+                    if (notificationBadge) {
+                        notificationBadge.classList.remove('pulse');
+                    }
+                } else {
+                    notificationPanel.classList.remove('show');
+                    setTimeout(() => {
+                        notificationPanel.style.display = 'none';
+                    }, 300); // Wait for animation to complete
+                }
+            }
+
+            // Close notification panel
+            function closeNotificationPanel() {
+                isPanelOpen = false;
+                notificationPanel.classList.remove('show');
+                setTimeout(() => {
+                    notificationPanel.style.display = 'none';
+                }, 300);
+            }
+
+            // Update notification count display
+            function updateNotificationCount(count) {
+                notificationCount = count;
+                if (unreadCount) {
+                    unreadCount.textContent = count;
+                }
+
+                if (count > 0) {
+                    if (!notificationBadge) {
+                        // Create badge if it doesn't exist
+                        const badge = document.createElement('span');
+                        badge.className = 'notification-badge';
+                        badge.id = 'notificationBadge';
+                        badge.textContent = count;
+                        notificationBell.appendChild(badge);
+                    } else {
+                        notificationBadge.textContent = count;
+                        notificationBadge.style.display = 'flex';
+                    }
+                    if (notificationSubtext) {
+                        notificationSubtext.innerHTML = `You have <span>${count}</span> unread notifications`;
+                    }
+                } else {
+                    if (notificationBadge) {
+                        notificationBadge.style.display = 'none';
+                    }
+                    if (notificationSubtext) {
+                        notificationSubtext.innerHTML = 'No unread notifications';
+                    }
+                }
+            }
+
+            // Add notification animation effects
+            function showNotificationIndicator() {
+                // Add pulse to the notification bell
+                notificationPulse.classList.add('active');
+                notificationBell.classList.add('notification-shake');
+
+                // Remove animations after completion
+                setTimeout(() => {
+                    notificationPulse.classList.remove('active');
+                    notificationBell.classList.remove('notification-shake');
+                }, 1500);
+            }
+
+            // Add new notification to the list
+            function addNotificationToList(notification) {
+                // Remove "no notifications" message if exists
+                if (noNotificationsMsg && noNotificationsMsg.style.display !== 'none') {
+                    noNotificationsMsg.style.display = 'none';
+                }
+
+                // Format timestamp
+                const createdAt = new Date(notification.createdAt);
+                const formattedDate = createdAt.toLocaleString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                // Create new notification element
+                const notificationElement = document.createElement('li');
+                notificationElement.className = 'notification-popup-item new-notification';
+                notificationElement.innerHTML = `
+            <div class="d-flex">
+                <span class="avatar avatar-sm me-2 avatar-rounded flex-shrink-0 bg-info">
+                    <i class="fas fa-bell fs-14"></i>
+                </span>
+                <div class="ms-2 flex-grow-1">
+                    <h6 class="notification-label text-dark mb-1 fs-13">${notification.subject}</h6>
+                    <div class="notification-subtext mb-1 fs-12">${notification.messageContent}</div>
+                    <div class="notification-time fs-11 text-muted">${formattedDate}</div>
+                    <small class="text-primary fs-10">Just now</small>
+                </div>
+                <div class="ms-auto">
+                    <i class="fas fa-chevron-right text-muted fs-10"></i>
+                </div>
+            </div>
+        `;
+
+                // Add to top of the list
+                floatingNotificationList.insertBefore(notificationElement, floatingNotificationList.firstChild);
+
+                // Remove "new" class after 5 seconds
+                setTimeout(() => {
+                    notificationElement.classList.remove('new-notification');
+                }, 5000);
+
+                // Limit to 10 notifications in the floating panel
+                const notifications = floatingNotificationList.querySelectorAll('.notification-popup-item:not(#noNotificationsMsg)');
+                if (notifications.length > 10) {
+                    notifications[notifications.length - 1].remove();
+                }
+
+                // Update count
+                updateNotificationCount(notificationCount + 1);
+            }
+
+            // Show browser notification
+            function showBrowserNotification(notification) {
+                if (Notification.permission === 'granted') {
+                    const browserNotification = new Notification(notification.subject, {
+                        body: notification.messageContent,
+                        icon: '/assets/images/brand-logos/favicon.ico',
+                        tag: 'dna-notification',
+                        requireInteraction: false
+                    });
+
+                    // Auto close after 5 seconds
+                    setTimeout(() => {
+                        browserNotification.close();
+                    }, 5000);
+
+                    // Close notification when clicked
+                    browserNotification.onclick = function () {
+                        window.focus();
+                        browserNotification.close();
+                        if (!isPanelOpen) {
+                            toggleNotificationPanel();
+                        }
+                    };
+                }
+            }
+
+            // WebSocket connection setup
+            function connectWebSocket() {
+                if (!currentUsername || currentUsername === 'anonymousUser') {
+                    console.log('No authenticated user, skipping WebSocket connection');
+                    return;
+                }
+
+                const socket = new SockJS('/ws');
+                stompClient = Stomp.over(socket);
+
+                stompClient.connect({}, function (frame) {
+                    console.log('Connected to WebSocket: ' + frame);
+
+                    // Subscribe to user-specific notifications
+                    stompClient.subscribe('/user/' + currentUsername + '/queue/notifications', function (notification) {
+                        try {
+                            const notificationData = JSON.parse(notification.body);
+                            console.log('Received notification:', notificationData);
+
+                            // Handle new notification
+                            handleNewNotification(notificationData);
+                        } catch (error) {
+                            console.error('Error parsing notification:', error);
+                        }
+                    });
+
+                }, function (error) {
+                    console.error('WebSocket connection error:', error);
+                    // Retry connection after 5 seconds
+                    setTimeout(connectWebSocket, 5000);
+                });
+            }
+
+            // Handle new notification from WebSocket
+            function handleNewNotification(notification) {
+                // Add to notification list
+                addNotificationToList(notification);
+
+                // Show visual indicator
+                showNotificationIndicator();
+
+                // Show browser notification
+                showBrowserNotification(notification);
+            }
+
+            // Mark all notifications as read
+            function markAllAsRead() {
+                // Update UI immediately
+                const newNotifications = floatingNotificationList.querySelectorAll('.new-notification');
+                newNotifications.forEach(item => {
+                    item.classList.remove('new-notification');
+                });
+
+                updateNotificationCount(0);
+
+                // Here you would typically make an API call to mark notifications as read
+                // Since we're not modifying controllers, this is a UI-only action
+                console.log('Mark all notifications as read');
+            }
+
+            // Event listeners
+            if (notificationBell) {
+                notificationBell.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Notification bell clicked, isPanelOpen:', isPanelOpen);
+                    toggleNotificationPanel();
+                });
+            }
+
+            if (closePanel) {
+                closePanel.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Close panel clicked');
+                    closeNotificationPanel();
+                });
+            }
+
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Mark all read clicked');
+                    markAllAsRead();
+                });
+            }
+
+            // Close panel when clicking outside
+            document.addEventListener('click', function (e) {
+                if (isPanelOpen && notificationPanel && notificationBell &&
+                    !notificationPanel.contains(e.target) && !notificationBell.contains(e.target)) {
+                    closeNotificationPanel();
+                }
+            });
+
+            // Prevent panel from closing when clicking inside
+            if (notificationPanel) {
+                notificationPanel.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            }
+
+            // Request browser notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(function (permission) {
+                    console.log('Notification permission:', permission);
+                });
+            }
+
+            // Initialize WebSocket connection
+            connectWebSocket();
+
+            // Initialize notification count display
+            updateNotificationCount(notificationCount);
+
+            // Show/hide "no notifications" message based on current notifications
+            const currentNotifications = floatingNotificationList.querySelectorAll('.notification-popup-item:not(#noNotificationsMsg)');
+            if (currentNotifications.length === 0 && noNotificationsMsg) {
+                noNotificationsMsg.style.display = 'block';
+            } else if (noNotificationsMsg) {
+                noNotificationsMsg.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

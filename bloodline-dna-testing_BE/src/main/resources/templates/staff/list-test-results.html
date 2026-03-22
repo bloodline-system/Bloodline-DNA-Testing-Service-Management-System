@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/staff-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Test Results Management', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+<div id="content">
+    <!-- Success/Error Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="ri-check-circle-line me-2"></i>Test result updated successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i>Failed to update test result. Please try again.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Test Results Management Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">DNA Test Results</div>
+                    <div class="ms-auto">
+                        <form th:action="@{/staff/search-test-results}" method="get" class="d-inline-block me-2">
+                            <input type="text" name="query" placeholder="Search by Test ID..." class="form-control d-inline-block w-auto" required />
+                            <button type="submit" class="btn btn-primary btn-sm ms-1">Search</button>
+                            <a th:href="@{/staff/list-test-results}" class="btn btn-outline-secondary btn-sm ms-1">Reset</a>
+                        </form>
+                        <form th:action="@{/staff/filter-test-results}" method="get" class="d-inline-block">
+                            <select name="status" class="form-select form-select-sm d-inline-block w-auto" required>
+                                <option th:each="resultsStatus : ${T(com.dna_testing_system.dev.enums.ResultStatus).values()}"
+                                        th:value="${resultsStatus}"
+                                        th:text="${resultsStatus}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm ms-1">Filter</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table text-nowrap table-bordered table-hover align-middle">
+                            <thead>
+                            <tr>
+                                <th scope="col">Test ID</th>
+                                <th scope="col">Test Date</th>
+                                <th scope="col">Result Summary</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="result : ${testResults}">
+                                <td><strong th:text="${result.testResultId}"></strong></td>
+                                <td>
+                                    <div class="text-body" th:text="${#temporals.format(result.testDate, 'MMM dd, yyyy')}"></div>
+                                    <small class="text-muted" th:text="${#temporals.format(result.testDate, 'HH:mm')}"></small>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 300px;" th:text="${result.resultSummary}"
+                                         th:title="${result.resultSummary}"></div>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${result.resultStatus == 'COMPLETED'} ? 'bg-success' :
+                                                          (${result.resultStatus == 'PROCESSING'} ? 'bg-primary' :
+                                                          (${result.resultStatus == 'FAILED'} ? 'bg-danger' : 'bg-warning'))"
+                                          th:text="${result.resultStatus}">Status</span>
+                                </td>
+                                <td>
+                                    <a th:if="${result.rawTestId != null}"
+                                       th:href="@{/staff/details-test-result(testResultId=${result.testResultId})}"
+                                       class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
+                                    <a th:if="${result.rawTestId != null}"
+                                       th:href="@{/staff/update-test-result(testResultId=${result.testResultId})}"
+                                       class="btn btn-sm btn-outline-success me-1">
+                                        <i class="ri-edit-line"></i>
+                                    </a>
+                                    <a th:if="${result.rawTestId != null}"
+                                       th:href="@{/staff/update-raw-data(testResultId=${result.testResultId})}"
+                                       class="btn btn-sm btn-outline-info me-1">
+                                        <i class="ri-file-edit-line"></i>
+                                    </a>
+                                    <a th:if="${result.rawTestId == null}"
+                                       th:href="@{/staff/create-raw-data(testResultsId=${result.testResultId})}"
+                                       class="btn btn-sm btn-outline-warning"
+                                       data-bs-toggle="tooltip"
+                                       title="Add Raw Data">
+                                        <i class="ri-add-line"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${testResults == null or #lists.isEmpty(testResults)}">
+                                <td colspan="5" class="text-center text-muted">No test results found.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block id="page-scripts">
+    <th:block th:replace="~{fragments/common/scripts :: scripts}"></th:block>
+    <script>
+        // Ensure proper page transitions for action buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionLinks = document.querySelectorAll('.btn[data-bs-toggle="tooltip"]');
+            actionLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = this.href;
+                });
+            });
+
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</th:block>
+</html>

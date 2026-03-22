@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/admin-layout :: layout(~{::#content}, ~{::#page-scripts}, 'Test Kit Management', null, null)}"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div id="content">
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="ri-check-circle-line me-2"></i><span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i><span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ri-error-warning-line me-2"></i><span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Test Kit Statistics Cards -->
+    <div class="row mb-4" th:if="${stats}">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-3 justify-content-between">
+                <!-- Total Kits -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-test-tube-line text-primary fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Total Kits</h6>
+                            <h4 class="mb-0 text-primary fw-bold" th:text="${stats.totalKits}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-check-line text-success fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Available</h6>
+                            <h4 class="mb-0 text-success fw-bold" th:text="${stats.availableKits}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unavailable -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-close-line text-danger fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Unavailable</h6>
+                            <h4 class="mb-0 text-danger fw-bold" th:text="${stats.unavailableKits}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expired -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-time-line text-warning fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Expired</h6>
+                            <h4 class="mb-0 text-warning fw-bold" th:text="${stats.expiredKits}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low Stock -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-alert-line text-orange fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Low Stock</h6>
+                            <h4 class="mb-0 text-orange fw-bold" th:text="${stats.lowStockKits}">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Stock -->
+                <div class="flex-fill">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-3">
+                            <i class="ri-stack-line text-info fs-4 mb-2"></i>
+                            <h6 class="text-muted mb-1 small">Total Stock</h6>
+                            <h4 class="mb-0 text-info fw-bold" th:text="${stats.totalStock}">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Kit Management Panel -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="ri-test-tube-line me-2"></i>Test Kit Management
+            </h5>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTestKitModal">
+                <i class="ri-add-line me-1"></i>Add New Test Kit
+            </button>
+        </div>
+        <div class="card-body">
+            <!-- Search and Filter Form -->
+            <form method="get" th:action="@{/admin/test-kit-management}" class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Search Kit Name</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           th:value="${search}" placeholder="Search by kit name...">
+                </div>
+                <div class="col-md-2">
+                    <label for="availability" class="form-label">Availability</label>
+                    <select class="form-select" id="availability" name="availability">
+                        <option value="all" th:selected="${selectedAvailability == 'all'}">All</option>
+                        <option value="available" th:selected="${selectedAvailability == 'available'}">Available</option>
+                        <option value="unavailable" th:selected="${selectedAvailability == 'unavailable'}">Unavailable</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="kitType" class="form-label">Kit Type</label>
+                    <select class="form-select" id="kitType" name="kitType">
+                        <option value="all" th:selected="${selectedKitType == 'all'}">All Types</option>
+                        <option th:each="type : ${kitTypes}" 
+                                th:value="${type}" 
+                                th:selected="${selectedKitType == type.name()}"
+                                th:text="${type.displayName}">Kit Type</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sampleType" class="form-label">Sample Type</label>
+                    <select class="form-select" id="sampleType" name="sampleType">
+                        <option value="all" th:selected="${selectedSampleType == 'all'}">All Types</option>
+                        <option th:each="type : ${sampleTypes}" 
+                                th:value="${type}" 
+                                th:selected="${selectedSampleType == type.name()}"
+                                th:text="${type.displayName}">Sample Type</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <label for="size" class="form-label">Per Page</label>
+                    <select class="form-select" id="size" name="size">
+                        <option value="10" th:selected="${size == 10}">10</option>
+                        <option value="25" th:selected="${size == 25}">25</option>
+                        <option value="50" th:selected="${size == 50}">50</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="ri-search-line me-1"></i>Filter
+                    </button>
+                    <a th:href="@{/admin/test-kit-management}" class="btn btn-outline-secondary">
+                        <i class="ri-refresh-line"></i>
+                    </a>
+                </div>
+            </form>
+
+            <!-- Test Kits Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kit Name</th>
+                            <th>Type</th>
+                            <th>Sample Type</th>
+                            <th>Base Price</th>
+                            <th>Current Price</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Expiry Date</th>
+                            <th>Produced By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(testKits)}">
+                            <td colspan="10" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="ri-test-tube-line fs-48 d-block mb-2"></i>
+                                    No test kits found matching your criteria.
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:each="kit : ${testKits}" 
+                            th:class="${kit.expired ? 'table-danger' : (kit.lowStock ? 'table-warning' : '')}">
+                            <td>
+                                <div class="fw-semibold" th:text="${kit.kitName}">Kit Name</div>
+                                <small class="text-muted" th:text="${#strings.abbreviate(kit.kitDescription ?: '', 50)}">Description...</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-transparent" th:text="${kit.kitType}">Type</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info-transparent" th:text="${kit.sampleType}">Sample</span>
+                            </td>
+                            <td th:text="'$' + ${kit.basePrice}">$0.00</td>
+                            <td>
+                                <span class="fw-semibold" th:text="'$' + ${kit.currentPrice}">$0.00</span>
+                                <span th:if="${kit.basePrice != kit.currentPrice}" 
+                                      class="badge bg-warning-transparent ms-1">Sale</span>
+                            </td>
+                            <td>
+                                <span th:text="${kit.quantityInStock}">0</span>
+                                <span th:if="${kit.lowStock}" class="badge bg-warning ms-1">
+                                    <i class="ri-alert-line"></i>Low
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${kit.isAvailable}" class="badge bg-success">
+                                    <i class="ri-check-line me-1"></i>Available
+                                </span>
+                                <span th:unless="${kit.isAvailable}" class="badge bg-danger">
+                                    <i class="ri-close-line me-1"></i>Unavailable
+                                </span>
+                                <span th:if="${kit.expired}" class="badge bg-warning ms-1">
+                                    <i class="ri-time-line me-1"></i>Expired
+                                </span>
+                            </td>
+                            <td>
+                                <div th:if="${kit.expiryDate}" 
+                                     th:text="${#temporals.format(kit.expiryDate, 'MMM dd, yyyy')}"
+                                     th:class="${kit.expired ? 'text-danger fw-semibold' : ''}">Date</div>
+                                <div th:unless="${kit.expiryDate}" class="text-muted">Not set</div>
+                            </td>
+                            <td th:text="${kit.producedBy}">Producer</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1"
+                                        th:attr="data-kit-id=${kit.id}"
+                                        onclick="viewTestKitDetail(this)"
+                                        title="View Details">
+                                    <i class="ri-eye-line"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success me-1"
+                                        th:attr="data-kit-id=${kit.id}"
+                                        onclick="editTestKit(this.dataset.kitId)"
+                                        title="Edit">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                        title="Delete"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal"
+                                        th:data-kit-id="${kit.id}"
+                                        th:data-kit-name="${kit.kitName}">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3" th:if="${totalPages > 1}">
+                <div class="text-muted">
+                    Showing 
+                    <span th:text="${(currentPage * size) + 1}">1</span> to 
+                    <span th:text="${T(java.lang.Math).min((currentPage + 1) * size, totalElements)}">10</span> of 
+                    <span th:text="${totalElements}">100</span> test kits
+                </div>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" 
+                               th:href="@{/admin/test-kit-management(page=${currentPage - 1}, size=${size}, search=${search}, availability=${selectedAvailability}, kitType=${selectedKitType}, sampleType=${selectedSampleType})}">
+                                <i class="ri-arrow-left-line"></i>
+                            </a>
+                        </li>
+                        <th:block th:each="pageNum : ${#numbers.sequence(#numbers.max(0, currentPage - 2), #numbers.min(totalPages - 1, currentPage + 2))}">
+                            <li class="page-item" th:classappend="${pageNum == currentPage} ? 'active'">
+                                <a class="page-link" 
+                                   th:href="@{/admin/test-kit-management(page=${pageNum}, size=${size}, search=${search}, availability=${selectedAvailability}, kitType=${selectedKitType}, sampleType=${selectedSampleType})}"
+                                   th:text="${pageNum + 1}">1</a>
+                            </li>
+                        </th:block>
+                        <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                            <a class="page-link" 
+                               th:href="@{/admin/test-kit-management(page=${currentPage + 1}, size=${size}, search=${search}, availability=${selectedAvailability}, kitType=${selectedKitType}, sampleType=${selectedSampleType})}">
+                                <i class="ri-arrow-right-line"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Test Kit Modal -->
+    <div class="modal fade" id="createTestKitModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form th:action="@{/admin/test-kit-management/create}" method="post" th:object="${testKitRequest}">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="ri-add-line me-2"></i>Add New Test Kit
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="kitName" class="form-label">Kit Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="kitName" th:field="*{kitName}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="producedBy" class="form-label">Produced By <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="producedBy" th:field="*{producedBy}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="kitType" class="form-label">Kit Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="kitType" th:field="*{kitType}" required>
+                                    <option value="">Select Kit Type</option>
+                                    <option th:each="type : ${kitTypes}" th:value="${type}" th:text="${type.displayName}">Type</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sampleType" class="form-label">Sample Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="sampleType" th:field="*{sampleType}" required>
+                                    <option value="">Select Sample Type</option>
+                                    <option th:each="type : ${sampleTypes}" th:value="${type}" th:text="${type.displayName}">Type</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="basePrice" class="form-label">Base Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="basePrice" th:field="*{basePrice}" 
+                                           step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="currentPrice" class="form-label">Current Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="currentPrice" th:field="*{currentPrice}" 
+                                           step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="quantityInStock" class="form-label">Quantity <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="quantityInStock" th:field="*{quantityInStock}" 
+                                       min="0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="expiryDate" class="form-label">Expiry Date</label>
+                                <input type="date" class="form-control" id="expiryDate" th:field="*{expiryDate}">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="isAvailable" th:field="*{isAvailable}" checked>
+                                    <label class="form-check-label" for="isAvailable">
+                                        Available for use
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="kitDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="kitDescription" th:field="*{kitDescription}" 
+                                          rows="3" placeholder="Optional description..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line me-1"></i>Create Test Kit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="ri-delete-bin-line me-2 text-danger"></i>Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the test kit <strong id="deleteKitName"></strong>?</p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ri-delete-bin-line me-1"></i>Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        // Handle view test kit detail
+        function viewTestKitDetail(button) {
+            if (!button) return;
+            
+            const kitId = button.getAttribute('data-kit-id');
+            if (kitId) {
+                window.location.href = '/admin/test-kit-management/' + kitId;
+            }
+        }
+        
+        // Handle edit test kit
+        function editTestKit(kitId) {
+            if (kitId) {
+                window.location.href = '/admin/test-kit-management/' + kitId + '/edit';
+            }
+        }
+        
+        // Handle delete modal
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const kitId = button.getAttribute('data-kit-id');
+                const kitName = button.getAttribute('data-kit-name');
+                
+                document.getElementById('deleteKitName').textContent = kitName;
+                document.getElementById('deleteForm').action = '/admin/test-kit-management/' + kitId + '/delete';
+            });
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const alertInstance = new bootstrap.Alert(alert);
+                alertInstance.close();
+            });
+        }, 5000);
+    </script>
+</div>
+
+</html>

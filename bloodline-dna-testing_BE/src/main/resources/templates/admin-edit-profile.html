@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Profile</title>
+  <style>
+    .form-container {
+      max-width: 450px;
+      margin: 40px auto;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 24px;
+      background: #fff;
+      box-shadow: 0 0 8px #eee;
+    }
+    .form-row {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .form-input, .form-date {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #bbb;
+    }
+    .form-error {
+      color: #d60000;
+      font-size: 0.96em;
+      margin-top: 2px;
+    }
+    .form-submit {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 5px;
+      background: #0078D7;
+      color: #fff;
+      font-weight: bold;
+    }
+    .avatar-preview {
+      display: block;
+      margin: 0 auto 16px auto;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 4px #bbb;
+    }
+  </style>
+</head>
+<body>
+<div class="form-container">
+  <h2>Edit Profile</h2>
+  <!-- Hiển thị avatar hiện tại nếu có -->
+  <div class="form-row" th:if="${userProfile.profileImageUrl != null and !#strings.isEmpty(userProfile.profileImageUrl)}">
+    <img th:src="@{${userProfile.profileImageUrl}}" alt="Avatar" class="avatar-preview"/>
+  </div>
+  <form th:action="@{/manage/profile/update}" th:object="${userProfile}" method="post" enctype="multipart/form-data">
+    <!-- Truyền username dạng hidden -->
+    <input type="hidden" name="username" th:value="${userProfile.username}" />
+    <!-- Nếu muốn giữ ảnh cũ khi không upload ảnh mới -->
+    <input type="hidden" th:field="*{profileImageUrl}"/>
+    <div class="form-row">
+      <label class="form-label" for="firstName">First Name</label>
+      <input id="firstName" type="text" th:field="*{firstName}" class="form-input"/>
+      <div class="form-error" th:if="${#fields.hasErrors('firstName')}"
+           th:errors="*{firstName}"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="lastName">Last Name</label>
+      <input id="lastName" type="text" th:field="*{lastName}" class="form-input"/>
+      <div class="form-error" th:if="${#fields.hasErrors('lastName')}"
+           th:errors="*{lastName}"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="email">Email</label>
+      <input id="email" type="email" th:field="*{email}" class="form-input"/>
+      <div class="form-error" th:if="${#fields.hasErrors('email')}"
+           th:errors="*{email}"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="dateOfBirth">Date of Birth</label>
+      <input id="dateOfBirth" type="date" th:field="*{dateOfBirth}" class="form-date"/>
+      <div class="form-error" th:if="${#fields.hasErrors('dateOfBirth')}"
+           th:errors="*{dateOfBirth}"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="phoneNumber">Phone Number</label>
+      <input id="phoneNumber" type="text" th:field="*{phoneNumber}" class="form-input"/>
+      <div class="form-error" th:if="${#fields.hasErrors('phoneNumber')}"
+           th:errors="*{phoneNumber}"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="password">Password</label>
+      <input id="password" type="password" th:field="*{password}" class="form-input" placeholder="Enter new password (leave blank to keep current)"/>
+      <div class="form-error" th:if="${#fields.hasErrors('password')}"
+           th:errors="*{password}"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="file">Avatar</label>
+      <input id="file" type="file" name="file" class="form-input" accept="image/*"/>
+    </div>
+    <div class="form-row">
+      <button type="submit" class="form-submit">Update</button>
+      <a th:href="@{/manage/profiles}" class="form-submit" style="text-decoration:none; display:inline-block; background:#888;">Cancel</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>

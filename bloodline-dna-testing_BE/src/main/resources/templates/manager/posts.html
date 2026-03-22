@@ -1,0 +1,70 @@
+<html
+        th:replace="~{layouts/manager-layout :: layout(~{::#blog-manager}, ~{::#page-scripts}, 'Blog Management', null, null)}"
+        xmlns:th="http://www.thymeleaf.org"
+>
+
+<div id="blog-manager">
+  <div class="container-fluid mt-3">
+    <div class="row d-flex justify-content-between align-items-center mb-4">
+      <div class="col-1">
+        <a class="" th:href="@{/manager/dashboard}">
+          <img class="rounded w-100" th:src="@{/assets/images/brand-logos/desktop-logo.png}" alt="Logo DNABlog" />
+        </a>
+      </div>
+      <a class="btn btn-primary col-2 me-3" th:href="@{/manager/posts/create}">+ Add new post</a>
+    </div>
+    <div id="message-alert" th:if="${message}" class="alert alert-success text-center">[[${message}]]</div>
+    <table class="table table-hover align-middle border-bottom text-center">
+      <thead class="table-dark">
+      <tr>
+        <th class="col-1">ID</th>
+        <th class="col-3">Title/Image</th>
+        <th class="col-3">Content</th>
+        <th class="col-1">Create At</th>
+        <th class="col-1">Category</th>
+        <th class="col-1">Status</th>
+        <th class="col-2">Update | Delete</th>
+      </tr>
+      </thead>
+      <tbody class="text-secondary fw-light">
+      <tr th:each="post : ${posts}">
+        <td th:text="${post.postId}"></td>
+        <td>
+          <div class="d-flex align-items-center">
+            <img th:src="${post.featuredImageUrl}" alt="Image" class="img-fluid rounded-circle border" style="width: 60px; height: 60px; object-fit: cover" />
+            <span style="text-align: justify" class="fw-bold ms-2" th:text="${post.postTitle}"></span>
+          </div>
+        </td>
+        <td th:text="${post.postContent}" style="text-align: justify; margin: 2px"></td>
+        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></td>
+        <td th:text="${post.postCategory}"></td>
+        <td th:text="${post.postStatus}"></td>
+        <td>
+          <a th:href="@{'/manager/posts/edit/' + ${post.postId}}" class="btn btn-sm btn-primary me-2">Edit</a>
+          <a th:href="@{'/manager/posts/delete/' + ${post.postId}}" class="btn btn-sm btn-danger me-2">Delete</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+  // Tu dong tat message alert
+  window.addEventListener("DOMContentLoaded", (event) => {
+    const messageAlert = document.getElementById("message-alert");
+    if (messageAlert) {
+      setTimeout(() => {
+        // Lam mo roi an thong bao
+        messageAlert.style.transition = "opacity 0.5s ease";
+        messageAlert.style.opacity = "0";
+        setTimeout(() => {
+          messageAlert.style.display = "none";
+        }, 500);
+      }, 2000);
+    }
+  });
+</script>
+</html>

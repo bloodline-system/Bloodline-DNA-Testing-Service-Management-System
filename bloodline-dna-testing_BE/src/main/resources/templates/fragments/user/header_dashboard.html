@@ -1,0 +1,49 @@
+<header class="app-header" th:fragment="header_dashboard" xmlns:th="">
+    <div class="main-header-container container-fluid">
+        <div class="header-content-left">
+            <div class="header-element">
+                <div class="horizontal-logo">
+                    <a th:href="@{/}" class="header-logo">
+                        <img th:src="@{/assets/images/brand-logos/desktop-logo.png}" alt="logo" class="desktop-logo">
+                        <img th:src="@{/assets/images/brand-logos/toggle-logo.png}" alt="logo" class="toggle-logo">
+                        <img th:src="@{/assets/images/brand-logos/desktop-white.png}" alt="logo" class="desktop-white">
+                        <img th:src="@{/assets/images/brand-logos/toggle-logo-white.png}" alt="logo" class="toggle-white">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="header-content-right">
+            <div class="header-element headerProfile-dropdown">
+                <a href="javascript:void(0);" class="header-link dropdown-toggle" id="mainHeaderProfile"
+                   data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <img th:if="${userProfile != null and userProfile.profileImageUrl != null}"
+                         th:src="@{${userProfile.profileImageUrl}}"
+                         alt="Profile Image" width="37" height="37" class="rounded-circle">
+                    <img th:if="${userProfile == null or userProfile.profileImageUrl == null}"
+                         th:src="@{/assets/images/faces/6.jpg}"
+                         alt="Default Avatar" width="37" height="37" class="rounded-circle">
+                </a>
+                <ul class="main-header-dropdown dropdown-menu pt-0 header-profile-dropdown dropdown-menu-end main-profile-menu"
+                    aria-labelledby="mainHeaderProfile">
+                    <li>
+                        <div class="main-header-profile bg-primary menu-header-content text-fixed-white">
+                            <div class="my-auto">
+                                <h6 class="mb-0 lh-1 text-fixed-white"
+                                    th:text="${userProfile?.fullName ?: 'Guest'}">Petey Cruiser</h6>
+                                <span class="fs-11 op-7 lh-1" th:text="${userProfile?.email ?: 'No-email'}">Premium Member</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a class="dropdown-item d-flex" th:href="@{/user/profile}"><i
+                            class="bx bx-user-circle fs-18 me-2 op-7"></i>Profile</a></li>
+                    <li><a class="dropdown-item d-flex" th:href="@{/user/profile/update}"><i
+                            class="bx bx-cog fs-18 me-2 op-7"></i>Edit Profile</a></li>
+                    <li><a class="dropdown-item d-flex" th:href="@{/user/dashboard}"><i
+                            class="bx bxs-inbox fs-18 me-2 op-7"></i>Dashboard</a></li>
+                    <li><a class="dropdown-item d-flex" th:href="@{/logout}"><i
+                            class="bx bx-log-out fs-18 me-2 op-7"></i>Sign Out</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
