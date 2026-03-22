@@ -84,7 +84,7 @@ jobs:
               -e DBMS_PASSWORD=$DBMS_PASSWORD \
               -e REDIS_HOST=$REDIS_HOST \
               -e REDIS_PASSWORD=$REDIS_PASSWORD \
-              $ECR_REGISTRY/$ECR_REPOSITORY:IMAGE_TAG
+              $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             
             docker images $ECR_REGISTRY/$ECR_REPOSITORY --format "{{.ID}}" \
                           | tail -n +6 \
