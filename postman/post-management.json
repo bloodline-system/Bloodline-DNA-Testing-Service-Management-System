@@ -1,25 +1,10 @@
 {
   "info": {
-    "_postman_id": "8c67b67c-5a91-4d84-96fa-a3a81c590db8",
+    "_postman_id": "b15f5723-e980-4163-8014-94ea0cfb1964",
     "name": "Post Management API (fixed)",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "{{base_url}}",
-      "type": "string"
-    }
-  ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{access_token}}",
-        "type": "string"
-      }
-    ]
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44542379",
+    "_collection_link": "https://go.postman.co/collection/44542379-b15f5723-e980-4163-8014-94ea0cfb1964?source=collection_link"
   },
   "item": [
     {
@@ -31,7 +16,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "pm.test('Status code is 200', function () {",
                   "  pm.response.to.have.status(200);",
@@ -44,7 +28,10 @@
                   "  pm.environment.set('expires_in', json.data.expires_in);",
                   "  pm.environment.set('user_id', json.data.user_id);",
                   "}"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -61,7 +48,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"admin_password_here\",\r\n  \"rememberMe\": true\r\n}",
+              "raw": "{\r\n  \"username\": \"{{admin_username}}\",\r\n  \"password\": \"{{admin_password}}\",\r\n  \"rememberMe\": true\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -416,6 +403,23 @@
           "response": []
         }
       ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "{{base_url}}",
+      "type": "string"
     }
   ]
 }
