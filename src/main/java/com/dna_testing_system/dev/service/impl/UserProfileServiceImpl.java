@@ -32,20 +32,41 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     @Transactional
     public boolean updateUserProfile(String username, UserProfileRequest request) {
-        // Tìm user và userProfile
-                User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
-        UserProfile userProfile = user.getProfile();
-        if (userProfile == null) {
-            // Nếu userProfile chưa tồn tại thì tạo mới
-            userProfile = userProfileMapper.toEntity(request);
-        } else {
-            // Nếu đã có thì update
-            userProfileMapper.updateUserProfileFromDto(request, userProfile);
+        UserProfile profile = user.getProfile();
+        
+        // Preserve current email BEFORE modifying profile
+        String currentEmail = profile != null ? profile.getEmail() : null;
+        
+        if (profile == null) {
+            profile = new UserProfile();
+            profile.setUser(user);
+            user.setProfile(profile);
         }
-        userProfile.setUser(user);
-        userProfileRepository.save(userProfile);
-
+        
+        // Preserve email if not provided in request (required field in database)
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            request.setEmail(currentEmail);
+        } else {
+            // Validate email uniqueness if email is being updated
+            String newEmail = request.getEmail().trim();
+            
+            // Only check uniqueness if email is actually changing
+            if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
+                // Check if another user already has this email
+                boolean emailExists = userProfileRepository.findAll().stream()
+                        .filter(up -> up.getEmail() != null)
+                        .anyMatch(up -> up.getEmail().equalsIgnoreCase(newEmail) && !up.getUser().getId().equals(user.getId()));
+                
+                if (emailExists) {
+                    throw new RuntimeException("Email already in use by another user");
+                }
+            }
+        }
+        
+        userProfileMapper.updateUserProfileFromDto(request, profile);
+        userRepository.save(user);
         return true;
     }
 
@@ -74,15 +95,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     @Transactional(readOnly = true)
     public List<UserProfileResponse> getUserProfileByName(String name) {
-        List<User> users = userRepository.findAll();
-        for (User user : users) {
-            if (!user.getProfile().getFirstName().equalsIgnoreCase(name) &&
-                    !user.getProfile().getLastName().equalsIgnoreCase(name)) {
-                users.remove(user);
-            }
-        }
-        return users.stream()
-                .map(userProfileMapper::toDto)
+        List<UserProfile> profiles = userProfileRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
+        return profiles.stream()
+                .map(profile -> userProfileMapper.toDto(profile.getUser()))
                 .collect(Collectors.toList());
     }
 
