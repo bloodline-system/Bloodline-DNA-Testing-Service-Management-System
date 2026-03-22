@@ -50,7 +50,7 @@ public class ContentPostServiceImpl implements ContentPostService {
     @Transactional(readOnly = true)
     public ContentPostResponse getPostById(Long postId) {
         ContentPost post = contentPostRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Not found post with id: " + postId));
+                .orElseThrow(() -> new NoSuchElementException("Not found post with id: " + postId));
         return toResponse(post);
     }
 
@@ -70,7 +70,7 @@ public class ContentPostServiceImpl implements ContentPostService {
     @Transactional
     public void deletePost(Long postId) {
         if (!contentPostRepository.existsById(postId)) {
-            throw new RuntimeException("Not found post with id: " + postId + " to delete.");
+            throw new NoSuchElementException("Not found post with id: " + postId + " to delete.");
         }
         contentPostRepository.deleteById(postId);
     }
