@@ -28,6 +28,6 @@ public class ContentPostResponse {
     Integer shareCount;
     LocalDateTime updatedAt;
     Long viewCount;
-    Long authorId;
+    String authorId;
     Set<PostTag> tags;
 }

@@ -18,8 +18,7 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ContentPostRequest {
-    @NotNull
-    Long authorId;
+    String authorId;
 
     Long postId;
 
