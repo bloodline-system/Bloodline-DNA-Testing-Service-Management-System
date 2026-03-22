@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "452d4eaf-67b6-4e46-af63-b252d167bb0f",
     "name": "Employee Management API",
-    "description": "Quản lý Nhân viên - DNA Testing System\nCho phép quản trị viên quản lý thông tin và phân công công việc cho đội ngũ nhân viên.\n\nChức năng:\n1. Thêm nhân viên mới (đầy đủ thông tin cá nhân & chuyên môn)\n2. Cập nhật thông tin nhân viên (chức vụ, phòng ban, liên hệ)\n3. Xóa / vô hiệu hóa tài khoản nhân viên đã nghỉ việc\n4. Phân quyền và gán vai trò (Manager, Staff)\n5. Xem lịch sử công việc và đơn xét nghiệm nhân viên đã xử lý\n\nResponse wrapper format:\n{\n  \"code\": 200,\n  \"message\": \"...\",\n  \"data\": { ... },\n  \"timestamp\": \"...\"\n}\n\nDefault credentials (seed data):\n- Admin   : admin / admin\n- Manager : manager / manager\n- Staff1  : staff1 / staff\n- Staff2  : staff2 / staff2",
+    "description": "Quản lý Nhân viên - DNA Testing System  \nCho phép quản trị viên quản lý thông tin và phân công công việc cho đội ngũ nhân viên.\n\nChức năng:\n\n1. Đăng nhập\n    \n2. Cập nhật thông tin nhân viên (chức vụ, phòng ban, liên hệ)\n    \n3. Xóa / vô hiệu hóa tài khoản nhân viên đã nghỉ việc\n    \n4. Phân quyền và gán vai trò (Manager, Staff)\n    \n5. Xem lịch sử công việc và đơn xét nghiệm nhân viên đã xử lý\n    \n\nResponse wrapper format:  \n{  \n\"code\": 200,  \n\"message\": \"...\",  \n\"data\": { ... },  \n\"timestamp\": \"...\"  \n}\n\nDefault credentials (seed data):\n\n- Admin : admin / admin\n    \n- Manager : manager / manager\n    \n- Staff1 : staff1 / staff\n    \n- Staff2 : staff2 / staff2",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "39783418",
     "_collection_link": "https://go.postman.co/collection/39783418-452d4eaf-67b6-4e46-af63-b252d167bb0f?source=collection_link"
@@ -363,11 +363,13 @@
                   "        const profile = body.data[0];",
                   "        pm.expect(profile).to.have.property(\"username\");",
                   "        pm.expect(profile).to.have.property(\"email\");",
-                  "        pm.expect(profile).to.have.property(\"isActive\");",
+                  "        pm.expect(profile).to.have.property(\"active\");",
                   "    }",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -426,10 +428,12 @@
                   "    pm.expect(body.data).to.have.property(\"firstName\");",
                   "    pm.expect(body.data).to.have.property(\"lastName\");",
                   "    pm.expect(body.data).to.have.property(\"role\");",
-                  "    pm.expect(body.data).to.have.property(\"isActive\");",
+                  "    pm.expect(body.data).to.have.property(\"active\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1431,8 +1435,7 @@
     },
     {
       "key": "timestamp",
-      "value": "",
-      "type": "default"
+      "value": ""
     }
   ]
 }

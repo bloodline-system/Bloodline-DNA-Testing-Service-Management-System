@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -43,27 +44,25 @@ public class StaffServiceImpl implements StaffService {
     RawTestDataRepository rawTestDataRepository;
     RawDataMapper rawDataMapper;
 
-
     @Override
     @Transactional
     public List<CRUDorderResponse> getForStaff(String username) {
         List<CRUDorderResponse> orders = new ArrayList<>();
         List<TestResult> testResults = testResultRepository.findAll();
-        if(testResults.isEmpty()) {
-            throw new ResourceNotFoundException("No test results found for the given username: " + username);
+        if (testResults.isEmpty()) {
+            return List.of();
         }
-        for(TestResult testResult : testResults) {
+        for (TestResult testResult : testResults) {
             if (testResult.getAnalyzedByStaff().getUsername().equalsIgnoreCase(username)) {
                 Long orderId = testResult.getOrder().getId();
                 ServiceOrder serviceOrder = orderServiceRepository.getById(orderId);
                 if (serviceOrder != null) {
                     // Map ServiceOrder to CRUDorderResponse
-                   CRUDorderResponse response = orderServiceMapper.toCRUDorderResponse(serviceOrder);
+                    CRUDorderResponse response = orderServiceMapper.toCRUDorderResponse(serviceOrder);
                     if (response != null) {
                         orders.add(response);
                     }
-                }
-                else{
+                } else {
                     throw new ResourceNotFoundException("Service order not found for ID: " + orderId);
                 }
             }
@@ -89,9 +88,9 @@ public class StaffServiceImpl implements StaffService {
         List<CRUDsampleCollectionResponse> sampleCollectionResponses = new ArrayList<>();
         List<SampleCollection> sampleCollections = sampleCollectionRepository.findAll();
         if (sampleCollections.isEmpty()) {
-            throw new IllegalArgumentException("No sample collections found for the given username: " + username);
+            return List.of();
         }
-        for(SampleCollection sampleCollection : sampleCollections) {
+        for (SampleCollection sampleCollection : sampleCollections) {
             if (sampleCollection.getStaff().getUsername().equalsIgnoreCase(username)) {
                 CRUDsampleCollectionResponse response = sampleCollectionMapper.toResponse(sampleCollection);
                 if (response != null) {
@@ -106,7 +105,8 @@ public class StaffServiceImpl implements StaffService {
     @Transactional
     public CRUDsampleCollectionResponse getSampleCollectionTasksById(Long sampleCollectionId) {
         SampleCollection sampleCollection = sampleCollectionRepository.findById(sampleCollectionId)
-                .orElseThrow(() -> new IllegalArgumentException("Sample collection not found for ID: " + sampleCollectionId));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Sample collection not found for ID: " + sampleCollectionId));
         CRUDsampleCollectionResponse response = sampleCollectionMapper.toResponse(sampleCollection);
         if (response == null) {
             throw new IllegalArgumentException("Failed to map sample collection to response");
@@ -118,17 +118,18 @@ public class StaffServiceImpl implements StaffService {
     @Override
     @Transactional
     public void updateSampleCollectionStatus(Long sampleCollectionId, String collectionStatus, String sampleQuality) {
-            SampleCollection sampleCollection = sampleCollectionRepository.findById(sampleCollectionId)
-                    .orElseThrow(() -> new IllegalArgumentException("Sample collection not found for ID: " + sampleCollectionId));
-            if(sampleCollection.getCollectionStatus().equals(CollectionStatus.CANCELLED)){
-                throw new IllegalArgumentException("Cannot update a cancelled sample collection");
-            }
-            if(sampleCollection.getCollectionStatus().equals(CollectionStatus.COLLECTED)){
-                throw new IllegalArgumentException("Cannot update a completed sample collection");
-            }
-            sampleCollection.setCollectionStatus(CollectionStatus.valueOf(collectionStatus));
-            sampleCollection.setSampleQuality(SampleQuality.valueOf(sampleQuality));
-            sampleCollectionRepository.save(sampleCollection);
+        SampleCollection sampleCollection = sampleCollectionRepository.findById(sampleCollectionId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Sample collection not found for ID: " + sampleCollectionId));
+        if (sampleCollection.getCollectionStatus().equals(CollectionStatus.CANCELLED)) {
+            throw new IllegalArgumentException("Cannot update a cancelled sample collection");
+        }
+        if (sampleCollection.getCollectionStatus().equals(CollectionStatus.COLLECTED)) {
+            throw new IllegalArgumentException("Cannot update a completed sample collection");
+        }
+        sampleCollection.setCollectionStatus(CollectionStatus.valueOf(collectionStatus));
+        sampleCollection.setSampleQuality(SampleQuality.valueOf(sampleQuality));
+        sampleCollectionRepository.save(sampleCollection);
     }
 
     @Override
@@ -136,7 +137,7 @@ public class StaffServiceImpl implements StaffService {
         List<TestResultsResponse> testResultsResponses = new ArrayList<>();
         List<TestResult> testResults = testResultRepository.findAll();
         if (testResults.isEmpty()) {
-            throw new IllegalArgumentException("No test results found for the given username: " + username);
+            return List.of();
         }
         for (TestResult testResult : testResults) {
             if (testResult.getAnalyzedByStaff().getUsername().equalsIgnoreCase(username)) {
@@ -214,11 +215,11 @@ public class StaffServiceImpl implements StaffService {
         List<CRUDorderResponse> filteredOrders = new ArrayList<>();
         List<TestResult> testResults = testResultRepository.findAll();
         if (testResults.isEmpty()) {
-            throw new ResourceNotFoundException("No test results found for the given username: " + username);
+            return List.of();
         }
         for (TestResult testResult : testResults) {
             if (testResult.getAnalyzedByStaff().getUsername().equalsIgnoreCase(username) &&
-                testResult.getOrder().getOrderStatus().toString().equalsIgnoreCase(status)) {
+                    testResult.getOrder().getOrderStatus().toString().equalsIgnoreCase(status)) {
                 ServiceOrder serviceOrder = orderServiceRepository.getById(testResult.getOrder().getId());
                 if (serviceOrder != null) {
                     CRUDorderResponse response = orderServiceMapper.toCRUDorderResponse(serviceOrder);
@@ -226,7 +227,8 @@ public class StaffServiceImpl implements StaffService {
                         filteredOrders.add(response);
                     }
                 } else {
-                    throw new ResourceNotFoundException("Service order not found for ID: " + testResult.getOrder().getId());
+                    throw new ResourceNotFoundException(
+                            "Service order not found for ID: " + testResult.getOrder().getId());
                 }
             }
         }
@@ -238,11 +240,11 @@ public class StaffServiceImpl implements StaffService {
         List<CRUDsampleCollectionResponse> filteredSampleCollections = new ArrayList<>();
         List<SampleCollection> sampleCollections = sampleCollectionRepository.findAll();
         if (sampleCollections.isEmpty()) {
-            throw new IllegalArgumentException("No sample collections found for the given username: " + username);
+            return List.of();
         }
         for (SampleCollection sampleCollection : sampleCollections) {
             if (sampleCollection.getStaff().getUsername().equalsIgnoreCase(username) &&
-                sampleCollection.getCollectionStatus().toString().equalsIgnoreCase(status)) {
+                    sampleCollection.getCollectionStatus().toString().equalsIgnoreCase(status)) {
                 CRUDsampleCollectionResponse response = sampleCollectionMapper.toResponse(sampleCollection);
                 if (response != null) {
                     filteredSampleCollections.add(response);
@@ -257,11 +259,11 @@ public class StaffServiceImpl implements StaffService {
         List<TestResultsResponse> filteredTestResults = new ArrayList<>();
         List<TestResult> testResults = testResultRepository.findAll();
         if (testResults.isEmpty()) {
-            throw new IllegalArgumentException("No test results found for the given username: " + username);
+            return List.of();
         }
         for (TestResult testResult : testResults) {
             if (testResult.getAnalyzedByStaff().getUsername().equalsIgnoreCase(username) &&
-                testResult.getResultStatus().toString().equalsIgnoreCase(status)) {
+                    testResult.getResultStatus().toString().equalsIgnoreCase(status)) {
                 TestResultsResponse response = testResultsMapper.toResponse(testResult);
                 if (response != null) {
                     filteredTestResults.add(response);
@@ -278,7 +280,8 @@ public class StaffServiceImpl implements StaffService {
             if (testResult.getAnalyzedByStaff().getUsername().equalsIgnoreCase(username)) {
                 if (testResult.getOrder().getId().equals(orderId)) {
                     ServiceOrder serviceOrder = orderServiceRepository.findById(orderId)
-                            .orElseThrow(() -> new IllegalArgumentException("Service order not found for ID: " + orderId));
+                            .orElseThrow(
+                                    () -> new IllegalArgumentException("Service order not found for ID: " + orderId));
                     CRUDorderResponse response = orderServiceMapper.toCRUDorderResponse(serviceOrder);
                     return response;
                 }
@@ -324,7 +327,8 @@ public class StaffServiceImpl implements StaffService {
     }
 
     @Override
-    public Page<CRUDsampleCollectionResponse> getSampleCollectionsPage(String username, String status, Pageable pageable) {
+    public Page<CRUDsampleCollectionResponse> getSampleCollectionsPage(String username, String status,
+            Pageable pageable) {
         List<CRUDsampleCollectionResponse> all = (status != null && !status.isBlank())
                 ? filterSampleCollectionsByStatus(status, username)
                 : getSampleCollectionTasks(username);
