@@ -28,11 +28,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Generate image tag
+        run: |
+          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "IMAGE_TAG_FULL=$(date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: latest
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -43,7 +47,6 @@ jobs:
         env:
           IMAGE_ENV: ${{ inputs.environment }}
 
-      # ✅ Fetch the ECR token HERE on the runner (aws CLI is available)
       - name: Get ECR login token
         id: ecr-token
         run: |
@@ -56,13 +59,13 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          # ✅ Pass the pre-fetched token as an env var into the SSH session
+
           envs: ECR_TOKEN,ECR_REGISTRY,ECR_REPOSITORY,CONTAINER_NAME,IMAGE_ENV,DBMS_CONNECTION,DBMS_USERNAME,DBMS_PASSWORD,REDIS_HOST,REDIS_PASSWORD,HOST_SMTP,PORT_SMTP,USERNAME_SMTP,PASSWORD_SMTP,JWT_SECRET_KEY
           script: |
-            # ✅ No aws CLI needed — use the token directly
+            # No aws CLI needed — use the token directly
             echo "$ECR_TOKEN" | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
             docker stop $CONTAINER_NAME || true
             docker rm $CONTAINER_NAME || true
@@ -81,7 +84,12 @@ jobs:
               -e DBMS_PASSWORD=$DBMS_PASSWORD \
               -e REDIS_HOST=$REDIS_HOST \
               -e REDIS_PASSWORD=$REDIS_PASSWORD \
-              $ECR_REGISTRY/$ECR_REPOSITORY:latest
+              $ECR_REGISTRY/$ECR_REPOSITORY:IMAGE_TAG
+            
+            docker images $ECR_REGISTRY/$ECR_REPOSITORY --format "{{.ID}}" \
+                          | tail -n +6 \
+                          | xargs -r docker rmi
+
         env:
           ECR_TOKEN: ${{ steps.ecr-token.outputs.token }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
