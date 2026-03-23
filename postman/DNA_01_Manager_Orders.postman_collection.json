@@ -1,0 +1,746 @@
+{
+  "info": {
+    "_postman_id": "edfa88c7-ade3-41e3-9144-2c77dee44b52",
+    "name": "DNA Testing – 01. Manager Orders",
+    "description": "Quản lý đơn xét nghiệm ADN.\nChạy Login trước để lấy token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 AUTH",
+      "description": "Chạy Login trước — token tự động lưu vào environment",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "// ── HTTP ──────────────────────────────────────────────",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('[HTTP] Content-Type là application/json', () => {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});",
+                  "pm.test('[HTTP] Response time < 3000ms', () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "",
+                  "// ── Business ──────────────────────────────────────────",
+                  "pm.test('[Business] data.accessToken là string không rỗng', () => {",
+                  "  pm.expect(json.data.accessToken).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Business] data.refreshToken là string không rỗng', () => {",
+                  "  pm.expect(json.data.refreshToken).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Business] data.accessToken dạng JWT (3 phần phân cách bởi .)', () => {",
+                  "  pm.expect(json.data.accessToken.split('.').length).to.eql(3);",
+                  "});",
+                  "",
+                  "// ── Lưu token ─────────────────────────────────────────",
+                  "if (json.data?.accessToken) {",
+                  "  pm.environment.set('access_token', json.data.accessToken);",
+                  "  pm.environment.set('refresh_token', json.data.refreshToken);",
+                  "  console.log('✅ Tokens saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"rememberMe\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Đăng nhập — access_token & refresh_token tự động lưu vào environment."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📋 MANAGER – DNA ORDERS",
+      "item": [
+        {
+          "name": "GET /dna-orders — Danh sách đơn ADN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const d = json.data;",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('[HTTP] Content-Type JSON', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json'));",
+                  "pm.test('[HTTP] Response time < 3000ms', () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data.orders là array', () => pm.expect(d.orders).to.be.an('array'));",
+                  "pm.test('[Business] data.summary tồn tại', () => pm.expect(d.summary).to.be.an('object'));",
+                  "pm.test('[Business] summary.totalOrders là number >= 0', () => pm.expect(d.summary.totalOrders).to.be.a('number').and.at.least(0));",
+                  "pm.test('[Business] summary.completedOrders <= summary.totalOrders', () => pm.expect(d.summary.completedOrders).to.be.at.most(d.summary.totalOrders));",
+                  "pm.test('[Business] summary.cancelledOrders <= summary.totalOrders', () => pm.expect(d.summary.cancelledOrders).to.be.at.most(d.summary.totalOrders));",
+                  "pm.test('[Business] data.currentPage == 0 (trang đầu)', () => pm.expect(d.currentPage).to.eql(0));",
+                  "pm.test('[Business] data.pageSize == 10', () => pm.expect(d.pageSize).to.eql(10));",
+                  "pm.test('[Business] data.totalPages là number >= 0', () => pm.expect(d.totalPages).to.be.a('number').and.at.least(0));",
+                  "pm.test('[Business] data.totalOrders là number >= 0', () => pm.expect(d.totalOrders).to.be.a('number').and.at.least(0));",
+                  "pm.test('[Business] data.filters tồn tại', () => pm.expect(d.filters).to.be.an('object'));",
+                  "pm.test('[Business] Mỗi order có id, orderStatus, customerName', () => {",
+                  "  d.orders.forEach(o => {",
+                  "    pm.expect(o).to.have.property('id');",
+                  "    pm.expect(o).to.have.property('orderStatus');",
+                  "    pm.expect(o.orderStatus).to.be.a('string').and.not.empty;",
+                  "  });",
+                  "});",
+                  "pm.test('[Business] totalOrders khớp length nếu trang đầy đủ', () => {",
+                  "  pm.expect(d.orders.length).to.be.at.most(10);",
+                  "});",
+                  "if (d.orders.length > 0) {",
+                  "  pm.environment.set('orderId', d.orders[0].id);",
+                  "  console.log('orderId saved:', d.orders[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lấy danh sách đơn ADN có phân trang. orderId đầu tiên tự lưu vào env."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /dna-orders/{id} — Chi tiết đơn ADN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const d = json.data;",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('[HTTP] Response time < 2000ms', () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data.order là object', () => pm.expect(d.order).to.be.an('object'));",
+                  "pm.test('[Business] data.kits là array', () => pm.expect(d.kits).to.be.an('array'));",
+                  "pm.test('[Business] data.participants là array', () => pm.expect(d.participants).to.be.an('array'));",
+                  "pm.test('[Business] order.id khớp với {{orderId}} đã lưu', () => {",
+                  "  pm.expect(String(d.order.id)).to.eql(String(pm.environment.get('orderId')));",
+                  "});",
+                  "pm.test('[Business] order.orderStatus là string hợp lệ', () => {",
+                  "  const valid = ['PENDING','CONFIRMED','SAMPLE_COLLECTED','ANALYZING','COMPLETED','CANCELLED'];",
+                  "  pm.expect(valid).to.include(d.order.orderStatus);",
+                  "});",
+                  "pm.test('[Business] order.createdAt tồn tại', () => pm.expect(d.order.createdAt).to.exist);",
+                  "pm.test('[Business] order.customerName là string không rỗng', () => {",
+                  "  pm.expect(d.order.customerName).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "{{orderId}}"
+              ]
+            },
+            "description": "Lấy chi tiết một đơn kèm kits và participants."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /dna-orders/{id}/status — Cập nhật trạng thái đơn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('[HTTP] Response time < 2000ms', () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data là null (Void endpoint)', () => pm.expect(json.data).to.be.null);",
+                  "pm.test('[Business] message chứa thành công', () => pm.expect(json.message).to.include('thành công'));",
+                  "pm.test('[Business] message chứa status vừa set (CONFIRMED)', () => pm.expect(json.message).to.include('CONFIRMED'));",
+                  "",
+                  "// ── Negative: status rỗng → 400 ───────────────────────",
+                  "// (Test riêng trong request [ERROR CASE] bên dưới)"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\",\n  \"notes\": \"Đã xác nhận lịch thu mẫu với khách hàng\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "{{orderId}}",
+                "status"
+              ]
+            },
+            "description": "Cập nhật trạng thái đơn ADN. Các status hợp lệ: PENDING | CONFIRMED | SAMPLE_COLLECTED | ANALYZING | COMPLETED | CANCELLED"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /dna-orders/{id}/assign — Phân công nhân viên",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data là null (Void endpoint)', () => pm.expect(json.data).to.be.null);",
+                  "pm.test('[Business] message chứa thành công', () => pm.expect(json.message).to.include('thành công'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"collectStaffId\": \"{{test_kit_id}}\",\n  \"analysisStaffId\": \"{{test_kit_id}}\",\n  \"notes\": \"Ưu tiên xử lý buổi sáng\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/{{orderId}}/assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "{{orderId}}",
+                "assign"
+              ]
+            },
+            "description": "Phân công nhân viên thu mẫu và phân tích cho đơn."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /dna-orders/pending-assignment — Đơn chờ phân công",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const d = json.data;",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data.pendingOrders là array', () => pm.expect(d.pendingOrders).to.be.an('array'));",
+                  "pm.test('[Business] data.availableStaff là array', () => pm.expect(d.availableStaff).to.be.an('array'));",
+                  "pm.test('[Business] data.pendingCount là number >= 0', () => pm.expect(d.pendingCount).to.be.a('number').and.at.least(0));",
+                  "pm.test('[Business] data.availableStaffCount là number >= 0', () => pm.expect(d.availableStaffCount).to.be.a('number').and.at.least(0));",
+                  "pm.test('[Business] pendingCount khớp với length của pendingOrders', () => {",
+                  "  pm.expect(d.pendingCount).to.eql(d.pendingOrders.length);",
+                  "});",
+                  "pm.test('[Business] availableStaffCount khớp với length của availableStaff', () => {",
+                  "  pm.expect(d.availableStaffCount).to.eql(d.availableStaff.length);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/pending-assignment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "pending-assignment"
+              ]
+            },
+            "description": "Lấy đơn PENDING chưa phân công + danh sách nhân viên khả dụng."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /dna-orders/{id}/kits — Kit xét nghiệm của đơn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('[HTTP] Response time < 2000ms', () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data là array', () => pm.expect(json.data).to.be.an('array'));",
+                  "pm.test('[Business] Mỗi kit có id và kitCode', () => {",
+                  "  json.data.forEach(k => {",
+                  "    pm.expect(k).to.have.property('id');",
+                  "    pm.expect(k.id).to.exist;",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/{{orderId}}/kits",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "{{orderId}}",
+                "kits"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /dna-orders/{id}/participants — Người tham gia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('[HTTP] Response time < 2000ms', () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data là array', () => pm.expect(json.data).to.be.an('array'));",
+                  "pm.test('[Business] Mỗi participant có id và fullName', () => {",
+                  "  json.data.forEach(p => {",
+                  "    pm.expect(p).to.have.property('id');",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/{{orderId}}/participants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "{{orderId}}",
+                "participants"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[ERROR] PATCH status — status không hợp lệ → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('[HTTP] Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('[Error] body.code == 400', () => pm.expect(json.code).to.eql(400));",
+                  "pm.test('[Error] body.message mô tả lỗi', () => pm.expect(json.message).to.be.a('string').and.not.empty);",
+                  "pm.test('[Error] body.path tồn tại', () => pm.expect(json.path).to.be.a('string').and.not.empty);",
+                  "pm.test('[Error] body.data là null (không trả data khi lỗi)', () => pm.expect(json.data).to.be.null);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INVALID_XYZ\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "{{orderId}}",
+                "status"
+              ]
+            },
+            "description": "Truyền status không nằm trong danh sách hợp lệ → phải trả 400."
+          },
+          "response": []
+        },
+        {
+          "name": "[ERROR] PATCH status — status rỗng → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('[HTTP] Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('[Error] body.code == 400', () => pm.expect(json.code).to.eql(400));",
+                  "pm.test('[Error] body.message không rỗng', () => pm.expect(json.message).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/{{orderId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "{{orderId}}",
+                "status"
+              ]
+            },
+            "description": "Truyền status rỗng → phải trả 400."
+          },
+          "response": []
+        },
+        {
+          "name": "[ERROR] GET /dna-orders/{id} — orderId không tồn tại → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('[HTTP] Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('[Error] body.code == 404', () => pm.expect(json.code).to.eql(404));",
+                  "pm.test('[Error] body.message không rỗng', () => pm.expect(json.message).to.be.a('string').and.not.empty);",
+                  "pm.test('[Error] body.path trỏ đúng endpoint', () => pm.expect(json.path).to.include('999999999'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "999999999"
+              ]
+            },
+            "description": "Truy vấn orderId không tồn tại → phải trả 404."
+          },
+          "response": []
+        },
+        {
+          "name": "[ERROR] POST assign — thiếu collectStaffId → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('[HTTP] Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('[Error] body.code == 400', () => pm.expect(json.code).to.eql(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"analysisStaffId\": \"some-uuid\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders/{{orderId}}/assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders",
+                "{{orderId}}",
+                "assign"
+              ]
+            },
+            "description": "Thiếu collectStaffId → phải trả 400."
+          },
+          "response": []
+        },
+        {
+          "name": "[ERROR] GET /dna-orders — Không có token → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('[HTTP] Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-orders"
+              ]
+            },
+            "description": "Gọi endpoint yêu cầu auth mà không có Bearer token → 401."
+          },
+          "response": []
+        }
+      ],
+      "description": "Quản lý đơn xét nghiệm ADN"
+    }
+  ]
+}

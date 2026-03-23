@@ -1,0 +1,467 @@
+{
+  "info": {
+    "_postman_id": "c55bf2ba-3960-4a3a-90f1-01ee7eac1a0b",
+    "name": "DNA Testing – 03. Manager Reports",
+    "description": "Tạo, xem, duyệt và từ chối báo cáo hệ thống.\nChạy Login trước để lấy token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 AUTH",
+      "description": "Chạy Login trước — token tự động lưu vào environment",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "// ── HTTP ──────────────────────────────────────────────",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('[HTTP] Content-Type là application/json', () => {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});",
+                  "pm.test('[HTTP] Response time < 3000ms', () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "",
+                  "// ── Business ──────────────────────────────────────────",
+                  "pm.test('[Business] data.accessToken là string không rỗng', () => {",
+                  "  pm.expect(json.data.accessToken).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Business] data.refreshToken là string không rỗng', () => {",
+                  "  pm.expect(json.data.refreshToken).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Business] data.accessToken dạng JWT (3 phần phân cách bởi .)', () => {",
+                  "  pm.expect(json.data.accessToken.split('.').length).to.eql(3);",
+                  "});",
+                  "",
+                  "// ── Lưu token ─────────────────────────────────────────",
+                  "if (json.data?.accessToken) {",
+                  "  pm.environment.set('access_token', json.data.accessToken);",
+                  "  pm.environment.set('refresh_token', json.data.refreshToken);",
+                  "  console.log('✅ Tokens saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"rememberMe\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Đăng nhập — access_token & refresh_token tự động lưu vào environment."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📄 MANAGER – REPORTS",
+      "item": [
+        {
+          "name": "GET /reports — Danh sách báo cáo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const d = json.data;",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('[HTTP] Response time < 3000ms', () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data.reports là array', () => pm.expect(d.reports).to.be.an('array'));",
+                  "pm.test('[Business] data.stats là object', () => pm.expect(d.stats).to.be.an('object'));",
+                  "pm.test('[Business] stats.totalReports >= 0', () => pm.expect(d.stats.totalReports).to.be.a('number').and.at.least(0));",
+                  "pm.test('[Business] stats.approvedReports + rejectedReports + generatedReports <= totalReports', () => {",
+                  "  pm.expect(d.stats.approvedReports + d.stats.rejectedReports + d.stats.generatedReports).to.be.at.most(d.stats.totalReports);",
+                  "});",
+                  "pm.test('[Business] data.currentPage == 0', () => pm.expect(d.currentPage).to.eql(0));",
+                  "pm.test('[Business] data.pageSize == 20', () => pm.expect(d.pageSize).to.eql(20));",
+                  "pm.test('[Business] data.totalPages >= 0', () => pm.expect(d.totalPages).to.be.a('number').and.at.least(0));",
+                  "pm.test('[Business] data.reportStatuses là array không rỗng', () => pm.expect(d.reportStatuses).to.be.an('array').and.not.empty);",
+                  "pm.test('[Business] data.reportTypes là array không rỗng', () => pm.expect(d.reportTypes).to.be.an('array').and.not.empty);",
+                  "pm.test('[Business] Mỗi report có id, reportName, reportStatus, reportType', () => {",
+                  "  d.reports.forEach(r => {",
+                  "    pm.expect(r).to.have.property('id');",
+                  "    pm.expect(r).to.have.property('reportName');",
+                  "    pm.expect(r).to.have.property('reportStatus');",
+                  "    pm.expect(r).to.have.property('reportType');",
+                  "  });",
+                  "});",
+                  "if (d.reports.length > 0) {",
+                  "  pm.environment.set('reportId', d.reports[0].id);",
+                  "  console.log('reportId saved:', d.reports[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-statistics/reports?page=0&size=20&status=all&sortBy=createdAt&sortDir=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-statistics",
+                "reports"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "all"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDir",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /reports/{id} — Chi tiết báo cáo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const d = json.data;",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data.id tồn tại', () => pm.expect(d.id).to.exist);",
+                  "pm.test('[Business] data.reportName là string không rỗng', () => pm.expect(d.reportName).to.be.a('string').and.not.empty);",
+                  "pm.test('[Business] data.reportStatus là string không rỗng', () => pm.expect(d.reportStatus).to.be.a('string').and.not.empty);",
+                  "pm.test('[Business] data.reportType là string không rỗng', () => pm.expect(d.reportType).to.be.a('string').and.not.empty);",
+                  "pm.test('[Business] data.reportCategory là string không rỗng', () => pm.expect(d.reportCategory).to.be.a('string').and.not.empty);",
+                  "pm.test('[Business] data.generatedByUserName tồn tại', () => pm.expect(d.generatedByUserName).to.exist);",
+                  "pm.test('[Business] data.id khớp với {{reportId}} đã lưu', () => {",
+                  "  pm.expect(String(d.id)).to.eql(String(pm.environment.get('reportId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-statistics/reports/{{reportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-statistics",
+                "reports",
+                "{{reportId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /reports — Tạo báo cáo mới",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const d = json.data;",
+                  "",
+                  "pm.test('[HTTP] Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('[HTTP] Response time < 3000ms', () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 201', () => {",
+                  "  pm.expect(json.code).to.eql(201);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data.id tồn tại (id mới được tạo)', () => pm.expect(d.id).to.exist);",
+                  "pm.test('[Business] data.reportName == tên đã gửi', () => pm.expect(d.reportName).to.eql('Báo cáo tháng 3/2026'));",
+                  "pm.test('[Business] data.reportType == MONTHLY', () => pm.expect(d.reportType).to.eql('MONTHLY'));",
+                  "pm.test('[Business] data.reportCategory == DNA_ORDERS', () => pm.expect(d.reportCategory).to.eql('DNA_ORDERS'));",
+                  "pm.test('[Business] data.reportStatus == GENERATED (trạng thái mặc định khi mới tạo)', () => pm.expect(d.reportStatus).to.eql('GENERATED'));",
+                  "pm.test('[Business] data.generatedByUserName tồn tại (lấy từ token)', () => pm.expect(d.generatedByUserName).to.exist);",
+                  "if (d?.id) { pm.environment.set('reportId', d.id); console.log('New reportId:', d.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reportName\": \"Báo cáo tháng 3/2026\",\n  \"reportType\": \"MONTHLY\",\n  \"reportCategory\": \"DNA_ORDERS\",\n  \"reportData\": {\n    \"period\": \"2026-03\",\n    \"totalOrders\": 120,\n    \"completedOrders\": 98,\n    \"revenue\": 245000000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-statistics/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-statistics",
+                "reports"
+              ]
+            },
+            "description": "Người tạo được lấy tự động từ Bearer token. reportId mới tự lưu."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /reports/{id}/status — Cập nhật trạng thái báo cáo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('[HTTP] Status 200', () => pm.response.to.have.status(200));",
+                  "// ── Cấu trúc ApiResponse ─────────────────────────────",
+                  "pm.test('[Struct] res.code == 200', () => {",
+                  "  pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "pm.test('[Struct] res.message là string không rỗng', () => {",
+                  "  pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.test('[Struct] res.timestamp tồn tại', () => {",
+                  "  pm.expect(json.timestamp).to.exist;",
+                  "});",
+                  "pm.test('[Business] data là null (Void endpoint)', () => pm.expect(json.data).to.be.null);",
+                  "pm.test('[Business] message chứa thành công', () => pm.expect(json.message).to.include('thành công'));",
+                  "pm.test('[Business] message chứa APPROVED', () => pm.expect(json.message).to.include('APPROVED'));",
+                  "",
+                  "// ── Verify: GET lại để kiểm tra status đã thật sự thay đổi ──",
+                  "// (Chạy request GET /reports/{id} ngay sau để xác nhận)"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-statistics/reports/{{reportId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-statistics",
+                "reports",
+                "{{reportId}}",
+                "status"
+              ]
+            },
+            "description": "Các status hợp lệ: GENERATED | APPROVED | REJECTED"
+          },
+          "response": []
+        },
+        {
+          "name": "[ERROR] PATCH /reports/{id}/status — status rỗng → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('[HTTP] Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('[Error] body.code == 400', () => pm.expect(json.code).to.eql(400));",
+                  "pm.test('[Error] body.message mô tả lỗi rõ ràng', () => pm.expect(json.message).to.be.a('string').and.not.empty);",
+                  "pm.test('[Error] body.path trỏ đúng endpoint', () => pm.expect(json.path).to.include('status'));",
+                  "pm.test('[Error] body.data là null', () => pm.expect(json.data).to.be.null);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-statistics/reports/{{reportId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-statistics",
+                "reports",
+                "{{reportId}}",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[ERROR] GET /reports/{id} — reportId không tồn tại → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('[HTTP] Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('[Error] body.code == 404', () => pm.expect(json.code).to.eql(404));",
+                  "pm.test('[Error] body.message không rỗng', () => pm.expect(json.message).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/dna-statistics/reports/999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "dna-statistics",
+                "reports",
+                "999999999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Tạo, duyệt, từ chối báo cáo hệ thống"
+    }
+  ]
+}
