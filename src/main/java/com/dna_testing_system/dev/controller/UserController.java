@@ -19,6 +19,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,7 +50,6 @@ public class UserController {
     TestKitService testKitService;
 
     @GetMapping("/all")
-    @PreAuthorize("hasRole('CUSTOMER')")
     @ResponseBody
     public ResponseEntity<ApiResponse<List<UserProfileResponse>>> getAllProfiles() {
         List<UserProfileResponse> profiles = userProfileService.getUserProfiles();
@@ -82,12 +82,27 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{username}")
+    @PutMapping(value = "/{username}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(@Valid @PathVariable String username,
-                                                                          @RequestBody UserProfileRequest userProfile,
-                                                                          @RequestParam(value = "file", required = false) MultipartFile file,
-                                                                          HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfileJson(@PathVariable String username,
+                                                                              @Valid @RequestBody UserProfileRequest userProfile,
+                                                                              HttpServletRequest httpServletRequest) {
+        return updateProfileInternal(username, userProfile, null, httpServletRequest);
+    }
+
+    @PutMapping(value = "/{username}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseBody
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfileMultipart(@PathVariable String username,
+                                                                                   @Valid @ModelAttribute UserProfileRequest userProfile,
+                                                                                   @RequestParam(value = "file", required = false) MultipartFile file,
+                                                                                   HttpServletRequest httpServletRequest) {
+        return updateProfileInternal(username, userProfile, file, httpServletRequest);
+    }
+
+    private ResponseEntity<ApiResponse<UserProfileResponse>> updateProfileInternal(String username,
+                                                                                   UserProfileRequest userProfile,
+                                                                                   MultipartFile file,
+                                                                                   HttpServletRequest httpServletRequest) {
         try {
             UserProfileResponse existingProfile = userProfileService.getUserProfile(username);
             String oldImageUrl = null;
@@ -98,11 +113,11 @@ public class UserController {
                     String uploadsDir = "uploads/";
                     String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
                     Path uploadPath = Paths.get(uploadsDir);
-                    
+
                     Files.createDirectories(uploadPath);
                     Path filePath = uploadPath.resolve(fileName);
                     file.transferTo(filePath.toFile());
-                    
+
                     String newImageUrl = "/uploads/" + fileName;
                     oldImageUrl = existingProfile.getProfileImageUrl();
                     userProfile.setProfileImageUrl(newImageUrl);

@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -35,7 +36,10 @@ public class UserFeedbackController {
     CustomerFeedbackService customerFeedbackService;
     UserRepository userRepository;
 
-    @PostMapping("/{feedbackId}")
+        @PostMapping(value = "/{feedbackId}", consumes = {
+            MediaType.MULTIPART_FORM_DATA_VALUE,
+            MediaType.APPLICATION_FORM_URLENCODED_VALUE
+        })
     @ResponseBody
     public ResponseEntity<ApiResponse<CustomerFeedbackResponse>> createFeedback(@PathVariable String feedbackId,
                                                                                 @Valid @ModelAttribute CreateFeedbackRequest request,
@@ -72,6 +76,44 @@ public class UserFeedbackController {
             );
         } catch (Exception e) {
             log.error("Error creating feedback for order ID: {} by user: {}", request.getOrderId(), authentication.getName(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to submit feedback: " + e.getMessage(), httpServletRequest.getRequestURI()));
+        }
+    }
+
+    @PostMapping(value = "/{feedbackId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse<CustomerFeedbackResponse>> createFeedbackJson(@PathVariable String feedbackId,
+                                                                                    @Valid @RequestBody CreateFeedbackRequest request,
+                                                                                    BindingResult bindingResult,
+                                                                                    HttpServletRequest httpServletRequest) {
+
+        log.info("Received JSON feedback creation request for feedbackId={}: {}", feedbackId, request);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            log.warn("Unauthenticated user attempting to submit feedback (JSON)");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "You must be logged in to submit feedback.", httpServletRequest.getRequestURI()));
+        }
+
+        try {
+            var existingUser = userRepository.findByUsername(authentication.getName());
+            String currentUserId = existingUser.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS)).getId();
+            request.setCustomerId(currentUserId);
+
+            if (bindingResult.hasErrors()) {
+                log.warn("Validation errors in JSON feedback body: {}", bindingResult.getAllErrors());
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Please fix the errors in the feedback form.", httpServletRequest.getRequestURI()));
+            }
+
+            CustomerFeedbackResponse feedback = customerFeedbackService.createFeedback(request);
+            log.info("Feedback created successfully (JSON) for order ID: {} by user: {}", request.getOrderId(), currentUserId);
+
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Feedback submitted successfully!", feedback));
+
+        } catch (Exception e) {
+            log.error("Error creating feedback (JSON) for order ID: {} by user: {}", request.getOrderId(), authentication.getName(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to submit feedback: " + e.getMessage(), httpServletRequest.getRequestURI()));
         }
