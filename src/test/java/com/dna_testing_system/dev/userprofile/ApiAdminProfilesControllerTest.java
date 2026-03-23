@@ -106,7 +106,7 @@ class ApiAdminProfilesControllerTest {
                 "profile",
                 "profile.json",
                 MediaType.APPLICATION_JSON_VALUE,
-                objectMapper.writeValueAsBytes(UserProfileRequest.builder().email("x@ex.com").password("password123").build())
+                objectMapper.writeValueAsBytes(UserProfileRequest.builder().email("x@ex.com").build())
         );
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/admin/profiles/{username}", "ghost")
@@ -140,7 +140,6 @@ class ApiAdminProfilesControllerTest {
 
         UserProfileRequest request = UserProfileRequest.builder()
                 .email("new@ex.com")
-                .password("password123")
                 .build();
         MockMultipartFile profilePart = new MockMultipartFile(
                 "profile",
