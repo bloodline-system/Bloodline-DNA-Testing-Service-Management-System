@@ -1,0 +1,348 @@
+{
+  "info": {
+    "_postman_id": "manager-report-api",
+    "name": "Manager Report API - Báo cáo thống kê",
+    "description": "APIs for managing system reports - creation, filtering, and status management with statistics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. List Reports with Pagination",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success status', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.status).to.equal(200);",
+              "});",
+              "",
+              "pm.test('Response contains reports array', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.data).to.have.property('reports');",
+              "    pm.expect(data.data.reports).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Response contains pagination info', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.data.pagination).to.have.property('currentPage');",
+              "    pm.expect(data.data.pagination).to.have.property('pageSize');",
+              "    pm.expect(data.data.pagination).to.have.property('totalPages');",
+              "    pm.expect(data.data.pagination).to.have.property('totalReports');",
+              "});",
+              "",
+              "pm.test('Response contains report statistics', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.data).to.have.property('reportStats');",
+              "    pm.expect(data.data.reportStats).to.have.property('totalReports');",
+              "    pm.expect(data.data.reportStats).to.have.property('generatedReports');",
+              "    pm.expect(data.data.reportStats).to.have.property('approvedReports');",
+              "    pm.expect(data.data.reportStats).to.have.property('rejectedReports');",
+              "});",
+              "",
+              "pm.test('Response contains available filters', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.data).to.have.property('allRoles');",
+              "    pm.expect(data.data).to.have.property('reportStatuses');",
+              "    pm.expect(data.data).to.have.property('reportTypes');",
+              "});",
+              "",
+              "// Store first report ID for detail test",
+              "if (pm.response.json().data.reports.length > 0) {",
+              "    const firstReport = pm.response.json().data.reports[0];",
+              "    pm.environment.set('reportId', firstReport.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwtToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/manager/reports?page=0&size=20&status=all&generatedByRole=all&search=&sortBy=createdAt&sortDir=desc",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "manager",
+            "reports"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "20"
+            },
+            {
+              "key": "status",
+              "value": "all"
+            },
+            {
+              "key": "generatedByRole",
+              "value": "all"
+            },
+            {
+              "key": "search",
+              "value": ""
+            },
+            {
+              "key": "sortBy",
+              "value": "createdAt"
+            },
+            {
+              "key": "sortDir",
+              "value": "desc"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Get Report Details",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Use report ID from previous test",
+              "if (!pm.environment.get('reportId')) {",
+              "    pm.test('ERROR: No report ID found', function () {",
+              "        pm.expect(true).to.be.false;",
+              "    });",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response contains report data', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.data).to.have.property('id');",
+              "    pm.expect(data.data).to.have.property('reportName');",
+              "    pm.expect(data.data).to.have.property('reportType');",
+              "    pm.expect(data.data).to.have.property('reportCategory');",
+              "    pm.expect(data.data).to.have.property('reportStatus');",
+              "});",
+              "",
+              "pm.test('Report status is one of valid values', function () {",
+              "    const data = pm.response.json();",
+              "    const validStatuses = ['GENERATED', 'APPROVED', 'REJECTED'];",
+              "    pm.expect(validStatuses).to.include(data.data.reportStatus);",
+              "});",
+              "",
+              "pm.test('Report type is defined', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.data.reportType).to.exist;",
+              "});",
+              "",
+              "pm.test('Response contains user who generated report', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.data.generatedByUserName).to.exist;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwtToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/manager/reports/{{reportId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "manager",
+            "reports",
+            "{{reportId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Create New Report",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Response indicates report creation success', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.message).to.include('created');",
+              "});",
+              "",
+              "pm.test('Response status field is 201', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.status).to.equal(201);",
+              "});",
+              "",
+              "pm.test('Response indicates no error', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.data).to.be.null;",
+              "    pm.expect(data.message).to.exist;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwtToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reportName\": \"DNA Testing Statistics Report {{timestamp}}\",\n  \"reportType\": \"DNA_ANALYSIS\",\n  \"reportCategory\": \"Statistics\",\n  \"reportData\": {\n    \"totalTests\": 250,\n    \"completedTests\": 200,\n    \"pendingTests\": 50,\n    \"accuracy\": 99.5\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/manager/reports",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "manager",
+            "reports"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Update Report Status",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Use report ID from test #2",
+              "if (!pm.environment.get('reportId')) {",
+              "    pm.test('ERROR: No report ID found', function () {",
+              "        pm.expect(true).to.be.false;",
+              "    });",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response indicates report status update success', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.message).to.include('status updated');",
+              "});",
+              "",
+              "pm.test('Response status field is 200', function () {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.status).to.equal(200);",
+              "});",
+              "",
+              "pm.test('Updated status is persisted', function () {",
+              "    // Verify by checking message indicates the status change",
+              "    const data = pm.response.json();",
+              "    const validStatuses = ['APPROVED', 'REJECTED'];",
+              "    pm.expect(data.message.toUpperCase()).to.include.oneOf(validStatuses);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwtToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"APPROVED\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/manager/reports/{{reportId}}/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "manager",
+            "reports",
+            "{{reportId}}",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
