@@ -95,10 +95,25 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     @Transactional(readOnly = true)
     public List<UserProfileResponse> getUserProfileByName(String name) {
-        List<UserProfile> profiles = userProfileRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
-        return profiles.stream()
-                .map(profile -> userProfileMapper.toDto(profile.getUser()))
+        if (name == null || name.isBlank()) {
+            return getUserProfiles();
+        }
+
+        String keyword = name.trim().toLowerCase();
+
+        return userRepository.findAll().stream()
+                .filter(user -> user.getProfile() != null)
+                .filter(user -> {
+                    UserProfile profile = user.getProfile();
+                    String firstName = profile.getFirstName();
+                    String lastName = profile.getLastName();
+                    String fullName = ((firstName == null ? "" : firstName) + " " + (lastName == null ? "" : lastName)).trim();
+
+                    return (firstName != null && firstName.toLowerCase().contains(keyword))
+                            || (lastName != null && lastName.toLowerCase().contains(keyword))
+                            || (!fullName.isEmpty() && fullName.toLowerCase().contains(keyword));
+                })
+                .map(userProfileMapper::toDto)
                 .collect(Collectors.toList());
     }
 
