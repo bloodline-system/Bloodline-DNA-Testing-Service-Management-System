@@ -48,7 +48,6 @@ public class UserController {
     TestKitService testKitService;
 
     @GetMapping("/all")
-    @PreAuthorize("hasRole('CUSTOMER')")
     @ResponseBody
     public ResponseEntity<ApiResponse<List<UserProfileResponse>>> getAllProfiles() {
         List<UserProfileResponse> profiles = userProfileService.getUserProfiles();

@@ -12,16 +12,22 @@
       "name": "AuthController",
       "item": [
         {
-          "name": "Login - Admin",
+          "name": "Login",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "let json = {};",
-                  "try { json = pm.response.json(); } catch(e) {}",
-                  "if (json?.data?.access_token) pm.collectionVariables.set('access_token', json.data.access_token);",
-                  "if (json?.data?.refresh_token) pm.collectionVariables.set('refresh_token', json.data.refresh_token);"
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "    pm.environment.set(\"access_token\", jsonData.data.access_token);",
+                  "    pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+                  "    pm.environment.set(\"expires_in\", jsonData.data.expires_in);",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -39,225 +45,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\",\n  \"rememberMe\": true\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "Login - Admin",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\",\n  \"rememberMe\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/api/v1/auth/login",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "auth",
-                    "login"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": null,
-              "header": [
-                {
-                  "key": "X-Content-Type-Options",
-                  "value": "nosniff"
-                },
-                {
-                  "key": "X-XSS-Protection",
-                  "value": "0"
-                },
-                {
-                  "key": "Cache-Control",
-                  "value": "no-cache, no-store, max-age=0, must-revalidate"
-                },
-                {
-                  "key": "Pragma",
-                  "value": "no-cache"
-                },
-                {
-                  "key": "Expires",
-                  "value": "0"
-                },
-                {
-                  "key": "X-Frame-Options",
-                  "value": "DENY"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                },
-                {
-                  "key": "Transfer-Encoding",
-                  "value": "chunked"
-                },
-                {
-                  "key": "Date",
-                  "value": "Sun, 22 Mar 2026 15:50:15 GMT"
-                },
-                {
-                  "key": "Keep-Alive",
-                  "value": "timeout=60"
-                },
-                {
-                  "key": "Connection",
-                  "value": "keep-alive"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n    \"code\": 200,\n    \"message\": \"Login successfully\",\n    \"data\": {\n        \"access_token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyMiIsInVzZXJuYW1lIjoibWFuYWdlcjIiLCJyb2xlcyI6WyJNQU5BR0VSIl0sInBlcm1pc3Npb25zIjpbXSwiaWF0IjoxNzc0MTk0NjE1LCJleHAiOjE3NzQxOTU1MTV9.jbvVnH4MQBaHlFq2KNdrZpao3GUfCO5LX4Mc4pG605U\",\n        \"refresh_token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyMiIsInRva2VuX3R5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzc0MTk0NjE1LCJleHAiOjE3NzQyODEwMTV9.xztvlcWK2DJVK3sgDzuj8SJW8MiLKzTtZ2jzc-KtViI\",\n        \"expires_in\": 1774195515064,\n        \"user_id\": \"6cc24bac-07e9-479b-aca7-3427fb20c5e5\"\n    },\n    \"timestamp\": \"2026-03-22T15:50:15.068283178Z\"\n}"
-            },
-            {
-              "name": "Login - Admin",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\",\n  \"rememberMe\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/api/v1/auth/login",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "auth",
-                    "login"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": null,
-              "header": [
-                {
-                  "key": "X-Content-Type-Options",
-                  "value": "nosniff"
-                },
-                {
-                  "key": "X-XSS-Protection",
-                  "value": "0"
-                },
-                {
-                  "key": "Cache-Control",
-                  "value": "no-cache, no-store, max-age=0, must-revalidate"
-                },
-                {
-                  "key": "Pragma",
-                  "value": "no-cache"
-                },
-                {
-                  "key": "Expires",
-                  "value": "0"
-                },
-                {
-                  "key": "X-Frame-Options",
-                  "value": "DENY"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                },
-                {
-                  "key": "Transfer-Encoding",
-                  "value": "chunked"
-                },
-                {
-                  "key": "Date",
-                  "value": "Sun, 22 Mar 2026 15:50:15 GMT"
-                },
-                {
-                  "key": "Keep-Alive",
-                  "value": "timeout=60"
-                },
-                {
-                  "key": "Connection",
-                  "value": "keep-alive"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n    \"code\": 200,\n    \"message\": \"Login successfully\",\n    \"data\": {\n        \"access_token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyMiIsInVzZXJuYW1lIjoibWFuYWdlcjIiLCJyb2xlcyI6WyJNQU5BR0VSIl0sInBlcm1pc3Npb25zIjpbXSwiaWF0IjoxNzc0MTk0NjE1LCJleHAiOjE3NzQxOTU1MTV9.jbvVnH4MQBaHlFq2KNdrZpao3GUfCO5LX4Mc4pG605U\",\n        \"refresh_token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyMiIsInRva2VuX3R5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzc0MTk0NjE1LCJleHAiOjE3NzQyODEwMTV9.xztvlcWK2DJVK3sgDzuj8SJW8MiLKzTtZ2jzc-KtViI\",\n        \"expires_in\": 1774195515064,\n        \"user_id\": \"6cc24bac-07e9-479b-aca7-3427fb20c5e5\"\n    },\n    \"timestamp\": \"2026-03-22T15:50:15.068283178Z\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Login - User",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "let json = {};",
-                  "try { json = pm.response.json(); } catch(e) {}",
-                  "if (json?.data?.access_token) pm.collectionVariables.set('access_token_user', json.data.access_token);"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"{{profile_username}}\",\n  \"password\": \"{{profile_password}}\",\n  \"rememberMe\": true\n}",
+              "raw": "{\n  \"username\": \"thanhnhi123\",\n  \"password\": \"thanhnhi123\",\n  \"rememberMe\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -282,8 +70,288 @@
       ]
     },
     {
+      "name": "UserFeedbackController",
+      "item": [
+        {
+          "name": "View My Feedback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Feedback list is array', function () {",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "feedback"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Feedback By Id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/feedback/{{feedback_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "feedback",
+                "{{feedback_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create feedback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();\r",
+                  "pm.environment.set(\"feedback_id\", json.data.id); "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"serviceId\": {{serviceId}},\r\n  \"orderId\": {{orderId}},\r\n  \"customerId\": \"{{customerId}}\",\r\n  \"serviceQualityRating\": 4,\r\n  \"staffBehaviorRating\": 2,\r\n  \"timelinessRating\": 1,\r\n  \"feedbackTitle\": \"Test feedback - thanhnhi123\",\r\n  \"feedbackContent\": \"Nội dung feedback để test create API\",\r\n  \"responseRequired\": true\r\n} ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/feedback/{{feedback_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "feedback",
+                "{{feedback_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "UserController",
       "item": [
+        {
+          "name": "Get All Profiles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Response envelope', function () {",
+                  "  pm.expect(json).to.have.property('code');",
+                  "  pm.expect(json).to.have.property('message');",
+                  "  pm.expect(json).to.have.property('data');",
+                  "});",
+                  "pm.test('Profiles is array', function () {",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profiles/all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Profiles (by name)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Profiles is array', function () {",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profiles/search?name={{user_name}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{user_name}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
         {
           "name": "Get Profile By Username",
           "event": [
@@ -291,15 +359,15 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status 200 or 404\", function () {\r",
-                  "  pm.expect([200, 404]).to.include(pm.response.code);\r",
-                  "});\r",
-                  "const json = pm.response.json();\r",
-                  "if (pm.response.code === 200) {\r",
-                  "  pm.test(\"Profile payload valid\", function () {\r",
-                  "    pm.expect(json.code).to.eql(200);\r",
-                  "    pm.expect(json.data).to.be.an(\"object\");\r",
-                  "  });\r",
+                  "pm.test('Status 200 or 404', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Profile payload valid', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "    pm.expect(json.data).to.be.an('object');",
+                  "  });",
                   "}"
                 ],
                 "type": "text/javascript",
@@ -322,7 +390,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/profiles/{{profile_username}}",
+              "raw": "{{baseUrl}}/api/v1/profiles/{{user_name}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -330,7 +398,7 @@
                 "api",
                 "v1",
                 "profiles",
-                "{{profile_username}}"
+                "{{user_name}}"
               ]
             }
           },
@@ -338,6 +406,19 @@
         },
         {
           "name": "Update Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -381,7 +462,7 @@
                 },
                 {
                   "key": "password",
-                  "value": "thanhnhi1",
+                  "value": "{{profile_password}}",
                   "type": "text"
                 },
                 {
@@ -392,7 +473,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/profiles/{{profile_username}}",
+              "raw": "{{baseUrl}}/api/v1/profiles/{{user_name}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -400,7 +481,7 @@
                 "api",
                 "v1",
                 "profiles",
-                "{{profile_username}}"
+                "{{user_name}}"
               ]
             }
           },
@@ -408,6 +489,19 @@
         },
         {
           "name": "Delete Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -422,7 +516,7 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/profiles/{{profile_username}}",
+              "raw": "{{baseUrl}}/api/v1/profiles/{{user_name}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -430,71 +524,7 @@
                 "api",
                 "v1",
                 "profiles",
-                "{{profile_username}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "UserFeedbackController",
-      "item": [
-        {
-          "name": "View My Feedback",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "feedback"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Feedback By Id",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/feedback/{{feedback_id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "feedback",
-                "{{feedback_id}}"
+                "{{user_name}}"
               ]
             }
           },
@@ -503,76 +533,96 @@
       ]
     }
   ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8080",
-      "type": "string"
+      "value": "http://localhost:8080"
     },
     {
       "key": "access_token",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "access_token_user",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "refresh_token",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "admin_username",
-      "value": "admin",
-      "type": "string"
+      "value": "admin"
     },
     {
       "key": "admin_password",
-      "value": "admin",
-      "type": "string"
+      "value": "admin"
     },
     {
       "key": "profile_username",
-      "value": "thanhnhi1",
-      "type": "string"
+      "value": "thanhnhi1"
     },
     {
       "key": "profile_password",
-      "value": "thanhnhi1",
-      "type": "string"
+      "value": "thanhnhi1"
     },
     {
       "key": "service_id",
-      "value": "1",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "order_id",
-      "value": "1",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "feedback_id",
-      "value": "1",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "sample_id",
-      "value": "1",
-      "type": "string"
+      "value": "1"
     },
     {
       "key": "sign_up_id",
-      "value": "",
-      "type": "string"
+      "value": ""
     },
     {
       "key": "otp",
-      "value": "123456",
-      "type": "string"
+      "value": "123456"
     }
   ]
 }
