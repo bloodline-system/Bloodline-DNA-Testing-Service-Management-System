@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/dashboard")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
 public class ApiAdminDashboardRestController {
 
     MedicalServiceManageService medicalServiceManageService;
@@ -76,14 +76,13 @@ public class ApiAdminDashboardRestController {
             Map<String, Object> stats = Map.of(
                     "dashboard", dashboardStats,
                     "monthlyStats", monthlyStats,
-                    "performanceMetrics", performanceMetrics
-            );
+                    "performanceMetrics", performanceMetrics);
 
             return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Dashboard statistics loaded", stats));
         } catch (Exception e) {
             log.error("Error loading dashboard statistics: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load dashboard statistics", request.getRequestURI()));
         }
     }
@@ -96,12 +95,12 @@ public class ApiAdminDashboardRestController {
     public ResponseEntity<ApiResponse<List<SystemActivity>>> getRecentActivities(HttpServletRequest request) {
         try {
             List<SystemActivity> recentActivities = getRecentSystemActivities();
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "Recent activities loaded", recentActivities));
         } catch (Exception e) {
             log.error("Error loading recent activities: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load activities", request.getRequestURI()));
         }
     }
@@ -114,12 +113,12 @@ public class ApiAdminDashboardRestController {
     public ResponseEntity<ApiResponse<List<SystemAlert>>> getSystemAlerts(HttpServletRequest request) {
         try {
             List<SystemAlert> alerts = getSystemAlerts();
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "System alerts loaded", alerts));
         } catch (Exception e) {
             log.error("Error loading system alerts: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load alerts", request.getRequestURI()));
         }
     }
@@ -141,12 +140,12 @@ public class ApiAdminDashboardRestController {
         try {
             // TODO: Implement proper pagination with UserRepository
             List<User> allUsers = userRepository.findAll();
-            
+
             // Filter by search
             List<User> filteredUsers = allUsers.stream()
-                    .filter(u -> search.isEmpty() || 
+                    .filter(u -> search.isEmpty() ||
                             u.getUsername().toLowerCase().contains(search.toLowerCase()) ||
-                            (u.getProfile() != null && u.getProfile().getEmail() != null && 
+                            (u.getProfile() != null && u.getProfile().getEmail() != null &&
                                     u.getProfile().getEmail().toLowerCase().contains(search.toLowerCase())))
                     .collect(Collectors.toList());
 
@@ -158,15 +157,14 @@ public class ApiAdminDashboardRestController {
                     "totalPages", (filteredUsers.size() + size - 1) / size,
                     "currentPage", page,
                     "pageSize", size,
-                    "userStats", userStats
-            );
+                    "userStats", userStats);
 
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "Users list loaded", response));
         } catch (Exception e) {
             log.error("Error loading users list: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load users", request.getRequestURI()));
         }
     }
@@ -182,19 +180,19 @@ public class ApiAdminDashboardRestController {
         try {
             User user = userRepository.findById(userId)
                     .orElse(null);
-            
+
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), 
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(),
                                 "User not found", request.getRequestURI()));
             }
 
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "User loaded", user));
         } catch (Exception e) {
             log.error("Error loading user details: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load user", request.getRequestURI()));
         }
     }
@@ -214,7 +212,7 @@ public class ApiAdminDashboardRestController {
 
             if (existingUser == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), 
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(),
                                 "User not found", request.getRequestURI()));
             }
 
@@ -244,12 +242,12 @@ public class ApiAdminDashboardRestController {
             existingUser.setUpdatedAt(LocalDateTime.now());
             User updatedUser = userRepository.save(existingUser);
 
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "User updated successfully", updatedUser));
         } catch (Exception e) {
             log.error("Error updating user: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to update user", request.getRequestURI()));
         }
     }
@@ -288,15 +286,14 @@ public class ApiAdminDashboardRestController {
                     "totalPages", (filteredLogs.size() + size - 1) / size,
                     "currentPage", page,
                     "pageSize", size,
-                    "statistics", logStats
-            );
+                    "statistics", logStats);
 
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "System logs loaded", response));
         } catch (Exception e) {
             log.error("Error loading system logs: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load logs", request.getRequestURI()));
         }
     }
@@ -406,15 +403,14 @@ public class ApiAdminDashboardRestController {
             Map<String, Object> response = Map.of(
                     "summary", analyticsSummary,
                     "systemMetrics", systemMetrics,
-                    "selectedPeriod", period
-            );
+                    "selectedPeriod", period);
 
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "Analytics data loaded", response));
         } catch (Exception e) {
             log.error("Error loading analytics: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load analytics", request.getRequestURI()));
         }
     }
@@ -433,16 +429,16 @@ public class ApiAdminDashboardRestController {
 
             if (profile == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), 
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(),
                                 "Profile not found", request.getRequestURI()));
             }
 
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "Profile loaded", profile));
         } catch (Exception e) {
             log.error("Error loading profile: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load profile", request.getRequestURI()));
         }
     }
@@ -462,7 +458,7 @@ public class ApiAdminDashboardRestController {
 
             if (existingProfile == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), 
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(),
                                 "Profile not found", request.getRequestURI()));
             }
 
@@ -480,7 +476,7 @@ public class ApiAdminDashboardRestController {
                 } catch (Exception e) {
                     log.error("Failed to upload profile image", e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                            .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                     "Failed to upload profile image", request.getRequestURI()));
                 }
             }
@@ -493,17 +489,17 @@ public class ApiAdminDashboardRestController {
             boolean updated = userProfileService.updateUserProfile(auth.getName(), userProfile);
             if (!updated) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), 
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(),
                                 "Profile not found", request.getRequestURI()));
             }
 
             UserProfileResponse updatedProfile = userProfileService.getUserProfile(auth.getName());
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "Profile updated successfully", updatedProfile));
         } catch (Exception e) {
             log.error("Error updating profile: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to update profile", request.getRequestURI()));
         }
     }
@@ -518,12 +514,12 @@ public class ApiAdminDashboardRestController {
     public ResponseEntity<ApiResponse<SystemConfiguration>> getSettings(HttpServletRequest request) {
         try {
             SystemConfiguration config = getSystemConfiguration();
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "Settings loaded", config));
         } catch (Exception e) {
             log.error("Error loading settings: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to load settings", request.getRequestURI()));
         }
     }
@@ -538,12 +534,12 @@ public class ApiAdminDashboardRestController {
             HttpServletRequest request) {
         try {
             log.info("System settings updated: {}", config);
-            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), 
+            return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(),
                     "Settings updated successfully", config));
         } catch (Exception e) {
             log.error("Error updating settings: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Unable to update settings", request.getRequestURI()));
         }
     }
@@ -566,7 +562,7 @@ public class ApiAdminDashboardRestController {
                     .mapToDouble(order -> 299.0)
                     .sum();
 
-            return new AdminDashboardStats(totalUsers, activeUsers, totalServices, 
+            return new AdminDashboardStats(totalUsers, activeUsers, totalServices,
                     totalOrders, pendingOrders, totalRevenue);
         } catch (Exception e) {
             log.error("Error getting dashboard statistics: ", e);
@@ -590,8 +586,7 @@ public class ApiAdminDashboardRestController {
                         "New Order Created",
                         "Order #" + order.getId() + " created by " + order.getCustomerName(),
                         timeAgo,
-                        "success"
-                ));
+                        "success"));
             }
 
             List<User> recentUsers = userRepository.findAll().stream()
@@ -606,8 +601,7 @@ public class ApiAdminDashboardRestController {
                         "New User Registered",
                         "User " + user.getUsername() + " joined the system",
                         timeAgo,
-                        "info"
-                ));
+                        "info"));
             }
 
         } catch (Exception e) {
@@ -634,8 +628,7 @@ public class ApiAdminDashboardRestController {
                         "warning",
                         "High Pending Orders",
                         pendingOrders + " orders are pending processing",
-                        "high"
-                ));
+                        "high"));
             }
 
             List<User> allUsers = userRepository.findAll();
@@ -648,16 +641,14 @@ public class ApiAdminDashboardRestController {
                         "info",
                         "Inactive Users",
                         inactiveUsers + " users are currently inactive",
-                        "medium"
-                ));
+                        "medium"));
             }
 
             alerts.add(new SystemAlert(
                     "success",
                     "System Running Normally",
                     "All services are operational",
-                    "low"
-            ));
+                    "low"));
 
         } catch (Exception e) {
             log.error("Error getting system alerts: ", e);
@@ -665,8 +656,7 @@ public class ApiAdminDashboardRestController {
                     "error",
                     "System Error",
                     "Unable to retrieve system status",
-                    "critical"
-            ));
+                    "critical"));
         }
 
         return alerts;
@@ -735,16 +725,18 @@ public class ApiAdminDashboardRestController {
                 "Production",
                 true,
                 true,
-                "smtp.bloodline.com"
-        );
+                "smtp.bloodline.com");
     }
 
     private List<SystemLog> getSystemLogs() {
         List<SystemLog> logs = new ArrayList<>();
         logs.add(new SystemLog("INFO", "System startup completed", "System", LocalDateTime.now().minusHours(2)));
-        logs.add(new SystemLog("WARN", "High memory usage detected", "Performance", LocalDateTime.now().minusMinutes(30)));
-        logs.add(new SystemLog("ERROR", "Database connection timeout", "Database", LocalDateTime.now().minusMinutes(15)));
-        logs.add(new SystemLog("INFO", "User authentication successful", "Security", LocalDateTime.now().minusMinutes(5)));
+        logs.add(new SystemLog("WARN", "High memory usage detected", "Performance",
+                LocalDateTime.now().minusMinutes(30)));
+        logs.add(new SystemLog("ERROR", "Database connection timeout", "Database",
+                LocalDateTime.now().minusMinutes(15)));
+        logs.add(new SystemLog("INFO", "User authentication successful", "Security",
+                LocalDateTime.now().minusMinutes(5)));
         return logs;
     }
 
@@ -806,19 +798,24 @@ public class ApiAdminDashboardRestController {
     }
 
     private String getTimeAgo(LocalDateTime dateTime) {
-        if (dateTime == null) return "Unknown";
+        if (dateTime == null)
+            return "Unknown";
 
         LocalDateTime now = LocalDateTime.now();
         long minutes = ChronoUnit.MINUTES.between(dateTime, now);
 
-        if (minutes < 1) return "Just now";
-        if (minutes < 60) return minutes + " minute" + (minutes == 1 ? "" : "s") + " ago";
+        if (minutes < 1)
+            return "Just now";
+        if (minutes < 60)
+            return minutes + " minute" + (minutes == 1 ? "" : "s") + " ago";
 
         long hours = ChronoUnit.HOURS.between(dateTime, now);
-        if (hours < 24) return hours + " hour" + (hours == 1 ? "" : "s") + " ago";
+        if (hours < 24)
+            return hours + " hour" + (hours == 1 ? "" : "s") + " ago";
 
         long days = ChronoUnit.DAYS.between(dateTime, now);
-        if (days < 7) return days + " day" + (days == 1 ? "" : "s") + " ago";
+        if (days < 7)
+            return days + " day" + (days == 1 ? "" : "s") + " ago";
 
         return dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
@@ -834,7 +831,7 @@ public class ApiAdminDashboardRestController {
         private final double totalRevenue;
 
         public AdminDashboardStats(long totalUsers, long activeUsers, long totalServices,
-                                   long totalOrders, long pendingOrders, double totalRevenue) {
+                long totalOrders, long pendingOrders, double totalRevenue) {
             this.totalUsers = totalUsers;
             this.activeUsers = activeUsers;
             this.totalServices = totalServices;
@@ -843,12 +840,29 @@ public class ApiAdminDashboardRestController {
             this.totalRevenue = totalRevenue;
         }
 
-        public long getTotalUsers() { return totalUsers; }
-        public long getActiveUsers() { return activeUsers; }
-        public long getTotalServices() { return totalServices; }
-        public long getTotalOrders() { return totalOrders; }
-        public long getPendingOrders() { return pendingOrders; }
-        public double getTotalRevenue() { return totalRevenue; }
+        public long getTotalUsers() {
+            return totalUsers;
+        }
+
+        public long getActiveUsers() {
+            return activeUsers;
+        }
+
+        public long getTotalServices() {
+            return totalServices;
+        }
+
+        public long getTotalOrders() {
+            return totalOrders;
+        }
+
+        public long getPendingOrders() {
+            return pendingOrders;
+        }
+
+        public double getTotalRevenue() {
+            return totalRevenue;
+        }
     }
 
     public static class SystemActivity {
@@ -868,12 +882,29 @@ public class ApiAdminDashboardRestController {
             this.timestamp = LocalDateTime.now();
         }
 
-        public String getType() { return type; }
-        public String getTitle() { return title; }
-        public String getDescription() { return description; }
-        public String getTimeAgo() { return timeAgo; }
-        public String getSeverity() { return severity; }
-        public LocalDateTime getTimestamp() { return timestamp; }
+        public String getType() {
+            return type;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getTimeAgo() {
+            return timeAgo;
+        }
+
+        public String getSeverity() {
+            return severity;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
     }
 
     public static class SystemAlert {
@@ -889,10 +920,21 @@ public class ApiAdminDashboardRestController {
             this.priority = priority;
         }
 
-        public String getType() { return type; }
-        public String getTitle() { return title; }
-        public String getMessage() { return message; }
-        public String getPriority() { return priority; }
+        public String getType() {
+            return type;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getPriority() {
+            return priority;
+        }
     }
 
     public static class MonthlySystemStats {
@@ -906,9 +948,17 @@ public class ApiAdminDashboardRestController {
             this.revenue = revenue;
         }
 
-        public long getNewOrders() { return newOrders; }
-        public long getNewUsers() { return newUsers; }
-        public double getRevenue() { return revenue; }
+        public long getNewOrders() {
+            return newOrders;
+        }
+
+        public long getNewUsers() {
+            return newUsers;
+        }
+
+        public double getRevenue() {
+            return revenue;
+        }
     }
 
     public static class SystemPerformanceMetrics {
@@ -919,7 +969,7 @@ public class ApiAdminDashboardRestController {
         private final int activeSessions;
 
         public SystemPerformanceMetrics(double cpuUsage, double memoryUsage, double diskUsage,
-                                        double uptime, int activeSessions) {
+                double uptime, int activeSessions) {
             this.cpuUsage = cpuUsage;
             this.memoryUsage = memoryUsage;
             this.diskUsage = diskUsage;
@@ -927,11 +977,25 @@ public class ApiAdminDashboardRestController {
             this.activeSessions = activeSessions;
         }
 
-        public double getCpuUsage() { return cpuUsage; }
-        public double getMemoryUsage() { return memoryUsage; }
-        public double getDiskUsage() { return diskUsage; }
-        public double getUptime() { return uptime; }
-        public int getActiveSessions() { return activeSessions; }
+        public double getCpuUsage() {
+            return cpuUsage;
+        }
+
+        public double getMemoryUsage() {
+            return memoryUsage;
+        }
+
+        public double getDiskUsage() {
+            return diskUsage;
+        }
+
+        public double getUptime() {
+            return uptime;
+        }
+
+        public int getActiveSessions() {
+            return activeSessions;
+        }
     }
 
     public static class UserManagementStats {
@@ -944,7 +1008,7 @@ public class ApiAdminDashboardRestController {
         private final long customerUsers;
 
         public UserManagementStats(long totalUsers, long activeUsers, long inactiveUsers,
-                                   long adminUsers, long managerUsers, long staffUsers, long customerUsers) {
+                long adminUsers, long managerUsers, long staffUsers, long customerUsers) {
             this.totalUsers = totalUsers;
             this.activeUsers = activeUsers;
             this.inactiveUsers = inactiveUsers;
@@ -954,13 +1018,33 @@ public class ApiAdminDashboardRestController {
             this.customerUsers = customerUsers;
         }
 
-        public long getTotalUsers() { return totalUsers; }
-        public long getActiveUsers() { return activeUsers; }
-        public long getInactiveUsers() { return inactiveUsers; }
-        public long getAdminUsers() { return adminUsers; }
-        public long getManagerUsers() { return managerUsers; }
-        public long getStaffUsers() { return staffUsers; }
-        public long getCustomerUsers() { return customerUsers; }
+        public long getTotalUsers() {
+            return totalUsers;
+        }
+
+        public long getActiveUsers() {
+            return activeUsers;
+        }
+
+        public long getInactiveUsers() {
+            return inactiveUsers;
+        }
+
+        public long getAdminUsers() {
+            return adminUsers;
+        }
+
+        public long getManagerUsers() {
+            return managerUsers;
+        }
+
+        public long getStaffUsers() {
+            return staffUsers;
+        }
+
+        public long getCustomerUsers() {
+            return customerUsers;
+        }
     }
 
     public static class SystemConfiguration {
@@ -973,8 +1057,8 @@ public class ApiAdminDashboardRestController {
         private String smtpServer;
 
         public SystemConfiguration(String systemName, String version, String adminEmail,
-                                   String environment, boolean maintenanceMode,
-                                   boolean emailNotifications, String smtpServer) {
+                String environment, boolean maintenanceMode,
+                boolean emailNotifications, String smtpServer) {
             this.systemName = systemName;
             this.version = version;
             this.adminEmail = adminEmail;
@@ -984,21 +1068,61 @@ public class ApiAdminDashboardRestController {
             this.smtpServer = smtpServer;
         }
 
-        public String getSystemName() { return systemName; }
-        public String getVersion() { return version; }
-        public String getAdminEmail() { return adminEmail; }
-        public String getEnvironment() { return environment; }
-        public boolean isMaintenanceMode() { return maintenanceMode; }
-        public boolean isEmailNotifications() { return emailNotifications; }
-        public String getSmtpServer() { return smtpServer; }
+        public String getSystemName() {
+            return systemName;
+        }
 
-        public void setSystemName(String systemName) { this.systemName = systemName; }
-        public void setVersion(String version) { this.version = version; }
-        public void setAdminEmail(String adminEmail) { this.adminEmail = adminEmail; }
-        public void setEnvironment(String environment) { this.environment = environment; }
-        public void setMaintenanceMode(boolean maintenanceMode) { this.maintenanceMode = maintenanceMode; }
-        public void setEmailNotifications(boolean emailNotifications) { this.emailNotifications = emailNotifications; }
-        public void setSmtpServer(String smtpServer) { this.smtpServer = smtpServer; }
+        public String getVersion() {
+            return version;
+        }
+
+        public String getAdminEmail() {
+            return adminEmail;
+        }
+
+        public String getEnvironment() {
+            return environment;
+        }
+
+        public boolean isMaintenanceMode() {
+            return maintenanceMode;
+        }
+
+        public boolean isEmailNotifications() {
+            return emailNotifications;
+        }
+
+        public String getSmtpServer() {
+            return smtpServer;
+        }
+
+        public void setSystemName(String systemName) {
+            this.systemName = systemName;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
+
+        public void setAdminEmail(String adminEmail) {
+            this.adminEmail = adminEmail;
+        }
+
+        public void setEnvironment(String environment) {
+            this.environment = environment;
+        }
+
+        public void setMaintenanceMode(boolean maintenanceMode) {
+            this.maintenanceMode = maintenanceMode;
+        }
+
+        public void setEmailNotifications(boolean emailNotifications) {
+            this.emailNotifications = emailNotifications;
+        }
+
+        public void setSmtpServer(String smtpServer) {
+            this.smtpServer = smtpServer;
+        }
     }
 
     public static class SystemLog {
@@ -1014,10 +1138,21 @@ public class ApiAdminDashboardRestController {
             this.timestamp = timestamp;
         }
 
-        public String getLevel() { return level; }
-        public String getMessage() { return message; }
-        public String getSource() { return source; }
-        public LocalDateTime getTimestamp() { return timestamp; }
+        public String getLevel() {
+            return level;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
     }
 
     public static class LogStatistics {
@@ -1033,10 +1168,21 @@ public class ApiAdminDashboardRestController {
             this.criticalLogs = criticalLogs;
         }
 
-        public long getInfoLogs() { return infoLogs; }
-        public long getWarningLogs() { return warningLogs; }
-        public long getErrorLogs() { return errorLogs; }
-        public long getCriticalLogs() { return criticalLogs; }
+        public long getInfoLogs() {
+            return infoLogs;
+        }
+
+        public long getWarningLogs() {
+            return warningLogs;
+        }
+
+        public long getErrorLogs() {
+            return errorLogs;
+        }
+
+        public long getCriticalLogs() {
+            return criticalLogs;
+        }
     }
 
     public static class AnalyticsSummary {
@@ -1049,29 +1195,69 @@ public class ApiAdminDashboardRestController {
         private String usersGrowth;
         private String aovGrowth;
 
-        public String getTotalRevenue() { return totalRevenue; }
-        public void setTotalRevenue(String totalRevenue) { this.totalRevenue = totalRevenue; }
-        
-        public String getTotalOrders() { return totalOrders; }
-        public void setTotalOrders(String totalOrders) { this.totalOrders = totalOrders; }
-        
-        public String getActiveUsers() { return activeUsers; }
-        public void setActiveUsers(String activeUsers) { this.activeUsers = activeUsers; }
-        
-        public String getAvgOrderValue() { return avgOrderValue; }
-        public void setAvgOrderValue(String avgOrderValue) { this.avgOrderValue = avgOrderValue; }
-        
-        public String getRevenueGrowth() { return revenueGrowth; }
-        public void setRevenueGrowth(String revenueGrowth) { this.revenueGrowth = revenueGrowth; }
-        
-        public String getOrdersGrowth() { return ordersGrowth; }
-        public void setOrdersGrowth(String ordersGrowth) { this.ordersGrowth = ordersGrowth; }
-        
-        public String getUsersGrowth() { return usersGrowth; }
-        public void setUsersGrowth(String usersGrowth) { this.usersGrowth = usersGrowth; }
-        
-        public String getAovGrowth() { return aovGrowth; }
-        public void setAovGrowth(String aovGrowth) { this.aovGrowth = aovGrowth; }
+        public String getTotalRevenue() {
+            return totalRevenue;
+        }
+
+        public void setTotalRevenue(String totalRevenue) {
+            this.totalRevenue = totalRevenue;
+        }
+
+        public String getTotalOrders() {
+            return totalOrders;
+        }
+
+        public void setTotalOrders(String totalOrders) {
+            this.totalOrders = totalOrders;
+        }
+
+        public String getActiveUsers() {
+            return activeUsers;
+        }
+
+        public void setActiveUsers(String activeUsers) {
+            this.activeUsers = activeUsers;
+        }
+
+        public String getAvgOrderValue() {
+            return avgOrderValue;
+        }
+
+        public void setAvgOrderValue(String avgOrderValue) {
+            this.avgOrderValue = avgOrderValue;
+        }
+
+        public String getRevenueGrowth() {
+            return revenueGrowth;
+        }
+
+        public void setRevenueGrowth(String revenueGrowth) {
+            this.revenueGrowth = revenueGrowth;
+        }
+
+        public String getOrdersGrowth() {
+            return ordersGrowth;
+        }
+
+        public void setOrdersGrowth(String ordersGrowth) {
+            this.ordersGrowth = ordersGrowth;
+        }
+
+        public String getUsersGrowth() {
+            return usersGrowth;
+        }
+
+        public void setUsersGrowth(String usersGrowth) {
+            this.usersGrowth = usersGrowth;
+        }
+
+        public String getAovGrowth() {
+            return aovGrowth;
+        }
+
+        public void setAovGrowth(String aovGrowth) {
+            this.aovGrowth = aovGrowth;
+        }
     }
 
     public static class SystemMetricsData {
@@ -1082,7 +1268,7 @@ public class ApiAdminDashboardRestController {
         private int activeSessionCount;
 
         public SystemMetricsData(double serverUptime, double responseTime,
-                                 double errorRate, int databaseConnections, int activeSessionCount) {
+                double errorRate, int databaseConnections, int activeSessionCount) {
             this.serverUptime = serverUptime;
             this.responseTime = responseTime;
             this.errorRate = errorRate;
@@ -1090,10 +1276,24 @@ public class ApiAdminDashboardRestController {
             this.activeSessionCount = activeSessionCount;
         }
 
-        public double getServerUptime() { return serverUptime; }
-        public double getResponseTime() { return responseTime; }
-        public double getErrorRate() { return errorRate; }
-        public int getDatabaseConnections() { return databaseConnections; }
-        public int getActiveSessionCount() { return activeSessionCount; }
+        public double getServerUptime() {
+            return serverUptime;
+        }
+
+        public double getResponseTime() {
+            return responseTime;
+        }
+
+        public double getErrorRate() {
+            return errorRate;
+        }
+
+        public int getDatabaseConnections() {
+            return databaseConnections;
+        }
+
+        public int getActiveSessionCount() {
+            return activeSessionCount;
+        }
     }
 }
