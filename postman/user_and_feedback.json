@@ -1,19 +1,197 @@
 {
   "info": {
-    "_postman_id": "9e857e9a-ec4f-4ce8-8ea6-f6b6a7b23f19",
-    "name": "Bloodline DNA - REST Controllers",
-    "description": "Collection cho các controller đã chuẩn hóa theo hướng REST/API.",
+    "_postman_id": "1a824f46-483f-4aaa-98f9-bd45e790c10d",
+    "name": "User & Feedback API",
+    "description": "Collection for user profiles and feedback endpoints\nBase URL: http://localhost:8080",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "44542392",
-    "_collection_link": "https://go.postman.co/collection/44542392-9e857e9a-ec4f-4ce8-8ea6-f6b6a7b23f19?source=collection_link"
+    "_exporter_id": "34182990",
+    "_collection_link": "https://go.postman.co/collection/34182990-1a824f46-483f-4aaa-98f9-bd45e790c10d?source=collection_link"
   },
   "item": [
     {
-      "name": "AuthController",
+      "name": "Auth",
       "item": [
+        {
+          "name": "Sign Up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Lưu signup-id\", () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data[\"sign-up-id\"]).to.be.a(\"string\");",
+                  "  pm.environment.set(\"signup-id\", body.data[\"sign-up-id\"]);",
+                  "});",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "let username = pm.variables.replaceIn(\"{{$randomUserName}}\");",
+                  "let email = pm.variables.replaceIn(\"{{$randomEmail}}\");",
+                  "let password = pm.variables.replaceIn(\"{{$randomPassword}}\");",
+                  "",
+                  "pm.environment.set(\"username\", username);",
+                  "pm.environment.set(\"email\", email);",
+                  "pm.environment.set(\"password\", password);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"{{password}}\",\r\n  \"email\": \"{{email}}\",\r\n  \"firstName\": \"Tinh\",\r\n  \"lastName\": \"Huynh\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/sign-up",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "sign-up"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Debug Get OTP Signup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Check if OTP is present\", function () {\r",
+                  "    var body = pm.response.json();\r",
+                  "    pm.expect(body.data[\"otp_code\"]).to.be.a(\"string\");\r",
+                  "    pm.expect(body.data[\"otp_code\"]).to.have.lengthOf(6);\r",
+                  "    pm.environment.set(\"otp_code\", body.data[\"otp_code\"]); // Store OTP in environment variable for further use\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/debug/otp/{{signup-id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "debug",
+                "otp",
+                "{{signup-id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verification OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "pm.test(\"Body matches string\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"User verified successfully\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"signUpId\": \"{{signup-id}}\",\n  \"otp\": \"{{otp_code}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/verification",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verification"
+              ]
+            }
+          },
+          "response": []
+        },
         {
           "name": "Login",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -27,6 +205,7 @@
                   "    pm.environment.set(\"access_token\", jsonData.data.access_token);",
                   "    pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
                   "    pm.environment.set(\"expires_in\", jsonData.data.expires_in);",
+                  "    pm.environment.set(\"user_id\", jsonData.data.user_id)",
                   "}"
                 ],
                 "type": "text/javascript",
@@ -45,7 +224,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"thanhnhi123\",\n  \"password\": \"thanhnhi123\",\n  \"rememberMe\": true\n}",
+              "raw": "{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"{{password}}\",\r\n  \"rememberMe\": true\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -66,136 +245,46 @@
             }
           },
           "response": []
-        }
-      ]
-    },
-    {
-      "name": "UserFeedbackController",
-      "item": [
-        {
-          "name": "View My Feedback",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 200', function () {",
-                  "  pm.expect(pm.response.code).to.eql(200);",
-                  "});",
-                  "const json = pm.response.json();",
-                  "pm.test('Feedback list is array', function () {",
-                  "  pm.expect(json.data).to.be.an('array');",
-                  "});"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/feedback",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "feedback"
-              ]
-            }
-          },
-          "response": []
         },
         {
-          "name": "Get Feedback By Id",
+          "name": "Refresh Token",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 200 or 404', function () {",
-                  "  pm.expect([200, 404]).to.include(pm.response.code);",
-                  "});"
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const jsonData = pm.response.json();\r",
+                  "if (jsonData.code === 200) {\r",
+                  "    pm.test(\"Access token is present\", function () {\r",
+                  "        pm.expect(jsonData.data.access_token).to.not.be.null;\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Refresh token is present\", function () {\r",
+                  "        pm.expect(jsonData.data.refresh_token).to.not.be.null;\r",
+                  "        });\r",
+                  "\r",
+                  "    pm.test(\"Add token to environment variables\", function () {\r",
+                  "        pm.environment.set(\"access_token\", jsonData.data.access_token);\r",
+                  "        pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);\r",
+                  "        pm.environment.set(\"expires_in\", jsonData.data.expires_in);\r",
+                  "    });\r",
+                  "\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
                 "requests": {}
               }
-            }
-          ],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
             },
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "graphql",
-              "graphql": {
-                "query": "",
-                "variables": ""
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/feedback/{{feedback_id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "feedback",
-                "{{feedback_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "create feedback",
-          "event": [
             {
-              "listen": "test",
+              "listen": "prerequest",
               "script": {
                 "exec": [
-                  "const json = pm.response.json();\r",
-                  "pm.environment.set(\"feedback_id\", json.data.id); "
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -204,21 +293,16 @@
             }
           ],
           "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"serviceId\": {{serviceId}},\r\n  \"orderId\": {{orderId}},\r\n  \"customerId\": \"{{customerId}}\",\r\n  \"serviceQualityRating\": 4,\r\n  \"staffBehaviorRating\": 2,\r\n  \"timelinessRating\": 1,\r\n  \"feedbackTitle\": \"Test feedback - thanhnhi123\",\r\n  \"feedbackContent\": \"Nội dung feedback để test create API\",\r\n  \"responseRequired\": true\r\n} ",
+              "raw": "{\r\n  \"refreshToken\": \"{{refresh_token}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -226,15 +310,15 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/feedback/{{feedback_id}}",
+              "raw": "{{baseUrl}}/api/v1/auth/refresh-token",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "feedback",
-                "{{feedback_id}}"
+                "auth",
+                "refresh-token"
               ]
             }
           },
@@ -243,29 +327,199 @@
       ]
     },
     {
-      "name": "UserController",
+      "name": "User Profile APIs",
       "item": [
         {
-          "name": "Get All Profiles",
+          "name": "GET Profile by username",
           "event": [
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200', function () {",
-                  "  pm.expect(pm.response.code).to.eql(200);",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
                   "});",
-                  "const json = pm.response.json();",
-                  "pm.test('Response envelope', function () {",
-                  "  pm.expect(json).to.have.property('code');",
-                  "  pm.expect(json).to.have.property('message');",
-                  "  pm.expect(json).to.have.property('data');",
+                  "",
+                  "pm.test(\"Response has code = 0\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.code).to.eql(200);",
                   "});",
-                  "pm.test('Profiles is array', function () {",
-                  "  pm.expect(json.data).to.be.an('array');",
+                  "",
+                  "pm.test(\"Response contains data.username\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.an('object');",
+                  "    pm.expect(jsonData.data.username).to.be.a('string');",
+                  "    pm.expect(jsonData.data.username).to.eql(pm.variables.get(\"username\"));",
                   "});"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profiles/{{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{username}}"
+              ]
+            },
+            "description": "Get user profile by username"
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Update profile (upload image?)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 201\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200,201]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has code = 0\", function () {",
+                  "    pm.response.to.have.jsonBody(\"code\", 200);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"{{$randomFirstName}}\",\n  \"lastName\": \"{{$randomLastName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"dateOfBirth\": \"2026-03-22\",\n  \"phoneNumber\": \"123777123\",\n  \"password\": \"strings12t\",\n  \"profileImageUrl\": \"string\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profiles/{{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "{{username}}"
+              ]
+            },
+            "description": "Update profile (schema shows file string – probably placeholder)"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Search profiles by name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"code = 0\", () => pm.expect(pm.response.json().code).to.eql(200));",
+                  "pm.test(\"data is array\", () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profiles/search?name={{searchName}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profiles",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{searchName}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET All profiles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"code = 0\", () => pm.expect(pm.response.json().code).to.eql(200));",
+                  "pm.test(\"data is array\", () => {",
+                  "    pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -298,203 +552,20 @@
           "response": []
         },
         {
-          "name": "Search Profiles (by name)",
+          "name": "DELETE Profile by username",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Status 200', function () {",
-                  "  pm.expect(pm.response.code).to.eql(200);",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
                   "});",
-                  "const json = pm.response.json();",
-                  "pm.test('Profiles is array', function () {",
-                  "  pm.expect(json.data).to.be.an('array');",
+                  "",
+                  "pm.test(\"Response data = true\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.be.true;",
                   "});"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/profiles/search?name={{user_name}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "profiles",
-                "search"
-              ],
-              "query": [
-                {
-                  "key": "name",
-                  "value": "{{user_name}}"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Profile By Username",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status 200 or 404', function () {",
-                  "  pm.expect([200, 404]).to.include(pm.response.code);",
-                  "});",
-                  "const json = pm.response.json();",
-                  "if (pm.response.code === 200) {",
-                  "  pm.test('Profile payload valid', function () {",
-                  "    pm.expect(json.code).to.eql(200);",
-                  "    pm.expect(json.data).to.be.an('object');",
-                  "  });",
-                  "}"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/profiles/{{user_name}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "profiles",
-                "{{user_name}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "firstName",
-                  "value": "Thanh",
-                  "type": "text"
-                },
-                {
-                  "key": "lastName",
-                  "value": "Nhi",
-                  "type": "text"
-                },
-                {
-                  "key": "email",
-                  "value": "thanhnhi1@example.com",
-                  "type": "text"
-                },
-                {
-                  "key": "dateOfBirth",
-                  "value": "2000-01-01",
-                  "type": "text"
-                },
-                {
-                  "key": "phoneNumber",
-                  "value": "0900000000",
-                  "type": "text"
-                },
-                {
-                  "key": "password",
-                  "value": "{{profile_password}}",
-                  "type": "text"
-                },
-                {
-                  "key": "file",
-                  "type": "file",
-                  "value": ""
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/profiles/{{user_name}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "profiles",
-                "{{user_name}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -516,7 +587,7 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/profiles/{{user_name}}",
+              "raw": "{{baseUrl}}/api/v1/profiles/{{username}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -524,7 +595,229 @@
                 "api",
                 "v1",
                 "profiles",
-                "{{user_name}}"
+                "{{username}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Feedback APIs",
+      "item": [
+        {
+          "name": "Create Service Type Copy",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 202]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response contains expected data\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.code).to.equal(201);\r",
+                  "    pm.environment.set(\"serviceTypeId\", jsonData.data.id);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeName\": \"type-{{$randomInt}}\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/service-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "service-types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Service Copy",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 202]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response contains expected data\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.code).to.equal(201);\r",
+                  "    pm.expect(jsonData.message).to.equal(\"Service created successfully\");\r",
+                  "    pm.environment.set(\"serviceId\", jsonData.data.id);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceName\": \"string\",\n  \"serviceCategory\": \"CIVIL\",\n  \"serviceTypeId\": {{serviceTypeId}},\n  \"participants\": 1,\n  \"executionTimeDays\": 1,\n  \"basePrice\": 19811,\n  \"currentPrice\": 121212,\n  \"isAvailable\": true,\n  \"serviceDescription\": \"string\",\n  \"featureAssignments\": [\n    {\n      \"featureName\": \"string\",\n      \"isAvailable\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "services"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET All Feedbacks",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"code = 0\", () => pm.expect(pm.response.json().code).to.eql(200));",
+                  "pm.test(\"data is array\", () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "feedback"
               ]
             }
           },
@@ -533,96 +826,26 @@
       ]
     }
   ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{access_token}}",
-        "type": "string"
-      }
-    ]
-  },
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "packages": {},
-        "requests": {},
-        "exec": [
-          ""
-        ]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "packages": {},
-        "requests": {},
-        "exec": [
-          ""
-        ]
-      }
-    }
-  ],
   "variable": [
     {
-      "key": "base_url",
-      "value": "http://localhost:8080"
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
     },
     {
-      "key": "access_token",
-      "value": ""
+      "key": "username",
+      "value": "testuser",
+      "type": "string"
     },
     {
-      "key": "access_token_user",
-      "value": ""
+      "key": "searchName",
+      "value": "john",
+      "type": "string"
     },
     {
-      "key": "refresh_token",
-      "value": ""
-    },
-    {
-      "key": "admin_username",
-      "value": "admin"
-    },
-    {
-      "key": "admin_password",
-      "value": "admin"
-    },
-    {
-      "key": "profile_username",
-      "value": "thanhnhi1"
-    },
-    {
-      "key": "profile_password",
-      "value": "thanhnhi1"
-    },
-    {
-      "key": "service_id",
-      "value": "1"
-    },
-    {
-      "key": "order_id",
-      "value": "1"
-    },
-    {
-      "key": "feedback_id",
-      "value": "1"
-    },
-    {
-      "key": "sample_id",
-      "value": "1"
-    },
-    {
-      "key": "sign_up_id",
-      "value": ""
-    },
-    {
-      "key": "otp",
-      "value": "123456"
+      "key": "feedbackId",
+      "value": "1",
+      "type": "string"
     }
   ]
 }
