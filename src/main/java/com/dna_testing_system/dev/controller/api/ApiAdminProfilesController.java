@@ -25,10 +25,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/profiles")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
 public class ApiAdminProfilesController {
     UserProfileService userProfileService;
-
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<UserProfileResponse>>> getAllProfiles(
@@ -40,12 +39,12 @@ public class ApiAdminProfilesController {
                     : userProfileService.getUserProfileByName(query);
 
             return ResponseEntity.ok(
-                    ApiResponse.success(HttpStatus.OK.value(), "Profiles loaded successfully", profiles)
-            );
+                    ApiResponse.success(HttpStatus.OK.value(), "Profiles loaded successfully", profiles));
         } catch (Exception e) {
             log.error("Error loading profiles", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load profiles", request.getRequestURI()));
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load profiles",
+                            request.getRequestURI()));
         }
     }
 
@@ -57,15 +56,16 @@ public class ApiAdminProfilesController {
             UserProfileResponse userProfile = userProfileService.getUserProfile(username);
             if (userProfile == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", request.getRequestURI()));
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found",
+                                request.getRequestURI()));
             }
             return ResponseEntity.ok(
-                    ApiResponse.success(HttpStatus.OK.value(), "Profile loaded successfully", userProfile)
-            );
+                    ApiResponse.success(HttpStatus.OK.value(), "Profile loaded successfully", userProfile));
         } catch (Exception e) {
             log.error("Error loading profile for username {}", username, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load profile", request.getRequestURI()));
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to load profile",
+                            request.getRequestURI()));
         }
     }
 
@@ -79,7 +79,8 @@ public class ApiAdminProfilesController {
         UserProfileResponse existingProfile = userProfileService.getUserProfile(username);
         if (existingProfile == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", request.getRequestURI()));
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found",
+                            request.getRequestURI()));
         }
 
         if (file == null || file.isEmpty()) {
@@ -95,7 +96,8 @@ public class ApiAdminProfilesController {
             } catch (Exception e) {
                 log.error("Failed to upload profile image", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to upload profile image", request.getRequestURI()));
+                        .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "Failed to upload profile image", request.getRequestURI()));
             }
         }
 
@@ -106,26 +108,26 @@ public class ApiAdminProfilesController {
         boolean updated = userProfileService.updateUserProfile(username, userProfile);
         if (!updated) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", request.getRequestURI()));
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found",
+                            request.getRequestURI()));
         }
 
         UserProfileResponse updatedProfile = userProfileService.getUserProfile(username);
         return ResponseEntity.ok(
-                ApiResponse.success(HttpStatus.OK.value(), "Profile updated successfully", updatedProfile)
-        );
+                ApiResponse.success(HttpStatus.OK.value(), "Profile updated successfully", updatedProfile));
     }
 
     @DeleteMapping("/{username}")
     public ResponseEntity<ApiResponse<Boolean>> deleteProfile(@PathVariable String username,
-                                                              HttpServletRequest request) {
+            HttpServletRequest request) {
         boolean deleted = userProfileService.deleteUserProfile(username);
         if (!deleted) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", request.getRequestURI()));
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found",
+                            request.getRequestURI()));
         }
 
         return ResponseEntity.ok(
-                ApiResponse.success(HttpStatus.OK.value(), "Profile deleted successfully", true)
-        );
+                ApiResponse.success(HttpStatus.OK.value(), "Profile deleted successfully", true));
     }
 }
