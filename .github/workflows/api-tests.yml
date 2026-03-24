@@ -62,38 +62,25 @@ jobs:
 
       - name: Set environment variables
         run: |
-          case "${{ inputs.environment || 'dev' }}" in
-            prod)    API_URL="${{ secrets.API_BASE_URL_PROD }}"    ;;
-            staging) API_URL="${{ secrets.API_BASE_URL_STAGING }}" ;;
-            *)       API_URL="${{ secrets.API_BASE_URL_DEV }}"     ;;
-          esac
-          echo "ENVIRONMENT=${{ inputs.environment || 'dev' }}" >> $GITHUB_ENV
-          echo "API_BASE_URL=$API_URL"                                        >> $GITHUB_ENV
-
-      - name: Wait for API ready
-        run: |
-          echo "⏳ Waiting for API..."
-          for i in {1..30}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_BASE_URL_STAGING }}/actuator/health || true)
-
-            if [ "$STATUS" = "200" ]; then
-              echo "API is ready!"
-              exit 0
-            fi
-
-            echo "⏳ Retry $i..."
-            sleep 5
-          done
-
-          echo "API not ready"
-          exit 1
+          ENV_NAME="${{ inputs.environment || 'ci' }}"
+          # Default to localhost:8080 for CI environment
+          API_URL="http://localhost:8080"
+          
+          echo "ENVIRONMENT=$ENV_NAME" >> $GITHUB_ENV
+          echo "API_BASE_URL=$API_URL" >> $GITHUB_ENV
+          echo "Using API URL: $API_URL"
 
       - name: Run — ${{ matrix.collection }}
         id: newman
         continue-on-error: true
         run: |
+          ENV_FILE="postman/environments/ci-environment.json"
+          if [ ! -f "$ENV_FILE" ]; then
+            ENV_FILE=""
+          fi
+          
           newman run postman/${{ matrix.collection }}.json \
-            --environment postman/environments/${{ env.ENVIRONMENT }}.json \
+            ${ENV_FILE:+--environment "$ENV_FILE"} \
             --env-var "baseUrl=${{ env.API_BASE_URL }}" \
             --reporters cli,json,htmlextra \
             --reporter-json-export      reports/result.json \
