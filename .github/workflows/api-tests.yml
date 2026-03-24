@@ -1,281 +1,78 @@
-name: API Tests + Auto Jira Bug
+name: API Tests – Staging
 
 on:
-  workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
-      collection:
-        required: false
-        type: string
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
 
-# ─────────────────────────────────────────────────────────────────
-# Job 1 — Discover collections and build the matrix dynamically.
-# To add a new collection: just drop <name>.json into postman/
-# ─────────────────────────────────────────────────────────────────
 jobs:
-  setup:
-    name: Discover collections
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.discover.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: 🔍 Build matrix from postman/*.json
-        id: discover
-        run: |
-          ALL=$(find postman -maxdepth 1 -name "*.json" | sort \
-            | xargs -I{} basename {} .json \
-            | jq -Rsc 'split("\n") | map(select(. != ""))')
-
-          FILTER="${{ inputs.collection }}"
-          if [[ -n "$FILTER" ]]; then
-            MATRIX=$(echo "$ALL" | jq -c --arg f "$FILTER" '[.[] | select(. == $f)]')
-          else
-            MATRIX="$ALL"
-          fi
-
-          echo "matrix={\"collection\":$MATRIX}" >> $GITHUB_OUTPUT
-          echo "Collections: $MATRIX"
-
-  # ─────────────────────────────────────────────────────────────────
-  # Job 2 — Run each discovered collection in parallel
-  # ─────────────────────────────────────────────────────────────────
-  api-tests:
-    name: ${{ matrix.collection }}
-    needs: setup
+  newman-tests:
+    name: Run Postman Collection (Newman)
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
-
     steps:
-      - uses: actions/checkout@v4
+      # ── 1. Checkout code ────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      # ── 2. Setup Node.js ────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── 3. Install Newman + HTML reporter ─────────────────────────────────
       - name: Install Newman
         run: |
-          npm install -g newman newman-reporter-htmlextra
-          mkdir -p reports
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
 
-      - name: Set environment variables
+      # ── 4. Inject credentials vào environment file ──────────────────────
+      #    Đọc file staging-environment.json (commit sẵn trong repo, không có credentials)
+      #    rồi điền username/password từ GitHub Secrets vào.
+      - name: Inject credentials into environment
         run: |
-          ENV_NAME="${{ inputs.environment }}"
-          if [ -z "$ENV_NAME" ]; then ENV_NAME="ci"; fi
+          jq --arg user "${{ secrets.STAGING_USERNAME }}" \
+             --arg pass "${{ secrets.STAGING_PASSWORD }}" \
+             '.values |= map(
+               if .key == "username" then .value = $user
+               elif .key == "password" then .value = $pass
+               else . end
+             )' postman/staging-environment.json > /tmp/staging-env-filled.json
 
-          case "$ENV_NAME" in
-            staging)
-              API_URL="${{ secrets.STAGING_URL }}"
-              ;;
-            production)
-              API_URL="${{ secrets.PRODUCTION_URL }}"
-              ;;
-            *)
-              API_URL="${{ secrets.CI_URL:-http://localhost:8080 }}"
-              ;;
-          esac
-
-          if [ -z "$API_URL" ]; then
-            echo "ERROR: API URL is not set for environment '$ENV_NAME'" >&2
-            exit 1
-          fi
-
-          echo "ENVIRONMENT=$ENV_NAME" >> $GITHUB_ENV
-          echo "API_BASE_URL=$API_URL" >> $GITHUB_ENV
-          echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> $GITHUB_ENV
-          echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> $GITHUB_ENV
-          echo "Using API URL: $API_URL"
-
-      - name: Wait for target API to be ready
+      # ── 5. Chạy Newman ───────────────────────────────────────────────────
+      - name: Run Newman tests
         run: |
-          echo "Waiting for API to be ready at ${{ env.API_BASE_URL }}"
-          for i in {1..30}; do
-            STATUS=$(curl -s -o /dev/null -w '%{http_code}' "${{ env.API_BASE_URL }}/actuator/health" || true)
-            if [ "$STATUS" = "200" ]; then
-              echo "API ready"; exit 0
-            fi
-            sleep 2
-          done
-          echo "Timed out waiting for API" >&2
-          exit 1
-
-      - name: Run — ${{ matrix.collection }}
-        id: newman
-        continue-on-error: true
-        run: |
-          ENV_FILE="postman/environments/ci-environment.json"
-          if [ ! -f "$ENV_FILE" ]; then
-            ENV_FILE=""
-          fi
-
-          newman run postman/${{ matrix.collection }}.json \
-            ${ENV_FILE:+--environment "$ENV_FILE"} \
-            --env-var "baseUrl=${{ env.API_BASE_URL }}" \
-            --env-var "admin_email=${{ env.ADMIN_EMAIL }}" \
-            --env-var "admin_password=${{ env.ADMIN_PASSWORD }}" \
-            --reporters cli,json,htmlextra \
-            --reporter-json-export      reports/result.json \
+          newman run postman/DNA_Testing_System_v3_postman_collection.json \
+            --environment /tmp/staging-env-filled.json \
+            --reporters cli,htmlextra,json \
             --reporter-htmlextra-export reports/result.html \
-            --reporter-htmlextra-title  "${{ matrix.collection }} · ${{ env.ENVIRONMENT }} · #${{ github.run_id }}" \
-            --timeout-request 30000
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+            --reporter-json-export reports/result.json \
+            --reporter-htmlextra-title "DNA Testing System – Staging" \
+            --reporter-htmlextra-showOnlyFails \
+            --delay-request 300 \
+            --timeout-request 10000 \
+            --color on \
+            || true
 
-      - name: Parse results
-        id: parse
+      # ── 6. Upload report ─────────────────────────────────────────────────
+      - name: Upload test reports
         if: always()
-        run: |
-          if [[ ! -f reports/result.json ]]; then
-            { echo "total=0"; echo "failed=1"; echo "passed=0"; echo "status=fail"; } >> $GITHUB_OUTPUT
-            echo "### ${{ matrix.collection }} — result.json not found" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
-
-          TOTAL=$(jq  '.run.stats.assertions.total  // 0' reports/result.json)
-          FAILED=$(jq '.run.stats.assertions.failed // 0' reports/result.json)
-          PASSED=$((TOTAL - FAILED))
-
-          { echo "total=$TOTAL"; echo "failed=$FAILED"; echo "passed=$PASSED"; } >> $GITHUB_OUTPUT
-
-          if [[ "$FAILED" -gt 0 ]]; then
-            echo "status=fail" >> $GITHUB_OUTPUT
-          else
-            echo "status=pass" >> $GITHUB_OUTPUT
-          fi
-
-          {
-            echo "### ${{ matrix.collection }} · ${{ env.ENVIRONMENT }}"
-            echo "| | Count |"
-            echo "|---|---|"
-            echo "| Passed | $PASSED |"
-            echo "| Failed | $FAILED |"
-            echo "| Total  | $TOTAL  |"
-          } >> $GITHUB_STEP_SUMMARY
-
-      - name: upload report
-        if: always()
-        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: report-${{ matrix.collection }}-${{ env.ENVIRONMENT }}-${{ github.run_id }}
+          name: newman-report-${{ github.run_number }}
           path: reports/
-          retention-days: 30
+          retention-days: 14
 
-      - name: Log / comment bug to Jira
-        if: steps.parse.outputs.status == 'fail'
-        env:
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+      # ── 7. Fail job nếu có test thất bại (optional) ──────────────────────
+      - name: Check test results
         run: |
-          set -euo pipefail
-          JIRA_BASE_URL="${JIRA_BASE_URL%/}"
-
-          FAILED="${{ steps.parse.outputs.failed }}"
-          TOTAL="${{ steps.parse.outputs.total }}"
-          COLLECTION="${{ matrix.collection }}"
-          ENV="${{ env.ENVIRONMENT }}"
-          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          BRANCH="${{ github.ref_name }}"
-          COMMIT="${{ github.sha }}"; COMMIT="${COMMIT:0:7}"
-          ACTOR="${{ github.actor }}"
-          DATE=$(date '+%d/%m/%Y %H:%M UTC')
-
-          FAILURES=$(jq -r '
-            [.run.executions[]? |
-              .item.name as $req |
-              (.assertions // [])[]? |
-              select(.error != null) |
-              "• \($req): \(.assertion) → \(.error.message // "unknown")"
-            ] | join("\n")
-          ' reports/result.json 2>/dev/null || echo "Could not extract failure details")
-
-          # ── Search for existing open bug (same collection + env) ──
-          SEARCH_BODY=$(jq -n --arg jql \
-            "project = ${JIRA_PROJECT_KEY} AND labels in (automated-test,${COLLECTION},${ENV}) AND summary ~ \"[AUTO-BUG][${ENV}][${COLLECTION}]\" AND statusCategory != Done ORDER BY created DESC" \
-            '{"jql":$jql,"maxResults":1,"fields":["key","summary","status"]}')
-
-          HTTP=$(curl -s -o /tmp/jira_search.json -w "%{http_code}" \
-            -u "${JIRA_EMAIL}:${JIRA_API_TOKEN}" \
-            -X POST -H "Content-Type: application/json" -H "Accept: application/json" \
-            -d "$SEARCH_BODY" "${JIRA_BASE_URL}/rest/api/3/search/jql")
-
-          [[ "$HTTP" != "200" ]] && { echo "❌ Jira search HTTP $HTTP"; cat /tmp/jira_search.json; exit 1; }
-
-          EXISTING_KEY=$(jq -r '.issues[0].key // empty' /tmp/jira_search.json)
-
-          if [[ -n "$EXISTING_KEY" ]]; then
-            echo "⚠️ $EXISTING_KEY exists — adding comment"
-            COMMENT_BODY=$(jq -n \
-              --arg run_url "$RUN_URL" --arg branch "$BRANCH" \
-              --arg date    "$DATE"    --arg ratio  "$FAILED/$TOTAL" \
-              --arg env     "$ENV"     --arg col    "$COLLECTION" \
-              '{body:{type:"doc",version:1,content:[{type:"paragraph",content:[
-                {type:"text",text:("🔄 Still failing · " + $col + " · " + $env + "\n")},
-                {type:"text",text:("Run: " + $run_url + " | " + $branch + " | " + $date + " | " + $ratio + " failed")}
-              ]}]}}')
-
-            curl -s --fail-with-body \
-              -u "${JIRA_EMAIL}:${JIRA_API_TOKEN}" \
-              -X POST -H "Content-Type: application/json" \
-              -d "$COMMENT_BODY" "${JIRA_BASE_URL}/rest/api/3/issue/${EXISTING_KEY}/comment"
-
-          else
-            echo "📝 Creating new bug..."
-            CREATE_BODY=$(jq -n \
-              --arg proj     "$JIRA_PROJECT_KEY" \
-              --arg env      "$ENV"      --arg col      "$COLLECTION" \
-              --arg date     "$DATE"     --arg failed   "$FAILED"     \
-              --arg total    "$TOTAL"    --arg branch   "$BRANCH"     \
-              --arg commit   "$COMMIT"   --arg actor    "$ACTOR"      \
-              --arg failures "$FAILURES" --arg run_url  "$RUN_URL"    \
-              '{
-                fields: {
-                  project:   {key:$proj},
-                  issuetype: {name:"Bug"},
-                  priority:  {name:"High"},
-                  summary:   ("[AUTO-BUG][" + $env + "][" + $col + "] API Tests Failed – " + $date + " (" + $failed + "/" + $total + " failed)"),
-                  labels:    ["automated-test","ci-cd",$env,$col],
-                  description: {
-                    type:"doc", version:1,
-                    content:[
-                      {type:"panel",attrs:{panelType:"error"},content:[
-                        {type:"paragraph",content:[{type:"text",text:("❌ " + $col + " tests failed on " + $env)}]}
-                      ]},
-                      {type:"heading",attrs:{level:2},content:[{type:"text",text:"📋 Details"}]},
-                      {type:"bulletList",content:[
-                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Collection: ",marks:[{type:"strong"}]},{type:"text",text:$col}]}]},
-                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Environment: ",marks:[{type:"strong"}]},{type:"text",text:$env}]}]},
-                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Branch: ",marks:[{type:"strong"}]},{type:"text",text:$branch}]}]},
-                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Commit: ",marks:[{type:"strong"}]},{type:"text",text:$commit}]}]},
-                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Actor: ",marks:[{type:"strong"}]},{type:"text",text:$actor}]}]},
-                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Time: ",marks:[{type:"strong"}]},{type:"text",text:$date}]}]}
-                      ]},
-                      {type:"heading",attrs:{level:2},content:[{type:"text",text:"🔴 Failures"}]},
-                      {type:"codeBlock",attrs:{language:"text"},content:[{type:"text",text:$failures}]},
-                      {type:"paragraph",content:[
-                        {type:"text",text:"🔗 View run",marks:[{type:"link",attrs:{href:$run_url}}]}
-                      ]}
-                    ]
-                  }
-                }
-              }')
-
-            HTTP=$(curl -s -o /tmp/jira_create.json -w "%{http_code}" \
-              -u "${JIRA_EMAIL}:${JIRA_API_TOKEN}" \
-              -X POST -H "Content-Type: application/json" \
-              -d "$CREATE_BODY" "${JIRA_BASE_URL}/rest/api/3/issue")
-
-            ISSUE_KEY=$(jq -r '.key // empty' /tmp/jira_create.json)
-            [[ -n "$ISSUE_KEY" ]] \
-              && echo "✅ Created: $ISSUE_KEY — ${JIRA_BASE_URL}/browse/$ISSUE_KEY" \
-              || { echo "❌ Failed (HTTP $HTTP):"; cat /tmp/jira_create.json; exit 1; }
+          FAILURES=$(jq '.run.stats.assertions.failed' reports/result.json)
+          echo "Failed assertions: $FAILURES"
+          if [ "$FAILURES" -gt "0" ]; then
+            echo "❌ $FAILURES assertion(s) failed!"
+            exit 1
           fi
-
-      - name: Fail if tests failed
-        if: steps.parse.outputs.status == 'fail'
-        run: |
-          echo "${{ matrix.collection }}: ${{ steps.parse.outputs.failed }}/${{ steps.parse.outputs.total }} failed"
-          exit 1
+          echo "✅ All tests passed!"
