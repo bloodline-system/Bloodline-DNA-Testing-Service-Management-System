@@ -17,6 +17,7 @@ public interface SystemReportMapper {
 
     // Response: from Entity → Response DTO
     @Mapping(source = "id", target = "reportId")
+    @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "generatedByUser.username", target = "generatedByUserName")
     @Mapping(source = "generatedByUser.profile.email", target = "generatedByUserEmail")
     @Mapping(source = "generatedByUser.profile.profileImageUrl", target = "generatedByUserImageUrl")

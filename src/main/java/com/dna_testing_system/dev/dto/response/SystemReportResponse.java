@@ -25,4 +25,10 @@ public class SystemReportResponse {
     String generatedByUserName;
     String reportData;
     ReportStatus reportStatus;
+    java.time.LocalDateTime createdAt;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("id")
+    public Long getId() {
+        return reportId;
+    }
 }

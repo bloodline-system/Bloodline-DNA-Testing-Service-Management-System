@@ -93,6 +93,16 @@ public class ManagerReportController {
                             result = r1.getReportType().name().compareTo(r2.getReportType().name());
                             break;
                         case "createdAt":
+                            if (r1.getCreatedAt() != null && r2.getCreatedAt() != null) {
+                                result = r1.getCreatedAt().compareTo(r2.getCreatedAt());
+                            } else if (r1.getCreatedAt() == null && r2.getCreatedAt() == null) {
+                                result = 0;
+                            } else if (r1.getCreatedAt() == null) {
+                                result = -1;
+                            } else {
+                                result = 1;
+                            }
+                            break;
                         default:
                             result = 0;
                             break;
