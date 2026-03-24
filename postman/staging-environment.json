@@ -1,0 +1,23 @@
+{
+  "id": "staging-env",
+  "name": "Staging",
+  "_postman_variable_scope": "environment",
+  "values": [
+    { "key": "baseUrl",       "value": "http://44.205.114.232", "enabled": true, "type": "default" },
+    { "key": "username",      "value": "",                      "enabled": true, "type": "secret"  },
+    { "key": "password",      "value": "",                      "enabled": true, "type": "secret"  },
+    { "key": "access_token",  "value": "",                      "enabled": true, "type": "secret"  },
+    { "key": "refresh_token", "value": "",                      "enabled": true, "type": "secret"  },
+    { "key": "signUpId",      "value": "",                      "enabled": true, "type": "default" },
+    { "key": "orderId",       "value": "",                      "enabled": true, "type": "default" },
+    { "key": "reportId",      "value": "",                      "enabled": true, "type": "default" },
+    { "key": "staffOrderId",  "value": "",                      "enabled": true, "type": "default" },
+    { "key": "paymentId",     "value": "",                      "enabled": true, "type": "default" },
+    { "key": "sampleId",      "value": "",                      "enabled": true, "type": "default" },
+    { "key": "testResultId",  "value": "",                      "enabled": true, "type": "default" },
+    { "key": "kitId",         "value": "",                      "enabled": true, "type": "default" },
+    { "key": "serviceId",     "value": "",                      "enabled": true, "type": "default" },
+    { "key": "feedbackId",    "value": "",                      "enabled": true, "type": "default" },
+    { "key": "username",      "value": "",                      "enabled": true, "type": "default" }
+  ]
+}
