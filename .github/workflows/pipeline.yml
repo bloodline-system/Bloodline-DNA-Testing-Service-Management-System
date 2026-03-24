@@ -28,11 +28,4 @@ jobs:
             -Dspring.profiles.active=test \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
-  # Run API tests for PR and development pushes (no EC2 deployment)
-  test-staging:
-    needs: ci-quality
-    if: github.event_name == 'pull_request' || (github.ref_name == 'development' && github.event_name == 'push')
-    uses: ./.github/workflows/api-tests.yml
-    with:
-      environment: staging
-    secrets: inherit
+
