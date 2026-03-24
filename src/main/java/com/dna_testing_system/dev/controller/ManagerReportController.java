@@ -22,9 +22,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,91 +48,106 @@ public class ManagerReportController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
-        // Get all reports
+        ReportQueryParams params = normalizeParams(page, size, status, generatedByRole, search, sortBy, sortDir);
+
         List<SystemReportResponse> allReports = systemReportService.getAllSystemReports();
+        List<SystemReportResponse> filteredReports = filterAndSortReports(allReports, params);
 
-        // Filter reports
-        List<SystemReportResponse> filteredReports = allReports.stream()
-                .filter(report -> {
-                    if (!"all".equals(status)) {
-                        return report.getReportStatus().name().equalsIgnoreCase(status);
-                    }
-                    return true;
-                })
-                .filter(report -> {
-                    if (!"all".equals(generatedByRole)) {
-                        return report.getGeneratedByUserRole() != null &&
-                                report.getGeneratedByUserRole().equalsIgnoreCase(generatedByRole);
-                    }
-                    return true;
-                })
-                .filter(report -> {
-                    if (!search.isEmpty()) {
-                        return report.getReportName().toLowerCase().contains(search.toLowerCase()) ||
-                                report.getReportCategory().toLowerCase().contains(search.toLowerCase()) ||
-                                report.getGeneratedByUserName().toLowerCase().contains(search.toLowerCase());
-                    }
-                    return true;
-                })
-                .sorted((r1, r2) -> {
-                    int result = 0;
-                    switch (sortBy) {
-                        case "reportName":
-                            result = r1.getReportName().compareTo(r2.getReportName());
-                            break;
-                        case "reportCategory":
-                            result = r1.getReportCategory().compareTo(r2.getReportCategory());
-                            break;
-                        case "generatedByUserRole":
-                            result = (r1.getGeneratedByUserRole() != null ? r1.getGeneratedByUserRole() : "")
-                                    .compareTo(
-                                            r2.getGeneratedByUserRole() != null ? r2.getGeneratedByUserRole() : "");
-                            break;
-                        case "reportStatus":
-                            result = r1.getReportStatus().name().compareTo(r2.getReportStatus().name());
-                            break;
-                        case "reportType":
-                            result = r1.getReportType().name().compareTo(r2.getReportType().name());
-                            break;
-                        case "createdAt":
-                        default:
-                            result = 0;
-                            break;
-                    }
-                    return "desc".equals(sortDir) ? -result : result;
-                })
-                .collect(Collectors.toList());
-
-        // Calculate report statistics
         ReportStatsResponse reportStats = calculateReportStatistics(allReports);
 
-        // Pagination
-        int totalReports = filteredReports.size();
-        int startItem = page * size;
-        int endItem = Math.min(startItem + size, totalReports);
-        List<SystemReportResponse> pageReports = filteredReports.subList(startItem, endItem);
-        int totalPages = (int) Math.ceil((double) totalReports / size);
+        List<SystemReportResponse> pageReports = paginateReports(filteredReports, params.page(), params.size());
 
         ListReportsResponse response = ListReportsResponse.builder()
                 .reports(pageReports)
                 .reportStats(reportStats)
                 .pagination(Map.of(
-                        "currentPage", page,
-                        "pageSize", size,
-                        "totalPages", totalPages,
-                        "totalReports", totalReports))
+                        "currentPage", params.page(),
+                        "pageSize", params.size(),
+                        "totalPages", calculateTotalPages(filteredReports.size(), params.size()),
+                        "totalReports", filteredReports.size()))
                 .filters(Map.of(
-                        "status", status,
-                        "generatedByRole", generatedByRole,
-                        "search", search,
-                        "sortBy", sortBy,
-                        "sortDir", sortDir))
+                        "status", params.status(),
+                        "generatedByRole", params.generatedByRole(),
+                        "search", params.search(),
+                        "sortBy", params.sortBy(),
+                        "sortDir", params.sortDir()))
                 .allRoles(RoleType.values())
                 .reportStatuses(ReportStatus.values())
                 .reportTypes(ReportType.values())
                 .build();
 
         return ApiResponse.success(HttpStatus.OK.value(), "Reports retrieved successfully", response);
+    }
+
+    private record ReportQueryParams(int page, int size, String status, String generatedByRole, String search, String sortBy, String sortDir) {}
+
+    private ReportQueryParams normalizeParams(int page, int size, String status, String generatedByRole, String search, String sortBy, String sortDir) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(size, 1);
+        String safeStatus = status == null ? "all" : status.trim();
+        String safeRole = generatedByRole == null ? "all" : generatedByRole.trim();
+        String safeSearch = search == null ? "" : search.trim().toLowerCase();
+        String safeSortBy = sortBy == null ? "createdAt" : sortBy.trim();
+        String safeSortDir = sortDir == null ? "desc" : sortDir.trim().toLowerCase();
+        return new ReportQueryParams(safePage, safeSize, safeStatus, safeRole, safeSearch, safeSortBy, safeSortDir);
+    }
+
+    private List<SystemReportResponse> filterAndSortReports(List<SystemReportResponse> allReports, ReportQueryParams params) {
+        return allReports.stream()
+                .filter(report -> "all".equalsIgnoreCase(params.status()) || report.getReportStatus() != null && report.getReportStatus().name().equalsIgnoreCase(params.status()))
+                .filter(report -> "all".equalsIgnoreCase(params.generatedByRole()) || safeString(report.getGeneratedByUserRole()).equalsIgnoreCase(params.generatedByRole()))
+                .filter(report -> params.search().isEmpty() ||
+                        safeString(report.getReportName()).toLowerCase().contains(params.search()) ||
+                        safeString(report.getReportCategory()).toLowerCase().contains(params.search()) ||
+                        safeString(report.getGeneratedByUserName()).toLowerCase().contains(params.search()))
+                .sorted((r1, r2) -> {
+                    int result;
+                    switch (params.sortBy()) {
+                        case "reportName":
+                            result = compareSafe(r1.getReportName(), r2.getReportName());
+                            break;
+                        case "reportCategory":
+                            result = compareSafe(r1.getReportCategory(), r2.getReportCategory());
+                            break;
+                        case "generatedByUserRole":
+                            result = compareSafe(r1.getGeneratedByUserRole(), r2.getGeneratedByUserRole());
+                            break;
+                        case "reportStatus":
+                            result = compareSafe(reportStatusName(r1), reportStatusName(r2));
+                            break;
+                        case "reportType":
+                            result = compareSafe(reportTypeName(r1), reportTypeName(r2));
+                            break;
+                        case "createdAt":
+                            result = compareDates(r1.getCreatedAt(), r2.getCreatedAt());
+                            break;
+                        default:
+                            result = 0;
+                    }
+                    return "desc".equalsIgnoreCase(params.sortDir()) ? -result : result;
+                })
+                .toList();
+    }
+
+    private int calculateTotalPages(int totalReports, int size) {
+        if (size <= 0) {
+            return 0;
+        }
+        return (int) Math.ceil((double) totalReports / size);
+    }
+
+    private List<SystemReportResponse> paginateReports(List<SystemReportResponse> reports, int page, int size) {
+        int total = reports.size();
+        int start = Math.min(page * size, total);
+        int end = Math.min(start + size, total);
+        return reports.subList(start, end);
+    }
+
+    private <T extends Comparable<? super T>> int compareDates(T d1, T d2) {
+        if (d1 == null && d2 == null) return 0;
+        if (d1 == null) return -1;
+        if (d2 == null) return 1;
+        return d1.compareTo(d2);
     }
 
     @GetMapping("/{reportId}")
@@ -144,7 +161,11 @@ public class ManagerReportController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Void> createReport(@Valid @RequestBody NewReportRequest reportRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        var existingUser = userRepository.findByUsername(auth.getName());
+        String currentUsername = auth != null ? auth.getName() : null;
+        if (currentUsername == null) {
+            throw new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS);
+        }
+        var existingUser = userRepository.findByUsername(currentUsername);
         String currentUserId = existingUser
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS)).getId();
 
@@ -162,7 +183,11 @@ public class ManagerReportController {
     public ApiResponse<Void> updateReportStatus(@PathVariable Long reportId,
             @Valid @RequestBody UpdateReportStatusRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        var existingUser = userRepository.findByUsername(auth.getName());
+        String currentUsername = auth != null ? auth.getName() : null;
+        if (currentUsername == null) {
+            throw new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS);
+        }
+        var existingUser = userRepository.findByUsername(currentUsername);
         String currentUserId = existingUser
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS)).getId();
 
@@ -191,7 +216,7 @@ public class ManagerReportController {
         long rejectedReports = reports.stream().filter(r -> r.getReportStatus() == ReportStatus.REJECTED).count();
 
         // Count by type
-        Map<ReportType, Long> reportsByType = new HashMap<>();
+        Map<ReportType, Long> reportsByType = new EnumMap<>(ReportType.class);
         for (ReportType type : ReportType.values()) {
             long count = reports.stream().filter(r -> r.getReportType() == type).count();
             reportsByType.put(type, count);
@@ -205,4 +230,21 @@ public class ManagerReportController {
                 .reportsByType(reportsByType)
                 .build();
     }
+
+    private String safeString(String value) {
+        return value == null ? "" : value;
+    }
+
+    private int compareSafe(String first, String second) {
+        return safeString(first).compareTo(safeString(second));
+    }
+
+    private String reportStatusName(SystemReportResponse report) {
+        return report != null && report.getReportStatus() != null ? report.getReportStatus().name() : "";
+    }
+
+    private String reportTypeName(SystemReportResponse report) {
+        return report != null && report.getReportType() != null ? report.getReportType().name() : "";
+    }
 }
+

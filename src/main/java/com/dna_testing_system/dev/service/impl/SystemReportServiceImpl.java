@@ -95,8 +95,11 @@ public class SystemReportServiceImpl implements SystemReportService {
     @Transactional
     public void updateExistReport(UpdatingReportRequest updatingReportRequest, Long systemReportId) {
         ReportStatus reportStatus;
+        if (updatingReportRequest == null || updatingReportRequest.getNewReportStatus() == null || updatingReportRequest.getNewReportStatus().isBlank()) {
+            throw new ApplicationException(ErrorCode.VALIDATE_ENUMERATION_FAILED, "Parsing status is not valid");
+        }
         try {
-            reportStatus = ReportStatus.valueOf(updatingReportRequest.getNewReportStatus().toUpperCase());
+            reportStatus = ReportStatus.valueOf(updatingReportRequest.getNewReportStatus().trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new ApplicationException(ErrorCode.VALIDATE_ENUMERATION_FAILED, "Parsing status is not valid");
         }
@@ -104,10 +107,16 @@ public class SystemReportServiceImpl implements SystemReportService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RESOURCE_NOT_FOUND));
         var editingByUser = userRepository.findById(updatingReportRequest.getGeneratedByUserId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS));
-        boolean isStaff = editingByUser.getUserRoles()
-                .stream().anyMatch(role -> role.getRole().getRoleName().equals(RoleType.STAFF.name()));
-        boolean isCustomer = editingByUser.getUserRoles()
-                .stream().anyMatch(role -> role.getRole().getRoleName().equals(RoleType.CUSTOMER.name()));
+        boolean isStaff = editingByUser.getUserRoles() != null && editingByUser.getUserRoles().stream()
+                .filter(userRole -> userRole != null && userRole.getRole() != null && userRole.getRole().getRoleName() != null)
+                .map(userRole -> userRole.getRole().getRoleName())
+                .anyMatch(roleName -> roleName.equalsIgnoreCase(RoleType.STAFF.name()));
+
+        boolean isCustomer = editingByUser.getUserRoles() != null && editingByUser.getUserRoles().stream()
+                .filter(userRole -> userRole != null && userRole.getRole() != null && userRole.getRole().getRoleName() != null)
+                .map(userRole -> userRole.getRole().getRoleName())
+                .anyMatch(roleName -> roleName.equalsIgnoreCase(RoleType.CUSTOMER.name()));
+
         if (!existingReport.getReportStatus().equals(reportStatus) && (isStaff || isCustomer)) {
             throw new ApplicationException(ErrorCode.MANIPULATION_SYSTEM_REPORT_FAILED, "No changing status allowed");
         }

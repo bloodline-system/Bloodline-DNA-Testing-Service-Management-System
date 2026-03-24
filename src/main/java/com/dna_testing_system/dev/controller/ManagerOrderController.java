@@ -11,12 +11,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -70,6 +74,95 @@ public class ManagerOrderController {
 
         return ApiResponse.success(HttpStatus.OK.value(), "New orders data", response);
     }
+
+    // ================== DNÁ ORDERS COMPATIBILITY ENDPOINTS (FOR POSTMAN QA) ==================
+
+    @GetMapping("/dna-orders")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Object> getDnaOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") int dummy) {
+        var orders = orderTaskManagementService.getServiceOrders();
+
+        int totalOrders = orders.size();
+        int start = Math.min(page * size, totalOrders);
+        int end = Math.min(start + size, totalOrders);
+
+        var pageOrders = orders.subList(start, end);
+
+        long completedOrders = orders.stream().filter(o -> o.getOrderStatus() == com.dna_testing_system.dev.enums.ServiceOrderStatus.COMPLETED).count();
+        long cancelledOrders = orders.stream().filter(o -> o.getOrderStatus() == com.dna_testing_system.dev.enums.ServiceOrderStatus.CANCELLED).count();
+
+        var summary = Map.<String, Object>of(
+                "totalOrders", totalOrders,
+                "completedOrders", completedOrders,
+                "cancelledOrders", cancelledOrders
+        );
+
+        var responseObj = Map.<String, Object>of(
+                "orders", pageOrders,
+                "summary", summary,
+                "currentPage", page,
+                "pageSize", size,
+                "totalPages", (int) Math.ceil((double) totalOrders / size),
+                "totalOrders", totalOrders,
+                "filters", Map.of("status", "all", "page", page, "size", size));
+
+        return ApiResponse.success(HttpStatus.OK.value(), "DNA orders fetched", responseObj);
+    }
+
+    @GetMapping("/dna-orders/{orderId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Object> getDnaOrderDetails(@PathVariable Long orderId) {
+        var order = orderTaskManagementService.getServiceOrders().stream()
+                .filter(o -> orderId.equals(o.getId()))
+                .findFirst()
+                .orElseThrow(() -> new com.dna_testing_system.dev.exception.ResourceNotFoundException(com.dna_testing_system.dev.exception.ErrorCode.NOT_FOUND));
+
+        var responseObj = Map.<String, Object>of(
+                "order", order,
+                "kits", order.getOrderKits() == null ? List.of() : order.getOrderKits(),
+                "participants", order.getOrderParticipants() == null ? List.of() : order.getOrderParticipants());
+
+        return ApiResponse.success(HttpStatus.OK.value(), "DNA order detail", responseObj);
+    }
+
+    @PatchMapping("/dna-orders/{orderId}/status")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> updateDnaOrderStatus(@PathVariable Long orderId,
+            @Valid @RequestBody com.dna_testing_system.dev.dto.request.manager.UpdateOrderStatusRequest request) {
+        orderTaskManagementService.updateOrderStatus(orderId, request.getStatus());
+        return ApiResponse.success(HttpStatus.OK.value(), "Order status updated", null);
+    }
+
+    @PostMapping("/dna-orders/{orderId}/assign")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> assignDnaOrderStaff(@PathVariable Long orderId,
+            @Valid @RequestBody com.dna_testing_system.dev.dto.request.manager.StaffAssignmentRequest request) {
+        request.setOrderId(orderId);
+        orderTaskManagementService.taskAssignmentForStaff(orderId,
+                com.dna_testing_system.dev.dto.request.StaffAvailableRequest.builder().staffId(request.getCollectStaffId()).build(),
+                com.dna_testing_system.dev.dto.request.StaffAvailableRequest.builder().staffId(request.getAnalysisStaffId()).build());
+        return ApiResponse.success(HttpStatus.OK.value(), "Staff assigned", null);
+    }
+
+    @GetMapping("/dna-orders/pending-assignment")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Object> getDnaPendingAssignment() {
+        var newOrders = orderTaskManagementService.getNewOrders();
+        var availableStaff = orderTaskManagementService.getStaffAvailable();
+
+        var responseObj = Map.<String, Object>of(
+                "pendingOrders", newOrders,
+                "availableStaff", availableStaff,
+                "pendingCount", newOrders.size(),
+                "availableStaffCount", availableStaff.size());
+
+        return ApiResponse.success(HttpStatus.OK.value(), "DNA pending assignment data", responseObj);
+    }
+
+    // =====================================================================================
 
     @PostMapping("/assign-staff")
     @ResponseStatus(HttpStatus.OK)

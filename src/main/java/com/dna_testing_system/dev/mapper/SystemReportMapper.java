@@ -17,6 +17,7 @@ public interface SystemReportMapper {
 
     // Response: from Entity → Response DTO
     @Mapping(source = "id", target = "reportId")
+    @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "generatedByUser.username", target = "generatedByUserName")
     @Mapping(source = "generatedByUser.profile.email", target = "generatedByUserEmail")
     @Mapping(source = "generatedByUser.profile.profileImageUrl", target = "generatedByUserImageUrl")
@@ -24,9 +25,18 @@ public interface SystemReportMapper {
     SystemReportResponse toResponse(SystemReport entity);
 
     default String getPrimaryRoleName(User user) {
+        if (user == null || user.getUserRoles() == null) {
+            return "UNKNOWN";
+        }
         return user.getUserRoles().stream()
-                .filter(UserRole::getIsActive)
-                .map(userRole -> userRole.getRole().getRoleName()) // nếu Role.name là Enum
+                .filter(userRole -> userRole != null && Boolean.TRUE.equals(userRole.getIsActive()))
+                .map(userRole -> {
+                    if (userRole.getRole() == null || userRole.getRole().getRoleName() == null) {
+                        return "UNKNOWN";
+                    }
+                    return userRole.getRole().getRoleName();
+                })
+                .filter(roleName -> roleName != null && !roleName.isBlank())
                 .findFirst()
                 .orElse("UNKNOWN");
     }

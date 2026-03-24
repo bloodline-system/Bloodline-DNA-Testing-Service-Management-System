@@ -62,39 +62,59 @@ jobs:
 
       - name: Set environment variables
         run: |
-          case "${{ inputs.environment || 'dev' }}" in
-            prod)    API_URL="${{ secrets.API_BASE_URL_PROD }}"    ;;
-            staging) API_URL="${{ secrets.API_BASE_URL_STAGING }}" ;;
-            *)       API_URL="${{ secrets.API_BASE_URL_DEV }}"     ;;
+          ENV_NAME="${{ inputs.environment }}"
+          if [ -z "$ENV_NAME" ]; then ENV_NAME="ci"; fi
+
+          case "$ENV_NAME" in
+            staging)
+              API_URL="${{ secrets.STAGING_URL }}"
+              ;;
+            production)
+              API_URL="${{ secrets.PRODUCTION_URL }}"
+              ;;
+            *)
+              API_URL="${{ secrets.CI_URL:-http://localhost:8080 }}"
+              ;;
           esac
-          echo "ENVIRONMENT=${{ inputs.environment || 'dev' }}" >> $GITHUB_ENV
-          echo "API_BASE_URL=$API_URL"                                        >> $GITHUB_ENV
 
-      - name: Wait for API ready
+          if [ -z "$API_URL" ]; then
+            echo "ERROR: API URL is not set for environment '$ENV_NAME'" >&2
+            exit 1
+          fi
+
+          echo "ENVIRONMENT=$ENV_NAME" >> $GITHUB_ENV
+          echo "API_BASE_URL=$API_URL" >> $GITHUB_ENV
+          echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> $GITHUB_ENV
+          echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> $GITHUB_ENV
+          echo "Using API URL: $API_URL"
+
+      - name: Wait for target API to be ready
         run: |
-          echo "⏳ Waiting for API..."
+          echo "Waiting for API to be ready at ${{ env.API_BASE_URL }}"
           for i in {1..30}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_BASE_URL_STAGING }}/actuator/health || true)
-
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' "${{ env.API_BASE_URL }}/actuator/health" || true)
             if [ "$STATUS" = "200" ]; then
-              echo "API is ready!"
-              exit 0
+              echo "API ready"; exit 0
             fi
-
-            echo "⏳ Retry $i..."
-            sleep 5
+            sleep 2
           done
-
-          echo "API not ready"
+          echo "Timed out waiting for API" >&2
           exit 1
 
       - name: Run — ${{ matrix.collection }}
         id: newman
         continue-on-error: true
         run: |
+          ENV_FILE="postman/environments/ci-environment.json"
+          if [ ! -f "$ENV_FILE" ]; then
+            ENV_FILE=""
+          fi
+
           newman run postman/${{ matrix.collection }}.json \
-            --environment postman/environments/${{ env.ENVIRONMENT }}.json \
+            ${ENV_FILE:+--environment "$ENV_FILE"} \
             --env-var "baseUrl=${{ env.API_BASE_URL }}" \
+            --env-var "admin_email=${{ env.ADMIN_EMAIL }}" \
+            --env-var "admin_password=${{ env.ADMIN_PASSWORD }}" \
             --reporters cli,json,htmlextra \
             --reporter-json-export      reports/result.json \
             --reporter-htmlextra-export reports/result.html \
