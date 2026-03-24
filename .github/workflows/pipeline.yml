@@ -29,18 +29,19 @@ jobs:
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
 
+  # Run API tests for PR and development pushes (no EC2 deployment)
+  test-staging:
+    needs: ci-quality
+    if: github.event_name == 'pull_request' || (github.ref_name == 'development' && github.event_name == 'push')
+    uses: ./.github/workflows/api-tests.yml
+    with:
+      environment: staging
+    secrets: inherit
+
   # Deploy staging (develop) - DISABLED TEMPORARILY
   # deploy-staging:
   #   if: github.ref_name == 'development' && github.event_name == 'push'
   #   uses: ./.github/workflows/deploy.yml
-  #   with:
-  #     environment: staging
-  #   secrets: inherit
-
-  # Test Staging - DISABLED TEMPORARILY
-  # test-staging:
-  #   needs: deploy-staging
-  #   uses: ./.github/workflows/api-tests.yml
   #   with:
   #     environment: staging
   #   secrets: inherit
