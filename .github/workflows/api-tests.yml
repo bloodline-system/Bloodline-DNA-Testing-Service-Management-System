@@ -46,11 +46,45 @@ jobs:
       - name: Create reports directory
         run: mkdir -p reports
 
-      # ── 6. Chạy Newman ───────────────────────────────────────────────────
+      # ── 6. Health check staging API URL ─────────────────────────────────
+      - name: Health-check staging API
+        run: |
+          API_URL=${{ secrets.STAGING_URL }}
+          echo "Checking staging API health at $API_URL/actuator/health"
+          for i in {1..20}; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$API_URL/actuator/health" || true)
+            echo "Attempt $i -> $HTTP_STATUS"
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "API is healthy"; break
+            fi
+            sleep 5
+          done
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "ERROR: API health check failed at $API_URL/actuator/health" >&2
+            exit 1
+          fi
+
+      # ── 7. Chạy Newman ───────────────────────────────────────────────────
       - name: Run Newman tests
         run: |
-          newman run postman/DNA_Testing_System_v3_postman_collection.json \
-            --environment /tmp/staging-env-filled.json \
+          COLLECTION=postman/DNA_Testing_System_v3_postman_collection.json
+          ENV_FILE=/tmp/staging-env-filled.json
+
+          echo "collection=$COLLECTION"
+          echo "environment=$ENV_FILE"
+
+          if [ ! -f "$COLLECTION" ]; then
+            echo "ERROR: collection file not found: $COLLECTION" >&2
+            exit 1
+          fi
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "ERROR: environment file not found: $ENV_FILE" >&2
+            exit 1
+          fi
+
+          set -x
+          newman run "$COLLECTION" \
+            --environment "$ENV_FILE" \
             --reporters cli,htmlextra,json \
             --reporter-htmlextra-export reports/result.html \
             --reporter-json-export reports/result.json \
@@ -58,10 +92,13 @@ jobs:
             --reporter-htmlextra-showOnlyFails \
             --delay-request 300 \
             --timeout-request 10000 \
-            --color on \
-            || true
+            --color on
+          NEWMAN_EXIT=$?
+          set +x
+          echo "Newman exit code: $NEWMAN_EXIT"
+          exit $NEWMAN_EXIT
 
-      # ── 7. Upload report ─────────────────────────────────────────────────
+      # ── 8. Upload report ─────────────────────────────────────────────────
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
