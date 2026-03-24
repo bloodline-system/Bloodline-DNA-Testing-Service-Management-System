@@ -42,7 +42,11 @@ jobs:
                else . end
              )' postman/staging-environment.json > /tmp/staging-env-filled.json
 
-      # ── 5. Chạy Newman ───────────────────────────────────────────────────
+      # ── 5. Tạo thư mục reports ───────────────────────────────────────────
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      # ── 6. Chạy Newman ───────────────────────────────────────────────────
       - name: Run Newman tests
         run: |
           newman run postman/DNA_Testing_System_v3_postman_collection.json \
@@ -57,7 +61,7 @@ jobs:
             --color on \
             || true
 
-      # ── 6. Upload report ─────────────────────────────────────────────────
+      # ── 7. Upload report ─────────────────────────────────────────────────
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -66,7 +70,7 @@ jobs:
           path: reports/
           retention-days: 14
 
-      # ── 7. Fail job nếu có test thất bại (optional) ──────────────────────
+      # ── 8. Fail job nếu có test thất bại (optional) ──────────────────────
       - name: Check test results
         run: |
           FAILURES=$(jq '.run.stats.assertions.failed' reports/result.json)
