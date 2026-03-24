@@ -49,7 +49,12 @@ jobs:
       # ── 6. Health check staging API URL ─────────────────────────────────
       - name: Health-check staging API
         run: |
-          API_URL=${{ secrets.STAGING_URL }}
+          API_URL="${{ secrets.STAGING_URL }}"
+          if [ -z "$API_URL" ]; then
+            echo "ERROR: STAGING_URL secret is empty or not configured. Please add STAGING_URL in repository secrets." >&2
+            exit 1
+          fi
+
           echo "Checking staging API health at $API_URL/actuator/health"
           for i in {1..20}; do
             HTTP_STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$API_URL/actuator/health" || true)
