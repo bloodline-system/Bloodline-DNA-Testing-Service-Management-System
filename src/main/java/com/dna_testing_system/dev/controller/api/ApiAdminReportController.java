@@ -57,27 +57,41 @@ public class ApiAdminReportController {
             HttpServletRequest request) {
 
         try {
+            if (page < 0) {
+                page = 0;
+            }
+            if (size <= 0) {
+                size = 20;
+            }
+
+            String safeStatus = status == null ? "all" : status.trim();
+            String safeGeneratedByRole = generatedByRole == null ? "all" : generatedByRole.trim();
+            String safeSearch = search == null ? "" : search.trim().toLowerCase();
+            String safeSortBy = sortBy == null ? "createdAt" : sortBy;
+            String safeSortDir = sortDir == null ? "desc" : sortDir.toLowerCase();
+
             List<SystemReportResponse> allReports = systemReportService.getAllSystemReports();
 
             List<SystemReportResponse> filtered = allReports.stream()
-                    .filter(r -> "all".equals(status) || r.getReportStatus().name().equalsIgnoreCase(status))
-                    .filter(r -> "all".equals(generatedByRole) ||
-                            (r.getGeneratedByUserRole() != null && r.getGeneratedByUserRole().equalsIgnoreCase(generatedByRole)))
-                    .filter(r -> search.isEmpty() ||
-                            r.getReportName().toLowerCase().contains(search.toLowerCase()) ||
-                            r.getReportCategory().toLowerCase().contains(search.toLowerCase()) ||
-                            r.getGeneratedByUserName().toLowerCase().contains(search.toLowerCase()))
+                    .filter(r -> "all".equalsIgnoreCase(safeStatus) ||
+                            (r.getReportStatus() != null && r.getReportStatus().name().equalsIgnoreCase(safeStatus)))
+                    .filter(r -> "all".equalsIgnoreCase(safeGeneratedByRole) ||
+                            safeString(r.getGeneratedByUserRole()).equalsIgnoreCase(safeGeneratedByRole))
+                    .filter(r -> safeSearch.isEmpty() ||
+                            safeString(r.getReportName()).toLowerCase().contains(safeSearch) ||
+                            safeString(r.getReportCategory()).toLowerCase().contains(safeSearch) ||
+                            safeString(r.getGeneratedByUserName()).toLowerCase().contains(safeSearch))
                     .sorted((r1, r2) -> {
-                        int result = switch (sortBy) {
-                            case "reportName" -> r1.getReportName().compareTo(r2.getReportName());
-                            case "reportCategory" -> r1.getReportCategory().compareTo(r2.getReportCategory());
-                            case "generatedByUserRole" -> (r1.getGeneratedByUserRole() != null ? r1.getGeneratedByUserRole() : "")
-                                    .compareTo(r2.getGeneratedByUserRole() != null ? r2.getGeneratedByUserRole() : "");
-                            case "reportStatus" -> r1.getReportStatus().name().compareTo(r2.getReportStatus().name());
-                            case "reportType" -> r1.getReportType().name().compareTo(r2.getReportType().name());
-                            default -> 0;
-                        };
-                        return "desc".equals(sortDir) ? -result : result;
+                        int result;
+                        switch (safeSortBy) {
+                            case "reportName" -> result = compareSafe(r1.getReportName(), r2.getReportName());
+                            case "reportCategory" -> result = compareSafe(r1.getReportCategory(), r2.getReportCategory());
+                            case "generatedByUserRole" -> result = compareSafe(r1.getGeneratedByUserRole(), r2.getGeneratedByUserRole());
+                            case "reportStatus" -> result = compareSafe(reportStatusName(r1), reportStatusName(r2));
+                            case "reportType" -> result = compareSafe(reportTypeName(r1), reportTypeName(r2));
+                            default -> result = 0;
+                        }
+                        return "desc".equalsIgnoreCase(safeSortDir) ? -result : result;
                     })
                     .collect(Collectors.toList());
 
@@ -134,6 +148,9 @@ public class ApiAdminReportController {
                                                                           HttpServletRequest request) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || auth.getName() == null) {
+                throw new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS);
+            }
             User currentUser = userRepository.findByUsername(auth.getName())
                     .map(u -> userRepository.findById(u.getId())
                             .orElseThrow(() -> new RuntimeException("User not found")))
@@ -169,6 +186,9 @@ public class ApiAdminReportController {
 
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || auth.getName() == null) {
+                throw new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS);
+            }
             String currentUserId = userRepository.findByUsername(auth.getName())
                     .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS))
                     .getId();
@@ -223,6 +243,22 @@ public class ApiAdminReportController {
                 .rejectedReports(rejectedReports)
                 .reportsByType(reportsByType)
                 .build();
+    }
+
+    private String safeString(String value) {
+        return value == null ? "" : value;
+    }
+
+    private int compareSafe(String first, String second) {
+        return safeString(first).compareTo(safeString(second));
+    }
+
+    private String reportStatusName(SystemReportResponse report) {
+        return report != null && report.getReportStatus() != null ? report.getReportStatus().name() : "";
+    }
+
+    private String reportTypeName(SystemReportResponse report) {
+        return report != null && report.getReportType() != null ? report.getReportType().name() : "";
     }
 
     // Inner class for statistics

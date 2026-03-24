@@ -24,4 +24,9 @@ public class ListReportsResponse {
     private RoleType[] allRoles;
     private ReportStatus[] reportStatuses;
     private ReportType[] reportTypes;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("stats")
+    public ReportStatsResponse getStats() {
+        return this.reportStats;
+    }
 }
