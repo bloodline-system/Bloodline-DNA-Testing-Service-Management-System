@@ -3,7 +3,6 @@ name: CI/CD Pipeline
 on:
   pull_request:
     branches: [main, development]
-
   push:
     branches: [main, development]
 
@@ -12,7 +11,6 @@ jobs:
   ci-quality:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -28,4 +26,18 @@ jobs:
             -Dspring.profiles.active=test \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
+  # Deploy staging (development)
+  deploy-staging:
+    if: (github.ref == 'refs/heads/development' || github.ref_name == 'development') && github.event_name == 'push'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: staging
+    secrets: inherit
 
+  # Test Staging
+  test-staging:
+    needs: deploy-staging
+    uses: ./.github/workflows/api-tests.yml
+    with:
+      environment: staging
+    secrets: inherit
