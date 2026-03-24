@@ -73,7 +73,12 @@ jobs:
       # ── 8. Fail job nếu có test thất bại (optional) ──────────────────────
       - name: Check test results
         run: |
-          FAILURES=$(jq '.run.stats.assertions.failed' reports/result.json)
+          if [ ! -f reports/result.json ]; then
+            echo "⚠️ reports/result.json not found; the Newman run may have failed before outputs were generated."
+            exit 1
+          fi
+
+          FAILURES=$(jq '.run.stats.assertions.failed // 0' reports/result.json)
           echo "Failed assertions: $FAILURES"
           if [ "$FAILURES" -gt "0" ]; then
             echo "❌ $FAILURES assertion(s) failed!"
