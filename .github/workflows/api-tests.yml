@@ -1,37 +1,38 @@
 name: API Tests – Staging
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      environment:
+        required: false
+        type: string
+        default: staging
+    secrets:
+      STAGING_USERNAME:
+        required: true
+      STAGING_PASSWORD:
+        required: true
+      STAGING_URL:
+        required: true
 
 jobs:
   newman-tests:
     name: Run Postman Collection (Newman)
     runs-on: ubuntu-latest
-
     steps:
-      # ── 1. Checkout code ────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── 2. Setup Node.js ────────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # ── 3. Install Newman + HTML reporter ─────────────────────────────────
       - name: Install Newman
         run: |
           npm install -g newman
           npm install -g newman-reporter-htmlextra
 
-      # ── 4. Inject credentials vào environment file ──────────────────────
-      #    Đọc file staging-environment.json (commit sẵn trong repo, không có credentials)
-      #    rồi điền username/password từ GitHub Secrets vào.
       - name: Inject credentials into environment
         run: |
           jq --arg user "${{ secrets.STAGING_USERNAME }}" \
@@ -42,10 +43,28 @@ jobs:
                else . end
              )' postman/staging-environment.json > /tmp/staging-env-filled.json
 
-      # ── 5. Chạy Newman ───────────────────────────────────────────────────
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Health-check staging API
+        run: |
+          API_URL="${{ secrets.STAGING_URL }}"
+          for i in {1..20}; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$API_URL/actuator/health" || true)
+            echo "Attempt $i -> $HTTP_STATUS"
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "API is healthy"; break
+            fi
+            sleep 5
+          done
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "ERROR: API health check failed" >&2
+            exit 1
+          fi
+
       - name: Run Newman tests
         run: |
-          newman run postman/DNA_Testing_System_v3_postman_collection.json \
+          newman run postman/DNA_Testing_System_v3.postman_collection.json \
             --environment /tmp/staging-env-filled.json \
             --reporters cli,htmlextra,json \
             --reporter-htmlextra-export reports/result.html \
@@ -54,10 +73,8 @@ jobs:
             --reporter-htmlextra-showOnlyFails \
             --delay-request 300 \
             --timeout-request 10000 \
-            --color on \
-            || true
+            --color on || true
 
-      # ── 6. Upload report ─────────────────────────────────────────────────
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -66,10 +83,13 @@ jobs:
           path: reports/
           retention-days: 14
 
-      # ── 7. Fail job nếu có test thất bại (optional) ──────────────────────
       - name: Check test results
         run: |
-          FAILURES=$(jq '.run.stats.assertions.failed' reports/result.json)
+          if [ ! -f reports/result.json ]; then
+            echo "⚠️ reports/result.json not found"
+            exit 1
+          fi
+          FAILURES=$(jq '.run.stats.assertions.failed // 0' reports/result.json)
           echo "Failed assertions: $FAILURES"
           if [ "$FAILURES" -gt "0" ]; then
             echo "❌ $FAILURES assertion(s) failed!"
