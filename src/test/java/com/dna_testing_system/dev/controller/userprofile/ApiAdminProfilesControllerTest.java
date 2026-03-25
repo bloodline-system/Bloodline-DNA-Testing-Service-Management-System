@@ -1,4 +1,4 @@
-package com.dna_testing_system.dev.userprofile;
+package com.dna_testing_system.dev.controller.userprofile;
 
 import com.dna_testing_system.dev.controller.api.ApiAdminProfilesController;
 import com.dna_testing_system.dev.config.ApplicationInitConfig;
