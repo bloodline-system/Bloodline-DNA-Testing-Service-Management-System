@@ -7,7 +7,7 @@ on:
     branches: [main, development]
 
 jobs:
-  # CI — PR only (unit + sonar)
+  # CI — PR only
   ci-quality:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
             -Dspring.profiles.active=test \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
-  # Deploy staging (development branch)
+  # Deploy staging
   deploy-staging:
     if: github.ref_name == 'development' && github.event_name == 'push'
     uses: ./.github/workflows/deploy.yml
@@ -34,33 +34,14 @@ jobs:
       environment: staging
     secrets: inherit
 
-  # Test Staging
+  # ✅ Test staging (FIX CHUẨN)
   test-staging:
-  needs: deploy-staging
-  uses: ./.github/workflows/api-tests.yml
-  with:
+    needs: deploy-staging
+    uses: ./.github/workflows/api-tests.yml
+    with:
+      environment: staging
+    secrets:
+      STAGING_USERNAME: ${{ secrets.STAGING_USERNAME }}
+      STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
+      STAGING_URL: ${{ secrets.STAGING_URL }}
     environment: staging
-  secrets:
-    STAGING_USERNAME: ${{ secrets.STAGING_USERNAME }}
-    STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
-    STAGING_URL: ${{ secrets.STAGING_URL }}
-  environment: staging
-
-  # Deploy production (main)
-  # deploy-prod:
-  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-  #   uses: ./.github/workflows/deploy.yml
-  #   with:
-  #     environment: prod
-  #   secrets: inherit
-
-  # Test production
-  # test-prod:
-  #   needs: deploy-prod
-  #   uses: ./.github/workflows/api-tests.yml
-  #   with:
-  #     environment: prod
-  #   secrets:
-  #     STAGING_USERNAME: ${{ secrets.STAGING_USERNAME }}
-  #     STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
-  #     STAGING_URL: ${{ secrets.STAGING_URL }}
