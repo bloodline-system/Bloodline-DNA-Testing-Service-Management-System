@@ -13,135 +13,84 @@ on:
       STAGING_PASSWORD:
         required: true
       STAGING_URL:
-        required: true
+        required: false   # 👈 QUAN TRỌNG: bỏ required
 
 jobs:
-  # ── Bước 1: Login lấy token ──────────────────────────────────────────────
   login:
-    name: Login & Get Token
     runs-on: ubuntu-latest
-    env:
-      BASE_URL: ${{ secrets.STAGING_URL }}
     outputs:
-      access_token: ${{ steps.do-login.outputs.access_token }}
+      access_token: ${{ steps.login.outputs.token }}
 
     steps:
-      - name: Validate BASE_URL
+      - name: Resolve BASE_URL
+        id: base
         run: |
+          BASE_URL="${{ secrets.STAGING_URL }}"
+
+          # fallback nếu không có secret
           if [ -z "$BASE_URL" ]; then
-            echo "❌ BASE_URL is not set"
-            exit 1
+            BASE_URL="http://44.205.114.232"
           fi
 
-      - name: Login to staging
-        id: do-login
+          echo "BASE_URL=$BASE_URL"
+          echo "base_url=$BASE_URL" >> $GITHUB_OUTPUT
+
+      - name: Login
+        id: login
         run: |
+          BASE_URL="${{ steps.base.outputs.base_url }}"
+
           RESPONSE=$(curl -s -X POST \
             "$BASE_URL/api/v1/auth/login" \
             -H "Content-Type: application/json" \
             -d "{\"username\":\"${{ secrets.STAGING_USERNAME }}\",\"password\":\"${{ secrets.STAGING_PASSWORD }}\",\"rememberMe\":true}")
 
-          echo "Response: $RESPONSE"
-
           TOKEN=$(echo "$RESPONSE" | jq -r '.data.access_token // .data.accessToken // empty')
 
           if [ -z "$TOKEN" ]; then
-            echo "❌ Login failed! Response: $RESPONSE"
+            echo "❌ Login failed"
+            echo "$RESPONSE"
             exit 1
           fi
 
-          echo "✅ Login successful"
-          echo "access_token=$TOKEN" >> $GITHUB_OUTPUT
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
-  # ── Bước 2: Chạy từng collection song song ───────────────────────────────
   api-tests:
-    name: Run ${{ matrix.collection }}
     needs: login
     runs-on: ubuntu-latest
-    env:
-      BASE_URL: ${{ secrets.STAGING_URL }}
 
     strategy:
-      fail-fast: false
       matrix:
         collection:
           - auth.json
-          - DNA_01_Manager_Orders.postman_collection.json
-          - DNA_02_Manager_Statistics.postman_collection.json
-          - DNA_03_Manager_Reports.postman_collection.json
-          - Employee-Management-API.postman_collection.json
-          - File-Download-API.postman_collection.json
-          - api-test-kit.json
-          - post-management.json
           - service.json
-          - test-kit-api-collection.json
-          - user_and_feedback.json
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Install newman
+        run: npm install -g newman
 
-      - name: Install Newman
+      - name: Prepare env
         run: |
-          npm install -g newman
-          npm install -g newman-reporter-htmlextra
-
-      - name: Prepare environment file
-        run: |
-          ACCESS_TOKEN="${{ needs.login.outputs.access_token }}"
-
-          jq \
-            --arg user    "${{ secrets.STAGING_USERNAME }}" \
-            --arg pass    "${{ secrets.STAGING_PASSWORD }}" \
-            --arg token   "$ACCESS_TOKEN" \
-            --arg baseurl "$BASE_URL" \
-            '.values |= map(
-              if   .key == "username"      then .value = $user
-              elif .key == "password"      then .value = $pass
-              elif .key == "access_token"  then .value = $token
-              elif .key == "jwtToken"      then .value = $token
-              elif .key == "token"         then .value = $token
-              elif .key == "baseUrl"       then .value = $baseurl
-              elif .key == "base_url"      then .value = $baseurl
-              else . end
-            )' postman/staging-environment.json > /tmp/env-filled.json
-
-      - name: Debug env (optional)
-        run: cat /tmp/env-filled.json
-
-      - name: Create reports directory
-        run: mkdir -p reports
-
-      - name: Run Newman – ${{ matrix.collection }}
-        run: |
-          COLLECTION="postman/${{ matrix.collection }}"
-          SAFE_NAME=$(echo "${{ matrix.collection }}" | sed 's/[^a-zA-Z0-9]/_/g')
-
-          if [ ! -f "$COLLECTION" ]; then
-            echo "⚠️ Collection not found: $COLLECTION — skipping"
-            exit 0
+          BASE_URL="${{ secrets.STAGING_URL }}"
+          if [ -z "$BASE_URL" ]; then
+            BASE_URL="http://44.205.114.232"
           fi
 
-          newman run "$COLLECTION" \
-            --environment /tmp/env-filled.json \
-            --reporters cli,htmlextra,json \
-            --reporter-htmlextra-export "reports/${SAFE_NAME}.html" \
-            --reporter-json-export      "reports/${SAFE_NAME}.json" \
-            --reporter-htmlextra-title  "DNA System – ${{ matrix.collection }}" \
-            --reporter-htmlextra-showOnlyFails \
-            --delay-request 300 \
-            --timeout-request 15000 \
-            --color on || true
+          jq \
+            --arg token "${{ needs.login.outputs.access_token }}" \
+            --arg base "$BASE_URL" \
+            --arg user "${{ secrets.STAGING_USERNAME }}" \
+            --arg pass "${{ secrets.STAGING_PASSWORD }}" \
+            '.values |= map(
+              if .key=="access_token" then .value=$token
+              elif .key=="baseUrl" then .value=$base
+              elif .key=="username" then .value=$user
+              elif .key=="password" then .value=$pass
+              else . end
+            )' postman/staging-environment.json > env.json
 
-      - name: Upload report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: report-${{ matrix.collection }}-${{ github.run_number }}
-          path: reports/
-          retention-days: 14
+      - name: Run test
+        run: |
+          newman run postman/${{ matrix.collection }} -e env.json || true
