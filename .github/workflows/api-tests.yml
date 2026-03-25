@@ -13,7 +13,10 @@ on:
       STAGING_PASSWORD:
         required: true
       STAGING_URL:
-        required: false
+        required: true
+
+env:
+  BASE_URL: ${{ secrets.STAGING_URL }}
 
 jobs:
   # ── Bước 1: Login lấy token ──────────────────────────────────────────────
@@ -22,24 +25,32 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       access_token: ${{ steps.do-login.outputs.access_token }}
+
     steps:
+      - name: Validate BASE_URL
+        run: |
+          if [ -z "$BASE_URL" ]; then
+            echo "❌ BASE_URL is not set"
+            exit 1
+          fi
+
       - name: Login to staging
         id: do-login
         run: |
-          BASE_URL="${{ secrets.STAGING_URL }}"
-          if [ -z "$BASE_URL" ]; then
-            BASE_URL="http://44.205.114.232"
-          fi
           RESPONSE=$(curl -s -X POST \
             "$BASE_URL/api/v1/auth/login" \
             -H "Content-Type: application/json" \
             -d "{\"username\":\"${{ secrets.STAGING_USERNAME }}\",\"password\":\"${{ secrets.STAGING_PASSWORD }}\",\"rememberMe\":true}")
+
           echo "Response: $RESPONSE"
+
           TOKEN=$(echo "$RESPONSE" | jq -r '.data.access_token // .data.accessToken // empty')
+
           if [ -z "$TOKEN" ]; then
             echo "❌ Login failed! Response: $RESPONSE"
             exit 1
           fi
+
           echo "✅ Login successful"
           echo "access_token=$TOKEN" >> $GITHUB_OUTPUT
 
@@ -48,6 +59,7 @@ jobs:
     name: Run ${{ matrix.collection }}
     needs: login
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
@@ -80,11 +92,8 @@ jobs:
 
       - name: Prepare environment file
         run: |
-          BASE_URL="${{ secrets.STAGING_URL }}"
-          if [ -z "$BASE_URL" ]; then
-            BASE_URL="http://44.205.114.232"
-          fi
           ACCESS_TOKEN="${{ needs.login.outputs.access_token }}"
+
           jq \
             --arg user    "${{ secrets.STAGING_USERNAME }}" \
             --arg pass    "${{ secrets.STAGING_PASSWORD }}" \
