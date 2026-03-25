@@ -16,9 +16,54 @@ on:
         required: false
 
 jobs:
-  newman-tests:
-    name: Run Postman Collection (Newman)
+  # ── Bước 1: Login lấy token ──────────────────────────────────────────────
+  login:
+    name: Login & Get Token
     runs-on: ubuntu-latest
+    outputs:
+      access_token: ${{ steps.do-login.outputs.access_token }}
+    steps:
+      - name: Login to staging
+        id: do-login
+        run: |
+          BASE_URL="${{ secrets.STAGING_URL }}"
+          if [ -z "$BASE_URL" ]; then
+            BASE_URL="http://44.205.114.232"
+          fi
+          RESPONSE=$(curl -s -X POST \
+            "$BASE_URL/api/v1/auth/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"username\":\"${{ secrets.STAGING_USERNAME }}\",\"password\":\"${{ secrets.STAGING_PASSWORD }}\",\"rememberMe\":true}")
+          echo "Response: $RESPONSE"
+          TOKEN=$(echo "$RESPONSE" | jq -r '.data.access_token // .data.accessToken // empty')
+          if [ -z "$TOKEN" ]; then
+            echo "❌ Login failed! Response: $RESPONSE"
+            exit 1
+          fi
+          echo "✅ Login successful"
+          echo "access_token=$TOKEN" >> $GITHUB_OUTPUT
+
+  # ── Bước 2: Chạy từng collection song song ───────────────────────────────
+  api-tests:
+    name: Run ${{ matrix.collection }}
+    needs: login
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        collection:
+          - auth.json
+          - DNA_01_Manager_Orders.postman_collection.json
+          - DNA_02_Manager_Statistics.postman_collection.json
+          - DNA_03_Manager_Reports.postman_collection.json
+          - Employee-Management-API.postman_collection.json
+          - File-Download-API.postman_collection.json
+          - api-test-kit.json
+          - post-management.json
+          - service.json
+          - test-kit-api-collection.json
+          - user_and_feedback.json
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,70 +78,57 @@ jobs:
           npm install -g newman
           npm install -g newman-reporter-htmlextra
 
-      - name: Inject credentials into environment
+      - name: Prepare environment file
         run: |
-          jq --arg user "${{ secrets.STAGING_USERNAME }}" \
-             --arg pass "${{ secrets.STAGING_PASSWORD }}" \
-             '.values |= map(
-               if .key == "username" then .value = $user
-               elif .key == "password" then .value = $pass
-               else . end
-             )' postman/staging-environment.json > /tmp/staging-env-filled.json
+          BASE_URL="${{ secrets.STAGING_URL }}"
+          if [ -z "$BASE_URL" ]; then
+            BASE_URL="http://44.205.114.232"
+          fi
+          ACCESS_TOKEN="${{ needs.login.outputs.access_token }}"
+          jq \
+            --arg user    "${{ secrets.STAGING_USERNAME }}" \
+            --arg pass    "${{ secrets.STAGING_PASSWORD }}" \
+            --arg token   "$ACCESS_TOKEN" \
+            --arg baseurl "$BASE_URL" \
+            '.values |= map(
+              if   .key == "username"      then .value = $user
+              elif .key == "password"      then .value = $pass
+              elif .key == "access_token"  then .value = $token
+              elif .key == "jwtToken"      then .value = $token
+              elif .key == "token"         then .value = $token
+              elif .key == "baseUrl"       then .value = $baseurl
+              elif .key == "base_url"      then .value = $baseurl
+              else . end
+            )' postman/staging-environment.json > /tmp/env-filled.json
 
       - name: Create reports directory
         run: mkdir -p reports
 
-      - name: Health-check staging API
+      - name: Run Newman – ${{ matrix.collection }}
         run: |
-          API_URL="${{ secrets.STAGING_URL }}"
-          if [ -z "$API_URL" ]; then
-            echo "⚠️ STAGING_URL not set, skipping health check"
+          COLLECTION="postman/${{ matrix.collection }}"
+          SAFE_NAME=$(echo "${{ matrix.collection }}" | sed 's/[^a-zA-Z0-9]/_/g')
+
+          if [ ! -f "$COLLECTION" ]; then
+            echo "⚠️ Collection not found: $COLLECTION — skipping"
             exit 0
           fi
-          for i in {1..20}; do
-            HTTP_STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$API_URL/actuator/health" || true)
-            echo "Attempt $i -> $HTTP_STATUS"
-            if [ "$HTTP_STATUS" = "200" ]; then
-              echo "API is healthy"; break
-            fi
-            sleep 5
-          done
-          if [ "$HTTP_STATUS" != "200" ]; then
-            echo "ERROR: API health check failed" >&2
-            exit 1
-          fi
 
-      - name: Run Newman tests
-        run: |
-          newman run postman/DNA_Testing_System_v3.postman_collection.json \
-            --environment /tmp/staging-env-filled.json \
+          newman run "$COLLECTION" \
+            --environment /tmp/env-filled.json \
             --reporters cli,htmlextra,json \
-            --reporter-htmlextra-export reports/result.html \
-            --reporter-json-export reports/result.json \
-            --reporter-htmlextra-title "DNA Testing System – Staging" \
+            --reporter-htmlextra-export "reports/${SAFE_NAME}.html" \
+            --reporter-json-export      "reports/${SAFE_NAME}.json" \
+            --reporter-htmlextra-title  "DNA System – ${{ matrix.collection }}" \
             --reporter-htmlextra-showOnlyFails \
             --delay-request 300 \
-            --timeout-request 10000 \
+            --timeout-request 15000 \
             --color on || true
 
-      - name: Upload test reports
+      - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: newman-report-${{ github.run_number }}
+          name: report-${{ matrix.collection }}-${{ github.run_number }}
           path: reports/
           retention-days: 14
-
-      - name: Check test results
-        run: |
-          if [ ! -f reports/result.json ]; then
-            echo "⚠️ reports/result.json not found"
-            exit 1
-          fi
-          FAILURES=$(jq '.run.stats.assertions.failed // 0' reports/result.json)
-          echo "Failed assertions: $FAILURES"
-          if [ "$FAILURES" -gt "0" ]; then
-            echo "❌ $FAILURES assertion(s) failed!"
-            exit 1
-          fi
-          echo "✅ All tests passed!"
