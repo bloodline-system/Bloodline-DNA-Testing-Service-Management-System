@@ -56,8 +56,9 @@ public class UserProfileServiceImpl implements UserProfileService {
             if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
                 // Check if another user already has this email
                 boolean emailExists = userProfileRepository.findAll().stream()
-                        .filter(up -> up.getEmail() != null)
-                        .anyMatch(up -> up.getEmail().equalsIgnoreCase(newEmail) && !up.getUser().getId().equals(user.getId()));
+                        .anyMatch(p -> p.getEmail() != null && 
+                                  p.getEmail().equalsIgnoreCase(newEmail) &&
+                                  !p.getUser().getId().equals(user.getId()));
                 
                 if (emailExists) {
                     throw new RuntimeException("Email already in use by another user");
@@ -95,25 +96,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     @Transactional(readOnly = true)
     public List<UserProfileResponse> getUserProfileByName(String name) {
-        if (name == null || name.isBlank()) {
-            return getUserProfiles();
-        }
-
-        String keyword = name.trim().toLowerCase();
-
-        return userRepository.findAll().stream()
-                .filter(user -> user.getProfile() != null)
-                .filter(user -> {
-                    UserProfile profile = user.getProfile();
-                    String firstName = profile.getFirstName();
-                    String lastName = profile.getLastName();
-                    String fullName = ((firstName == null ? "" : firstName) + " " + (lastName == null ? "" : lastName)).trim();
-
-                    return (firstName != null && firstName.toLowerCase().contains(keyword))
-                            || (lastName != null && lastName.toLowerCase().contains(keyword))
-                            || (!fullName.isEmpty() && fullName.toLowerCase().contains(keyword));
-                })
-                .map(userProfileMapper::toDto)
+        List<UserProfile> profiles = userProfileRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
+        return profiles.stream()
+                .map(profile -> userProfileMapper.toDto(profile.getUser()))
                 .collect(Collectors.toList());
     }
 
