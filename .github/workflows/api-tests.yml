@@ -15,14 +15,13 @@ on:
       STAGING_URL:
         required: true
 
-env:
-  BASE_URL: ${{ secrets.STAGING_URL }}
-
 jobs:
   # ── Bước 1: Login lấy token ──────────────────────────────────────────────
   login:
     name: Login & Get Token
     runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ secrets.STAGING_URL }}
     outputs:
       access_token: ${{ steps.do-login.outputs.access_token }}
 
@@ -59,6 +58,8 @@ jobs:
     name: Run ${{ matrix.collection }}
     needs: login
     runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ secrets.STAGING_URL }}
 
     strategy:
       fail-fast: false
@@ -109,6 +110,9 @@ jobs:
               elif .key == "base_url"      then .value = $baseurl
               else . end
             )' postman/staging-environment.json > /tmp/env-filled.json
+
+      - name: Debug env (optional)
+        run: cat /tmp/env-filled.json
 
       - name: Create reports directory
         run: mkdir -p reports
