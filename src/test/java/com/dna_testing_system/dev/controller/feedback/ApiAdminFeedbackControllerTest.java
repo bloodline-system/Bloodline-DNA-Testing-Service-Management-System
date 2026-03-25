@@ -1,4 +1,4 @@
-package com.dna_testing_system.dev.feedback;
+package com.dna_testing_system.dev.controller.feedback;
 
 import com.dna_testing_system.dev.controller.api.ApiAdminFeedbackController;
 import com.dna_testing_system.dev.config.ApplicationInitConfig;
