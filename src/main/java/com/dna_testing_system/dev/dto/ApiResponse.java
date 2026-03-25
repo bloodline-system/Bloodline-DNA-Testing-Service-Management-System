@@ -35,9 +35,6 @@ public class ApiResponse<T> {
     @JsonProperty("timestamp")
     private Instant timestamp;
 
-    /**
-     * Success response
-     */
     public static <T> ApiResponse<T> success(int code, String message, T data) {
         return ApiResponse.<T>builder()
                 .code(code)
@@ -47,9 +44,7 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    /**
-     * Error response
-     */
+
     public static <T> ApiResponse<T> error(int code, String message, String path) {
         return ApiResponse.<T>builder()
                 .code(code)
