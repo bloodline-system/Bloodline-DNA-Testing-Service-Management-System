@@ -1,11 +1,9 @@
 name: CI/CD Pipeline
-
 on:
   pull_request:
     branches: [main, development]
   push:
     branches: [main, development]
-
 jobs:
   # CI — PR only (unit + sonar)
   ci-quality:
@@ -13,19 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-
       - name: Run Unit Test + Sonar
         run: |
           mvn clean verify sonar:sonar \
             -Dspring.profiles.active=test \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-
   # Deploy staging (develop)
   deploy-staging:
     if: github.ref_name == 'development' && github.event_name == 'push'
@@ -33,7 +28,6 @@ jobs:
     with:
       environment: staging
     secrets: inherit
-
   # Test Staging
   test-staging:
     needs: deploy-staging
@@ -41,7 +35,6 @@ jobs:
     with:
       environment: staging
     secrets: inherit
-
 ## # Deploy production (main)
 #  deploy-prod:
 #    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -49,11 +42,10 @@ jobs:
 #    with:
 #      environment: prod
 #    secrets: inherit
-
 ## # Test production
 #  test-prod:
 #    needs: deploy-prod
 #    uses: ./.github/workflows/api-tests.yml
 #    with:
 #      environment: prod
-#    secrets: inherit
+#    secrets: inherit mã này chạy kh giống
