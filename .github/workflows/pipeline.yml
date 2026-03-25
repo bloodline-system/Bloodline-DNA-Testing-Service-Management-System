@@ -36,14 +36,15 @@ jobs:
 
   # Test Staging
   test-staging:
-    needs: deploy-staging
-    uses: ./.github/workflows/api-tests.yml
-    with:
-      environment: staging
-    secrets:
-      STAGING_USERNAME: ${{ secrets.STAGING_USERNAME }}
-      STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
-      STAGING_URL: ${{ secrets.STAGING_URL }}
+  needs: deploy-staging
+  uses: ./.github/workflows/api-tests.yml
+  with:
+    environment: staging
+  secrets:
+    STAGING_USERNAME: ${{ secrets.STAGING_USERNAME }}
+    STAGING_PASSWORD: ${{ secrets.STAGING_PASSWORD }}
+    STAGING_URL: ${{ secrets.STAGING_URL }}
+  environment: staging
 
   # Deploy production (main)
   # deploy-prod:
