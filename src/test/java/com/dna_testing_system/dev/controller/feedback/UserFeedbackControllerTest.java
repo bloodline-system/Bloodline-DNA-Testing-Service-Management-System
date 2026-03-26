@@ -197,4 +197,68 @@ class UserFeedbackControllerTest {
                 .andExpect(jsonPath("$.code").value(404))
                 .andExpect(jsonPath("$.message").value("Feedback not found"));
     }
+
+    @Test
+    @WithMockUser(username = "alice")
+    void viewMyFeedback_userNotFound_returns500FromUnhandledEntityNotFound() throws Exception {
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.empty());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/feedback"))
+                .andExpect(status().isInternalServerError());
+
+        verify(customerFeedbackService, never()).getFeedbackByCustomer(anyString());
+    }
+
+    @Test
+    @WithMockUser(username = "alice")
+    void createFeedbackForm_userNotFound_returns500AndMessageContainsFailed() throws Exception {
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.empty());
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/feedback/{feedbackId}", "fb1")
+                        .param("serviceId", "1")
+                        .param("customerId", "temp")
+                        .param("serviceQualityRating", "5")
+                        .param("staffBehaviorRating", "5")
+                        .param("timelinessRating", "5"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value(500))
+                .andExpect(jsonPath("$.message", containsString("Failed to submit feedback")));
+    }
+
+    @Test
+    @WithMockUser(username = "alice")
+    void createFeedbackJson_serviceThrows_returns500() throws Exception {
+        when(userRepository.findByUsername("alice"))
+                .thenReturn(Optional.of(User.builder().id("u1").username("alice").passwordHash("x").build()));
+        when(customerFeedbackService.createFeedback(org.mockito.ArgumentMatchers.any(CreateFeedbackRequest.class)))
+                .thenThrow(new RuntimeException("boom"));
+
+        CreateFeedbackRequest request = CreateFeedbackRequest.builder()
+                .serviceId(1L)
+                .customerId("temp")
+                .serviceQualityRating(5)
+                .staffBehaviorRating(5)
+                .timelinessRating(5)
+                .build();
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/feedback/{feedbackId}", "fb1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value(500))
+                .andExpect(jsonPath("$.message", containsString("Failed to submit feedback")));
+    }
+
+    @Test
+    void getFeedbackById_returns200WhenFound() throws Exception {
+        when(customerFeedbackService.getFeedbackById(1L))
+                .thenReturn(CustomerFeedbackResponse.builder().id(1L).feedbackTitle("t").build());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/feedback/{feedbackId}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("Get feedback successfully"))
+                .andExpect(jsonPath("$.data.id").value(1));
+    }
 }
+

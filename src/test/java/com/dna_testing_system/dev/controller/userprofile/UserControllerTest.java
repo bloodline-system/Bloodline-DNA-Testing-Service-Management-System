@@ -26,13 +26,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -202,4 +206,99 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("Profile not found"))
                 .andExpect(jsonPath("$.path").value("/api/v1/profiles/ghost"));
     }
+
+    @Test
+    void updateProfileJson_validBody_returnsOk() throws Exception {
+        UserProfileResponse existing = UserProfileResponse.builder()
+                .username("alice")
+                .email("old@ex.com")
+                .profileImageUrl("/uploads/existing.png")
+                .dateOfBirth(LocalDate.of(2000, 1, 1))
+                .build();
+        UserProfileResponse updated = UserProfileResponse.builder()
+                .username("alice")
+                .email("new@ex.com")
+                .profileImageUrl("/uploads/existing.png")
+                .dateOfBirth(LocalDate.of(2000, 1, 1))
+                .build();
+
+        when(userProfileService.getUserProfile("alice")).thenReturn(existing, updated);
+        when(userProfileService.updateUserProfile(eq("alice"), org.mockito.ArgumentMatchers.any(UserProfileRequest.class))).thenReturn(true);
+
+        String json = "{\"firstName\":\"Alice\",\"lastName\":\"Ng\",\"email\":\"new@ex.com\",\"phoneNumber\":\"+84 123\"}";
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/profiles/{username}", "alice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.getBytes(StandardCharsets.UTF_8)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("Update profile successfully"))
+                .andExpect(jsonPath("$.data.email").value("new@ex.com"));
+    }
+
+    @Test
+    void updateProfileJson_invalidEmail_returns400FromValidation() throws Exception {
+        String json = "{\"firstName\":\"Alice\",\"email\":\"not-an-email\"}";
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/profiles/{username}", "alice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.getBytes(StandardCharsets.UTF_8)))
+                .andExpect(status().isBadRequest());
+
+        verify(userProfileService, never()).updateUserProfile(anyString(), any());
+    }
+
+    @Test
+    void updateProfileMultipart_withFileUploadFailure_returns400AndDoesNotUpdateService() throws Exception {
+        UserProfileResponse existing = UserProfileResponse.builder()
+                .username("alice")
+                .email("old@ex.com")
+                .profileImageUrl("/uploads/existing.png")
+                .dateOfBirth(LocalDate.of(2000, 1, 1))
+                .build();
+        when(userProfileService.getUserProfile("alice")).thenReturn(existing);
+
+        MockMultipartFile badFile = new MockMultipartFile(
+                "file",
+                "avatar.png",
+                MediaType.IMAGE_PNG_VALUE,
+                new byte[]{1, 2, 3}
+        ) {
+            @Override
+            public void transferTo(java.io.File dest) throws IOException {
+                throw new IOException("disk full");
+            }
+        };
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/profiles/{username}", "alice")
+                        .file(badFile)
+                        .with(req -> {
+                            req.setMethod("PUT");
+                            return req;
+                        })
+                                                .param("email", "new@ex.com")
+                        .param("firstName", "Alice"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message", containsString("File upload failed")));
+
+                verify(userProfileService, never()).updateUserProfile(eq("alice"), org.mockito.ArgumentMatchers.any(UserProfileRequest.class));
+    }
+
+    @Test
+    void updateProfile_whenGetUserProfileThrows_returns500() throws Exception {
+        when(userProfileService.getUserProfile("alice")).thenThrow(new RuntimeException("boom"));
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/profiles/{username}", "alice")
+                        .with(req -> {
+                            req.setMethod("PUT");
+                            return req;
+                        })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .param("email", "x@ex.com"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value(500))
+                .andExpect(jsonPath("$.message", containsString("Error updating profile")));
+    }
 }
+
