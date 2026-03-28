@@ -50,7 +50,6 @@
             "{{baseUrl}}"
           ],
           "path": [
-            "{{baseUrl}}",
             "api",
             "v1",
             "auth",
@@ -70,20 +69,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -137,7 +124,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -155,20 +141,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -234,7 +208,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -251,20 +224,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -330,7 +291,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -354,20 +314,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -429,7 +377,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -446,20 +393,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -525,7 +460,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -556,20 +490,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -610,7 +532,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -633,20 +554,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -700,7 +609,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -718,20 +626,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -772,7 +668,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -789,20 +684,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -864,7 +747,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -881,20 +763,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -960,7 +830,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -978,20 +847,8 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Tự động refresh token nếu hết hạn\r",
-                  "const token = pm.environment.get(\"access_token\");\r",
-                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
-                  "\r",
-                  "if (!token || Date.now() > expiresIn) {\r",
-                  "  // Gọi API refresh token\r",
-                  "    try {\r",
-                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
-                  "\r",
-                  "        console.log(response.json());\r",
-                  "    } catch (err) {\r",
-                  "        console.error(err);\r",
-                  "    }\r",
-                  "}"
+                  "// Token auto-refresh removed (not supported in Newman)",
+                  "// Token is set by Login request test script"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -1045,7 +902,6 @@
                 "{{baseUrl}}"
               ],
               "path": [
-                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",

@@ -57,8 +57,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
             }
           },
           "response": []
@@ -93,8 +100,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/manager/posts?page=0&size=10&sort=createdAt,desc&q=&status=all&category=all&tag=all",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "manager", "posts"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -167,8 +181,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/manager/posts",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "manager", "posts"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts"
+              ]
             }
           },
           "response": []
@@ -196,8 +217,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "manager", "posts", "{{post_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}"
+              ]
             }
           },
           "response": []
@@ -240,8 +269,16 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "manager", "posts", "{{post_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}"
+              ]
             }
           },
           "response": []
@@ -270,7 +307,9 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}/status?status=PUBLISHED",
-              "host": ["{{baseUrl}}"],
+              "host": [
+                "{{baseUrl}}"
+              ],
               "path": [
                 "api",
                 "v1",
@@ -309,8 +348,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "manager", "posts", "{{post_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}"
+              ]
             }
           },
           "response": []
@@ -335,8 +382,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/manager/posts/{{post_id}}?hard=true",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "manager", "posts", "{{post_id}}"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "posts",
+                "{{post_id}}"
+              ],
               "query": [
                 {
                   "key": "hard",
