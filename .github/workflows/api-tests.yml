@@ -1,0 +1,119 @@
+api-tests.yml
+c  -d "$COMMENT_BODY" "${JIRA_BASE_URL}/rest/api/3/issue/${EXISTING_KEY}/comment"
+
+          else
+            echo "📝 Creating new bug..."
+            CREATE_BODY=$(jq -n \
+              --arg proj     "$JIRA_PROJECT_KEY" \
+              --arg env      "$ENV"      --arg col      "$COLLECTION" \
+              --arg date     "$DATE"     --arg failed   "$FAILED"     \
+              --arg total    "$TOTAL"    --arg branch   "$BRANCH"     \
+              --arg commit   "$COMMIT"   --arg actor    "$ACTOR"      \
+              --arg failures "$FAILURES" --arg run_url  "$RUN_URL"    \
+              '{
+                fields: {
+                  project:   {key:$proj},
+                  issuetype: {name:"Bug"},
+                  priority:  {name:"High"},
+                  summary:   ("[AUTO-BUG][" + $env + "][" + $col + "] API Tests Failed – " + $date + " (" + $failed + "/" + $total + " failed)"),
+                  labels:    ["automated-test","ci-cd",$env,$col],
+                  description: {
+                    type:"doc", version:1,
+                    content:[
+                      {type:"panel",attrs:{panelType:"error"},content:[
+                        {type:"paragraph",content:[{type:"text",text:("❌ " + $col + " tests failed on " + $env)}]}
+                      ]},
+                      {type:"heading",attrs:{level:2},content:[{type:"text",text:"📋 Details"}]},
+                      {type:"bulletList",content:[
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Collection: ",marks:[{type:"strong"}]},{type:"text",text:$col}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Environment: ",marks:[{type:"strong"}]},{type:"text",text:$env}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Branch: ",marks:[{type:"strong"}]},{type:"text",text:$branch}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Commit: ",marks:[{type:"strong"}]},{type:"text",text:$commit}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Actor: ",marks:[{type:"strong"}]},{type:"text",text:$actor}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Time: ",marks:[{type:"strong"}]},{type:"text",text:$date}]}]}
+                      ]},
+                      {type:"heading",attrs:{level:2},content:[{type:"text",text:"🔴 Failures"}]},
+                      {type:"codeBlock",attrs:{language:"text"},content:[{type:"text",text:$failures}]},
+                      {type:"paragraph",content:[
+                        {type:"text",text:"🔗 View run",marks:[{type:"link",attrs:{href:$run_url}}]}
+                      ]}
+                    ]
+                  }
+                }
+              }')
+
+            HTTP=$(curl -s -o /tmp/jira_create.json -w "%{http_code}" \
+              -u "${JIRA_EMAIL}:${JIRA_API_TOKEN}" \
+              -X POST -H "Content-Type: application/json" \
+              -d "$CREATE_BODY" "${JIRA_BASE_URL}/rest/api/3/issue")
+
+            ISSUE_KEY=$(jq -r '.key // empty' /tmp/jira_create.json)
+            [[ -n "$ISSUE_KEY" ]] \
+              && echo "✅ Created: $ISSUE_KEY — ${JIRA_BASE_URL}/browse/$ISSUE_KEY" \
+              || { echo "❌ Failed (HTTP $HTTP):"; cat /tmp/jira_create.json; exit 1; }
+          fi
+
+      - name: Fail if tests failed
+        if: steps.parse.outputs.status == 'fail'
+        run: |
+          echo "${{ matrix.collection }}: ${{ steps.parse.outputs.failed }}/${{ steps.parse.outputs.total }} failed"
+          exit 1
+c  -d "$COMMENT_BODY" "${JIRA_BASE_URL}/rest/api/3/issue/${EXISTING_KEY}/comment"
+
+          else
+            echo "📝 Creating new bug..."
+            CREATE_BODY=$(jq -n \
+              --arg proj     "$JIRA_PROJECT_KEY" \
+              --arg env      "$ENV"      --arg col      "$COLLECTION" \
+              --arg date     "$DATE"     --arg failed   "$FAILED"     \
+              --arg total    "$TOTAL"    --arg branch   "$BRANCH"     \
+              --arg commit   "$COMMIT"   --arg actor    "$ACTOR"      \
+              --arg failures "$FAILURES" --arg run_url  "$RUN_URL"    \
+              '{
+                fields: {
+                  project:   {key:$proj},
+                  issuetype: {name:"Bug"},
+                  priority:  {name:"High"},
+                  summary:   ("[AUTO-BUG][" + $env + "][" + $col + "] API Tests Failed – " + $date + " (" + $failed + "/" + $total + " failed)"),
+                  labels:    ["automated-test","ci-cd",$env,$col],
+                  description: {
+                    type:"doc", version:1,
+                    content:[
+                      {type:"panel",attrs:{panelType:"error"},content:[
+                        {type:"paragraph",content:[{type:"text",text:("❌ " + $col + " tests failed on " + $env)}]}
+                      ]},
+                      {type:"heading",attrs:{level:2},content:[{type:"text",text:"📋 Details"}]},
+                      {type:"bulletList",content:[
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Collection: ",marks:[{type:"strong"}]},{type:"text",text:$col}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Environment: ",marks:[{type:"strong"}]},{type:"text",text:$env}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Branch: ",marks:[{type:"strong"}]},{type:"text",text:$branch}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Commit: ",marks:[{type:"strong"}]},{type:"text",text:$commit}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Actor: ",marks:[{type:"strong"}]},{type:"text",text:$actor}]}]},
+                        {type:"listItem",content:[{type:"paragraph",content:[{type:"text",text:"Time: ",marks:[{type:"strong"}]},{type:"text",text:$date}]}]}
+                      ]},
+                      {type:"heading",attrs:{level:2},content:[{type:"text",text:"🔴 Failures"}]},
+                      {type:"codeBlock",attrs:{language:"text"},content:[{type:"text",text:$failures}]},
+                      {type:"paragraph",content:[
+                        {type:"text",text:"🔗 View run",marks:[{type:"link",attrs:{href:$run_url}}]}
+                      ]}
+                    ]
+                  }
+                }
+              }')
+
+            HTTP=$(curl -s -o /tmp/jira_create.json -w "%{http_code}" \
+              -u "${JIRA_EMAIL}:${JIRA_API_TOKEN}" \
+              -X POST -H "Content-Type: application/json" \
+              -d "$CREATE_BODY" "${JIRA_BASE_URL}/rest/api/3/issue")
+
+            ISSUE_KEY=$(jq -r '.key // empty' /tmp/jira_create.json)
+            [[ -n "$ISSUE_KEY" ]] \
+              && echo "✅ Created: $ISSUE_KEY — ${JIRA_BASE_URL}/browse/$ISSUE_KEY" \
+              || { echo "❌ Failed (HTTP $HTTP):"; cat /tmp/jira_create.json; exit 1; }
+          fi
+
+      - name: Fail if tests failed
+        if: steps.parse.outputs.status == 'fail'
+        run: |
+          echo "${{ matrix.collection }}: ${{ steps.parse.outputs.failed }}/${{ steps.parse.outputs.total }} failed"
+          exit 1
