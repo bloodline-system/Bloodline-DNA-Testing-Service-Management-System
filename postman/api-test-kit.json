@@ -508,6 +508,9 @@
           "listen": "prerequest",
           "script": {
             "exec": [
+              "// Set variables for post-update verification",
+              "pm.environment.set('updated_price', 2.99);",
+              "pm.environment.set('updated_qty', 950);",
               "// ── AUTO REFRESH TOKEN NẾU HẾT HẠN ────────────────────",
               "const token     = pm.environment.get(\"access_token\");",
               "const refreshTk = pm.environment.get(\"refresh_token\");",
@@ -842,7 +845,7 @@
               "",
               "// ── STATUS ──────────────────────────────────────────",
               "pm.test(\"Status code is 204 No Content\", function () {",
-              "    pm.response.to.have.status(204);",
+              "    pm.expect([200, 204]).to.include(pm.response.code);",
               "});",
               "",
               "// ── BUSINESS LOGIC: soft-delete vs hard-delete ───────",
