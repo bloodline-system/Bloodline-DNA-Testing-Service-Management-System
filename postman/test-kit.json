@@ -50,6 +50,7 @@
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "auth",
@@ -111,6 +112,7 @@
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits"
@@ -190,6 +192,7 @@
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits"
@@ -246,6 +249,7 @@
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits",
@@ -304,6 +308,7 @@
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits",
@@ -349,6 +354,7 @@
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits",
@@ -399,6 +405,7 @@
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits",
