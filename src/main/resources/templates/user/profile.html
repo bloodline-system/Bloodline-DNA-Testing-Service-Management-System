@@ -1,0 +1,121 @@
+
+<html lang="en" dir="ltr" data-nav-layout="horizontal" data-nav-style="menu-click" data-menu-position="fixed"
+      data-theme-mode="light" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/public/head :: head">
+</head>
+<body class="landing-body" >
+
+<!-- Start Switcher -->
+<!-- End Switcher -->
+
+<div class="landing-page-wrapper">
+
+    <!-- app-header -->
+    <!-- Start::app-sidebar -->
+    <aside th:replace="fragments/user/profile-header :: profile-header "></aside>
+    <!-- End::app-sidebar -->
+
+    <!-- Start::app-content -->
+    <div class="main-content landing-main">
+    <div class="profile-container">
+            <!-- Banner với avatar -->
+            <div class="profile-banner">
+                <div class="avatar-wrapper">
+                    <img th:if="${userProfile.profileImageUrl != null and !#strings.isEmpty(userProfile.profileImageUrl)}"
+                         th:src="@{${userProfile.profileImageUrl}}" alt="Profile Image" class="profile-image"/>
+                    <img th:if="${userProfile.profileImageUrl == null or #strings.isEmpty(userProfile.profileImageUrl)}"
+                         th:src="@{/images/default-avatar.png}" alt="Default Avatar" class="profile-image"/>
+                </div>
+            </div>
+
+            <!-- Header với tên và status -->
+            <div class="profile-header">
+                <h1 class="username" th:text="${userProfile.username}">Username</h1>
+                <span class="status-badge"
+                      th:classappend="${userProfile.active ? 'status-active' : 'status-inactive'}"
+                      th:text="${userProfile.active ? 'Active Account' : 'Inactive Account'}"></span>
+            </div>
+
+            <!-- Thông báo -->
+            <div th:if="${userProfile.message}" class="message-alert" th:text="${userProfile.message}"></div>
+
+            <!-- Grid thông tin -->
+            <div class="profile-grid">
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-id-card info-icon"></i>User ID
+                    </div>
+                    <div class="info-value" th:text="${userProfile.userId}"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-envelope info-icon"></i>Email
+                    </div>
+                    <div class="info-value" th:text="${userProfile.email}"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-user info-icon"></i>First Name
+                    </div>
+                    <div class="info-value" th:text="${userProfile.firstName}"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-user-tag info-icon"></i>Last Name
+                    </div>
+                    <div class="info-value" th:text="${userProfile.lastName}"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-phone info-icon"></i>Phone
+                    </div>
+                    <div class="info-value" th:text="${userProfile.phoneNumber}"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-birthday-cake info-icon"></i>Birthday
+                    </div>
+                    <div class="info-value" th:text="${#temporals.format(userProfile.dateOfBirth, 'dd/MM/yyyy')}"></div>
+                </div>
+
+                <div class="info-card" style="grid-column: 1 / -1;">
+                    <div class="info-label">
+                        <i class="fas fa-calendar-plus info-icon"></i>Member Since
+                    </div>
+                    <div class="info-value" th:text="${#temporals.format(userProfile.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <a th:href="@{/user/profile/update}" class="btn-modern btn-primary-modern">
+                    <i class="fas fa-edit"></i>
+                    Edit Profile
+                </a>
+                <a th:href="@{/user/home}" class="btn-modern btn-secondary-modern">
+                    <i class="fas fa-home"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+
+        <!-- End:: Section-10 -->
+
+        <div th:replace="fragments/public/last-footer :: last-footer"></div>
+    </div>
+    <!-- End::app-content -->
+
+
+</div>
+<div class="scrollToTop">
+    <span class="arrow"><i class="ri-arrow-up-s-fill fs-20"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<div th:replace="fragments/public/script :: scripts"></div>
+</body>
+</html>

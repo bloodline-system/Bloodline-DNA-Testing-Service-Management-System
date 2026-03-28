@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Manage User Profiles</title>
+    <meta charset="UTF-8">
+    <style>
+        table { width: 100%; border-collapse: collapse; margin: 20px 0;}
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background: #f7f7f7; }
+        .actions button, .actions a { margin-right: 6px; }
+        .search-form { margin-bottom: 16px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .pagination { margin: 16px 0; text-align: center; }
+        .pagination a, .pagination span { padding: 6px 12px; margin: 2px; border: 1px solid #ccc; border-radius: 4px; text-decoration: none;}
+        .pagination .current { background: #0078D7; color: #fff; }
+    </style>
+</head>
+<body>
+<h2>Manage User Profiles</h2>
+
+<!-- Search form -->
+<form th:action="@{/manage/search-profiles}" method="get" class="search-form">
+    <input type="text" name="query" placeholder="Search by first name or last name" />
+    <button type="submit">Search</button>
+    <a th:href="@{/manage/profiles}" style="margin-left:10px;">Reset</a>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>Avatar</th>
+        <th>Username</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Date of Birth</th>
+        <th>Status</th>
+        <th colspan="2">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${userProfiles}">
+        <td>
+            <img th:if="${user.profileImageUrl != null and !#strings.isEmpty(user.profileImageUrl)}"
+                 th:src="@{${user.profileImageUrl}}" alt="Avatar" class="avatar" />
+            <img th:if="${user.profileImageUrl == null or #strings.isEmpty(user.profileImageUrl)}"
+                 th:src="@{/images/default-avatar.png}" alt="Avatar" class="avatar" />
+        </td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.firstName}"></td>
+        <td th:text="${user.lastName}"></td>
+        <td th:text="${user.email}"></td>
+        <td th:text="${user.phoneNumber}"></td>
+        <td th:text="${#temporals.format(user.dateOfBirth, 'yyyy-MM-dd')}"></td>
+        <td>
+            <span th:text="${user.active ? 'Active' : 'Inactive'}"
+                  th:classappend="${user.active ? 'status-active' : 'status-inactive'}"></span>
+        </td>
+        <td>
+            <!-- Sửa: chuyển sang trang sửa profile -->
+            <a th:href="@{/manage/profile/update(username=${user.username})}">Edit</a>
+        </td>
+        <td>
+            <!-- Xóa: xác nhận JS -->
+            <a th:href="@{/manage/profile/delete(username=${user.username})}"
+               onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- Phân trang: nếu có phân trang backend thì thêm currentPage, totalPages vào model -->
+<!--
+<div class="pagination" th:if="${totalPages > 1}">
+    <a th:if="${currentPage > 1}" th:href="@{/manage/profiles(page=${currentPage-1})}">&laquo; Prev</a>
+    <span th:each="page : ${#numbers.sequence(1, totalPages)}"
+          th:class="${page==currentPage} ? 'current' : ''">
+        <a th:if="${page != currentPage}"
+           th:href="@{/manage/profiles(page=${page})}"
+           th:text="${page}"></a>
+        <span th:if="${page == currentPage}" th:text="${page}"></span>
+    </span>
+    <a th:if="${currentPage < totalPages}" th:href="@{/manage/profiles(page=${currentPage+1})}">Next &raquo;</a>
+</div>
+-->
+
+<!-- Nếu muốn sửa profile, bạn có thể tạo riêng edit-profile.html hoặc show form ngay tại đây nếu thích (modal hoặc inline form) -->
+
+</body>
+</html>

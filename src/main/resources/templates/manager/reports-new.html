@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layouts/manager-layout :: layout(~{::#main-content}, ~{::#page-scripts}, ${pageTitle}, ${breadcrumbs}, ~{::#action-buttons})}">
+
+<div id="main-content">
+    <!-- Alert for errors -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Create New Report Form -->
+    <div class="card custom-card">
+        <div class="card-header">
+            <div class="card-title">Create New Report</div>
+        </div>
+        <div class="card-body">
+            <form action="/manager/reports/create" method="post" id="newReportForm">
+                <div class="row g-4">
+                    <!-- Report Name -->
+                    <div class="col-md-6">
+                        <label for="reportName" class="form-label">Report Name <span
+                                class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="reportName" name="reportName" required
+                            placeholder="Enter report name">
+                        <div class="form-text">Enter a descriptive name for your report</div>
+                    </div>
+
+                    <!-- Report Type -->
+                    <div class="col-md-6">
+                        <label for="reportType" class="form-label">Report Type <span
+                                class="text-danger">*</span></label>
+                        <select class="form-select" id="reportType" name="reportType" required>
+                            <option value="">Select Report Type</option>
+                            <option th:each="type : ${reportTypes}" th:value="${type.name()}"
+                                th:text="${type.description}">Report Type</option>
+                        </select>
+                        <div class="form-text">Choose the type of report you want to create</div>
+                    </div>
+
+                    <!-- Report Category -->
+                    <div class="col-md-6">
+                        <label for="reportCategory" class="form-label">Report Category <span
+                                class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="reportCategory" name="reportCategory" required
+                            placeholder="Enter report category">
+                        <div class="form-text">Specify the category or classification of this report</div>
+                    </div>
+
+                    <!-- Report File Path (Optional) -->
+                    <div class="col-md-6">
+                        <label for="reportFilePath" class="form-label">Report File Path</label>
+                        <input type="text" class="form-control" id="reportFilePath" name="reportFilePath"
+                            placeholder="Enter file path (optional)">
+                        <div class="form-text">Optional: Specify the path where the report file is stored</div>
+                    </div>
+
+                    <!-- Report Data -->
+                    <div class="col-12">
+                        <label for="reportData" class="form-label">Report Data <span
+                                class="text-danger">*</span></label>
+                        <textarea class="form-control" id="reportData" name="reportData" rows="10" required
+                            placeholder="Enter the report data content..."></textarea>
+                        <div class="form-text">Enter the main content or data for this report</div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="col-12">
+                        <div class="d-flex gap-3 justify-content-end">
+                            <a href="/manager/reports" class="btn btn-light">
+                                <i class="ri-close-line me-1"></i>Cancel
+                            </a>
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="ri-refresh-line me-1"></i>Reset
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-save-line me-1"></i>Create Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Help Information -->
+    <div class="card custom-card mt-4">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="ri-information-line me-2"></i>Report Creation Guidelines
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Report Types Available:</h6>
+                    <ul class="list-unstyled">
+                        <li th:each="type : ${reportTypes}" class="mb-1">
+                            <span class="badge bg-info-transparent text-info me-2" th:text="${type.name()}">TYPE</span>
+                            <span th:text="${type.description}">Description</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Best Practices:</h6>
+                    <ul class="text-muted">
+                        <li>Use descriptive and meaningful report names</li>
+                        <li>Choose appropriate categories for better organization</li>
+                        <li>Provide comprehensive data in the report content</li>
+                        <li>Include relevant analysis and insights</li>
+                        <li>Review your data before submitting</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="action-buttons">
+    <div class="d-flex gap-2">
+        <a href="/manager/reports" class="btn btn-outline-secondary">
+            <i class="ri-arrow-left-line me-1"></i>Back to Reports
+        </a>
+    </div>
+</div>
+
+<div id="page-scripts">
+    <script type="text/html" th:replace="~{fragments/common/scripts :: scripts}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Form validation
+            const form = document.getElementById('newReportForm');
+            const reportName = document.getElementById('reportName');
+            const reportType = document.getElementById('reportType');
+            const reportCategory = document.getElementById('reportCategory');
+            const reportData = document.getElementById('reportData');
+
+            // Add real-time validation
+            [reportName, reportType, reportCategory, reportData].forEach(field => {
+                field.addEventListener('input', function () {
+                    validateField(this);
+                });
+                field.addEventListener('change', function () {
+                    validateField(this);
+                });
+            });
+
+            // Form submission handler
+            form.addEventListener('submit', function (e) {
+                let isValid = true;
+
+                // Validate all required fields
+                [reportName, reportType, reportCategory, reportData].forEach(field => {
+                    if (!validateField(field)) {
+                        isValid = false;
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    showAlert('danger', 'Please fill in all required fields correctly.');
+                }
+            });
+
+            // Populate category based on type selection
+            reportType.addEventListener('change', function () {
+                const selectedType = this.value;
+                if (selectedType && !reportCategory.value) {
+                    // Auto-suggest category based on type
+                    const suggestions = {
+                        'DAILY_ORDERS': 'Operations',
+                        'MONTHLY_REVENUE': 'Financial',
+                        'STAFF_PRODUCTIVITY': 'HR & Performance',
+                        'CUSTOMER_SATISFACTION': 'Customer Service',
+                        'HEALTH_SYSTEM': 'System Health',
+                        'QUALITY_METRICS': 'Quality Assurance'
+                    };
+
+                    if (suggestions[selectedType]) {
+                        reportCategory.value = suggestions[selectedType];
+                        validateField(reportCategory);
+                    }
+                }
+            });
+        });
+
+        function validateField(field) {
+            const value = field.value.trim();
+            let isValid = true;
+
+            // Remove existing validation classes
+            field.classList.remove('is-valid', 'is-invalid');
+
+            if (field.hasAttribute('required') && !value) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else if (value) {
+                // Additional validation based on field type
+                if (field.id === 'reportName' && value.length < 3) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else if (field.id === 'reportData' && value.length < 10) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.add('is-valid');
+                }
+            }
+
+            return isValid;
+        }
+
+        function showAlert(type, message) {
+            const alertContainer = document.querySelector('#main-content');
+            const existingAlert = alertContainer.querySelector('.alert');
+
+            // Remove existing alert
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.insertBefore(alert, alertContainer.firstElementChild);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert && alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</div>
+
+</html>

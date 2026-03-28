@@ -1,0 +1,178 @@
+<div th:fragment="scripts" xmlns:th="http://www.w3.org/1999/xhtml">
+    <script th:src="@{/assets/libs/jquery/jquery.min.js}"></script>
+    <script th:src="@{/assets/libs/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/assets/libs/choices.js/public/assets/scripts/choices.min.js}"></script>
+    <script th:src="@{/assets/libs/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+    <script th:src="@{/assets/libs/simplebar/simplebar.min.js}"></script>
+    <script th:src="@{/assets/libs/node-waves/waves.min.js}"></script>
+    <script th:src="@{/assets/js/sticky.js}"></script>
+    <script th:src="@{/assets/js/sidemenu.js}"></script>
+    <script th:src="@{/assets/js/main.js}"></script>
+    <script th:src="@{/assets/js/custom.js}"></script>
+
+    <!-- Dashboard Specific Scripts -->
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Initialize popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+
+            // Sidebar toggle functionality
+            $('#sidebar-toggle').on('click', function(e) {
+                e.preventDefault();
+                $('body').toggleClass('sidenav-toggled');
+            });
+
+            // Add active class to current menu item
+            var currentPath = window.location.pathname;
+            $('.main-menu .side-menu__item').each(function() {
+                if ($(this).attr('href') === currentPath) {
+                    $(this).closest('.slide').addClass('active');
+                    $(this).closest('.has-sub').addClass('active open');
+                }
+            });
+
+            // Handle submenu toggles
+            $('.has-sub > .side-menu__item').on('click', function(e) {
+                e.preventDefault();
+                var parent = $(this).parent();
+
+                if (parent.hasClass('open')) {
+                    parent.removeClass('open');
+                    parent.find('.slide-menu').slideUp(200);
+                } else {
+                    $('.has-sub').removeClass('open');
+                    $('.slide-menu').slideUp(200);
+                    parent.addClass('open');
+                    parent.find('.slide-menu').slideDown(200);
+                }
+            });
+
+            // Stats cards animation
+            $('.stats-card').each(function(index) {
+                $(this).css('animation-delay', (index * 0.1) + 's');
+                $(this).addClass('fade-in-up');
+            });
+
+            // Auto-refresh functionality
+            let autoRefreshEnabled = false;
+            let refreshInterval;
+
+            function startAutoRefresh() {
+                if (!autoRefreshEnabled) {
+                    autoRefreshEnabled = true;
+                    refreshInterval = setInterval(function() {
+                        if (document.hasFocus()) {
+                            console.log('Auto-refreshing dashboard data...');
+                            // Implement AJAX refresh here
+                            refreshDashboardData();
+                        }
+                    }, 300000); // 5 minutes
+                }
+            }
+
+            function stopAutoRefresh() {
+                if (autoRefreshEnabled) {
+                    autoRefreshEnabled = false;
+                    clearInterval(refreshInterval);
+                }
+            }
+
+            function refreshDashboardData() {
+                // Example AJAX call to refresh dashboard data
+                /*
+                $.ajax({
+                    url: '/api/user/dashboard/refresh',
+                    method: 'GET',
+                    success: function(data) {
+                        // Update statistics
+                        updateStatistics(data.statistics);
+                        // Update recent requests
+                        updateRecentRequests(data.recentRequests);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Failed to refresh dashboard:', error);
+                    }
+                });
+                */
+            }
+
+            function updateStatistics(stats) {
+                // Update statistic cards with new data
+                if (stats) {
+                    $('#requests-sent').text(stats.requestsSent || 0);
+                    $('#requests-in-progress').text(stats.requestsInProgress || 0);
+                    $('#upcoming-appointments').text(stats.upcomingAppointments || 0);
+                    $('#results-available').text(stats.resultsAvailable || 0);
+                }
+            }
+
+            // Start auto-refresh when page loads
+            startAutoRefresh();
+
+            // Stop auto-refresh when page is hidden
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    stopAutoRefresh();
+                } else {
+                    startAutoRefresh();
+                }
+            });
+
+            console.log('User Dashboard scripts initialized successfully');
+        });
+
+        // Global functions
+        function viewRequestDetails(requestId) {
+            window.location.href = '/user/test-requests/' + requestId;
+        }
+
+        function refreshDashboard() {
+            location.reload();
+        }
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            let html = document.querySelector("html");
+            if (html.getAttribute("data-theme-mode") === "dark") {
+                html.setAttribute("data-theme-mode", "light");
+                html.setAttribute("data-header-styles", "light");
+                html.setAttribute("data-menu-styles", "light");
+                localStorage.removeItem("valexdarktheme");
+            } else {
+                html.setAttribute("data-theme-mode", "dark");
+                html.setAttribute("data-header-styles", "dark");
+                html.setAttribute("data-menu-styles", "dark");
+                localStorage.setItem("valexdarktheme", "true");
+            }
+        }
+
+        // Add fade-in animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translate3d(0, 40px, 0);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate3d(0, 0, 0);
+                }
+            }
+
+            .fade-in-up {
+                animation: fadeInUp 0.6s ease-out forwards;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</div>
