@@ -49,6 +49,42 @@
 			"value": "",
 			"type": "default",
 			"enabled": true
+		},
+		{
+			"key": "base_url",
+			"value": "{{baseUrl}}",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "sample_filename",
+			"value": "your_actual_file_on_staging.pdf",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "order_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "report_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "analysis_staff_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "collect_staff_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
 		}
 	],
 	"color": null,
