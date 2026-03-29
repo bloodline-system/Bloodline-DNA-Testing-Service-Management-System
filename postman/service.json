@@ -30,22 +30,16 @@
         }
       ],
       "request": {
-        "auth": {
-          "type": "noauth"
-        },
+        "auth": { "type": "noauth" },
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/auth/login",
+<<<<<<< HEAD
           "host": [
             "{{baseUrl}}"
           ],
@@ -56,6 +50,10 @@
             "auth",
             "login"
           ]
+=======
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "auth", "login"]
+>>>>>>> 0e77c821 (unit test)
         }
       },
       "response": []
@@ -70,8 +68,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -120,7 +130,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/services/{{service_id}}",
+              "raw": "{{baseUrl}}/api/v1/manager/services/4",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -130,7 +140,7 @@
                 "v1",
                 "manager",
                 "services",
-                "{{service_id}}"
+                "4"
               ]
             }
           },
@@ -143,8 +153,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -168,17 +190,7 @@
                   "    pm.response.to.have.status(200);\r",
                   "});\r",
                   "\r",
-                  "",
-                  "",
-                  "// Save first service_id for subsequent requests",
-                  "try {",
-                  "  const body = pm.response.json();",
-                  "  if (body.data && body.data.content && body.data.content.length > 0) {",
-                  "    pm.environment.set('service_id', body.data.content[0].id);",
-                  "  } else if (Array.isArray(body.data) && body.data.length > 0) {",
-                  "    pm.environment.set('service_id', body.data[0].id);",
-                  "  }",
-                  "} catch(e) { console.warn('Could not save service_id', e); }"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -205,9 +217,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/services",
+              "raw": "{{base_url}}/api/v1/manager/services",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -227,8 +239,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -289,9 +313,9 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/services/search?query=string",
+              "raw": "{{base_url}}/api/v1/manager/services/search?query=string",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -318,8 +342,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -376,9 +412,9 @@
               "raw": "{\n  \"serviceName\": \"string\",\n  \"serviceCategory\": \"CIVIL\",\n  \"serviceTypeId\": 3,\n  \"participants\": 1,\n  \"executionTimeDays\": 1,\n  \"basePrice\": 19811,\n  \"currentPrice\": 121212,\n  \"isAvailable\": true,\n  \"serviceDescription\": \"string\",\n  \"featureAssignments\": [\n    {\n      \"featureName\": \"string\",\n      \"isAvailable\": true\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/services",
+              "raw": "{{base_url}}/api/v1/manager/services",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -398,8 +434,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -460,9 +508,9 @@
               "raw": "{\n  \"serviceName\": \"string\",\n  \"serviceCategory\": \"CIVIL\",\n  \"serviceTypeId\": 2,\n  \"participants\": 1,\n  \"executionTimeDays\": 1,\n  \"basePrice\": 243827,\n  \"currentPrice\": 234234,\n  \"isAvailable\": true,\n  \"serviceDescription\": \"string\",\n  \"editFeatureAssignments\": [\n    {\n      \"featureName\": \"string\",\n      \"isAvailable\": true\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/services/{{service_id}}",
+              "raw": "{{base_url}}/api/v1/manager/services/1",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -470,7 +518,7 @@
                 "v1",
                 "manager",
                 "services",
-                "{{service_id}}"
+                "1"
               ]
             }
           },
@@ -484,7 +532,7 @@
               "script": {
                 "exec": [
                   "pm.test(\"Status code is 204\", function () {\r",
-                  "    pm.expect([200, 204]).to.include(pm.response.code);\r",
+                  "    pm.response.to.have.status(204);\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -496,8 +544,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -533,9 +593,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/services/{{service_id}}",
+              "raw": "{{base_url}}/api/v1/manager/services/3",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -543,7 +603,7 @@
                 "v1",
                 "manager",
                 "services",
-                "{{service_id}}"
+                "3"
               ]
             }
           },
@@ -561,8 +621,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -611,9 +683,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/service-types/{{service_type_id}}",
+              "raw": "{{base_url}}/api/v1/manager/service-types/1",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -621,7 +693,7 @@
                 "v1",
                 "manager",
                 "service-types",
-                "{{service_type_id}}"
+                "1"
               ]
             }
           },
@@ -634,8 +706,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -671,9 +755,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/service-types",
+              "raw": "{{base_url}}/api/v1/manager/service-types",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -693,8 +777,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -751,9 +847,9 @@
               "raw": "{\n  \"typeName\": \"string4\",\n  \"isActive\": true\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/service-types",
+              "raw": "{{base_url}}/api/v1/manager/service-types",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -773,8 +869,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -835,9 +943,9 @@
               "raw": "{\n  \"typeName\": \"string\",\n  \"isActive\": true\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/service-types/{{service_type_id}}",
+              "raw": "{{base_url}}/api/v1/manager/service-types/1",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -845,7 +953,7 @@
                 "v1",
                 "manager",
                 "service-types",
-                "{{service_type_id}}"
+                "1"
               ]
             }
           },
@@ -858,8 +966,20 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Token auto-refresh removed (not supported in Newman)",
-                  "// Token is set by Login request test script"
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -880,7 +1000,7 @@
               "script": {
                 "exec": [
                   "pm.test(\"Status code is 204\", function () {\r",
-                  "    pm.expect([200, 204]).to.include(pm.response.code);\r",
+                  "    pm.response.to.have.status(204);\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -908,9 +1028,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/manager/service-types/{{service_type_id}}",
+              "raw": "{{base_url}}/api/v1/manager/service-types/1",
               "host": [
-                "{{baseUrl}}"
+                "{{base_url}}"
               ],
               "path": [
                 "{{baseUrl}}",
@@ -918,7 +1038,7 @@
                 "v1",
                 "manager",
                 "service-types",
-                "{{service_type_id}}"
+                "1"
               ]
             }
           },
@@ -935,16 +1055,6 @@
     {
       "key": "token",
       "value": "YOUR_BEARER_TOKEN"
-    },
-    {
-      "key": "service_id",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "service_type_id",
-      "value": "",
-      "type": "string"
     }
   ]
 }
