@@ -213,6 +213,51 @@ class ManagerReportControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "manager", roles = "MANAGER")
+    void getReportById_notFound_returns404() throws Exception {
+        when(systemReportService.getSystemReportByReportId(9999999L)).thenReturn(null);
+
+        mockMvc.perform(get("/api/v1/manager/reports/9999999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Report not found"));
+
+        verify(systemReportService).getSystemReportByReportId(9999999L);
+    }
+
+    @Test
+    @WithMockUser(username = "manager", roles = "MANAGER")
+    void updateReportStatus_withoutStatusInput_returns400() throws Exception {
+        User manager = User.builder().id("user-1").username("manager").build();
+        when(userRepository.findByUsername("manager")).thenReturn(Optional.of(manager));
+        when(userRepository.findById("user-1")).thenReturn(Optional.of(manager));
+
+        mockMvc.perform(patch("/api/v1/manager/reports/44/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("status không được để trống"));
+    }
+
+    @Test
+    @WithMockUser(username = "manager", roles = "MANAGER")
+    void createReport_withManager_userNotFound_returns401() throws Exception {
+        when(userRepository.findByUsername("manager")).thenReturn(Optional.empty());
+
+        NewReportRequest request = NewReportRequest.builder()
+                .reportName("Weekly Performance")
+                .reportType(ReportType.STAFF_PRODUCTIVITY)
+                .reportCategory("Productivity")
+                .reportData("data test")
+                .build();
+
+        mockMvc.perform(post("/api/v1/manager/reports")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("User not found"));
+    }
+
+    @Test
     void getAllReports_withoutAuth_returns401() throws Exception {
         mockMvc.perform(get("/api/v1/manager/reports"))
                 .andExpect(status().isUnauthorized());
