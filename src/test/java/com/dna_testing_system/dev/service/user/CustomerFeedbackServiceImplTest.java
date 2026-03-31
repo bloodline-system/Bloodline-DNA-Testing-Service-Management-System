@@ -1,4 +1,4 @@
-package com.dna_testing_system.dev.controller.feedback;
+package com.dna_testing_system.dev.service.user;
 
 import com.dna_testing_system.dev.dto.request.CreateFeedbackRequest;
 import com.dna_testing_system.dev.dto.request.RespondFeedbackRequest;

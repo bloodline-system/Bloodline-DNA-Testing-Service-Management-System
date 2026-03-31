@@ -1,4 +1,4 @@
-package com.dna_testing_system.dev.controller.userprofile;
+package com.dna_testing_system.dev.service.user;
 
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
 import com.dna_testing_system.dev.dto.response.UserProfileResponse;
