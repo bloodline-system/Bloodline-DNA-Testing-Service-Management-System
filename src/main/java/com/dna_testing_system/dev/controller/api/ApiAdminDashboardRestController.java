@@ -138,6 +138,11 @@ public class ApiAdminDashboardRestController {
             @RequestParam(defaultValue = "desc") String sortDir,
             HttpServletRequest request) {
         try {
+            if (page < 0 || size <= 0) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(),
+                                "Invalid pagination parameters", request.getRequestURI()));
+            }
             // TODO: Implement proper pagination with UserRepository
             List<User> allUsers = userRepository.findAll();
 
