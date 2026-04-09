@@ -66,6 +66,12 @@ class UserFeedbackBvaTest {
                 .thenReturn(CustomerFeedbackResponse.builder().id(1L).build());
     }
 
+    // =====================================================================
+    // PHAN 1 - Rating boundaries (@Min(1), @Max(5)) cho JSON endpoint
+    // Bien: 0 (min-1), 1 (min), 5 (max), 6 (max+1)
+    // =====================================================================
+
+    /** BVA-UF-RJ-01..12: 3 rating fields x 4 moc bien cho JSON */
     @ParameterizedTest
     @WithMockUser(username = "alice")
     @CsvSource({
@@ -105,6 +111,12 @@ class UserFeedbackBvaTest {
         }
     }
 
+    // =====================================================================
+    // PHAN 2 - feedbackTitle boundary (@Size(max=255)) cho JSON endpoint
+    // Bien: 255 (max valid), 256 (max+1 invalid)
+    // =====================================================================
+
+    /** BVA-UF-TI-01..02: feedbackTitle length 255/256 */
     @ParameterizedTest
     @WithMockUser(username = "alice")
     @ValueSource(ints = {255, 256})
@@ -122,6 +134,12 @@ class UserFeedbackBvaTest {
         }
     }
 
+    // =====================================================================
+    // PHAN 3 - Required fields boundary (@NotNull)
+    // Bien: serviceId null, customerId null
+    // =====================================================================
+
+    /** BVA-UF-RQ-01..02: null cho cac field bat buoc */
     @ParameterizedTest
     @WithMockUser(username = "alice")
     @ValueSource(strings = {"missingServiceId", "missingCustomerId"})
@@ -141,6 +159,12 @@ class UserFeedbackBvaTest {
         verify(customerFeedbackService, never()).createFeedback(any(CreateFeedbackRequest.class));
     }
 
+    // =====================================================================
+    // PHAN 4 - Rating boundaries cho FORM endpoint
+    // Bien: 0, 1, 5, 6 (serviceQualityRating)
+    // =====================================================================
+
+    /** BVA-UF-RF-01..04: rating bien cho multipart/form */
     @ParameterizedTest
     @WithMockUser(username = "alice")
     @CsvSource({
@@ -163,6 +187,10 @@ class UserFeedbackBvaTest {
             verify(customerFeedbackService, never()).createFeedback(any(CreateFeedbackRequest.class));
         }
     }
+
+    // =====================================================================
+    // Helper
+    // =====================================================================
 
     private CreateFeedbackRequest validRequest() {
         return CreateFeedbackRequest.builder()
