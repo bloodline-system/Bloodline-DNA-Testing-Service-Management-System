@@ -68,6 +68,12 @@ class UserProfileBvaTest {
     @MockitoBean
     TestKitService testKitService;
 
+        // =====================================================================
+        // PHAN 1 - firstName (@Size(max=100))
+        // Bien: 100 (max valid), 101 (max+1 invalid)
+        // =====================================================================
+
+        /** BVA-UP-FN-01: firstName length=100 -> 200 */
     @Test
     void updateProfileJson_firstNameLength100_returns200() throws Exception {
         mockUpdateSuccess("alice");
@@ -81,6 +87,7 @@ class UserProfileBvaTest {
                 .andExpect(jsonPath("$.code").value(200));
     }
 
+        /** BVA-UP-FN-02: firstName length=101 -> 400 */
     @Test
     void updateProfileJson_firstNameLength101_returns400() throws Exception {
         String firstName101 = "a".repeat(101);
@@ -94,6 +101,12 @@ class UserProfileBvaTest {
         verify(userProfileService, never()).updateUserProfile(eq("alice"), any());
     }
 
+        // =====================================================================
+        // PHAN 2 - lastName (@Size(max=100))
+        // Bien: 100 (max valid), 101 (max+1 invalid)
+        // =====================================================================
+
+        /** BVA-UP-LN-01: lastName length=100 -> 200 */
         @Test
         void updateProfileJson_lastNameLength100_returns200() throws Exception {
                 mockUpdateSuccess("alice");
@@ -107,6 +120,7 @@ class UserProfileBvaTest {
                                 .andExpect(jsonPath("$.code").value(200));
         }
 
+        /** BVA-UP-LN-02: lastName length=101 -> 400 */
         @Test
         void updateProfileJson_lastNameLength101_returns400() throws Exception {
                 String lastName101 = "b".repeat(101);
@@ -120,6 +134,13 @@ class UserProfileBvaTest {
                 verify(userProfileService, never()).updateUserProfile(eq("alice"), any());
         }
 
+        // =====================================================================
+        // PHAN 3 - phoneNumber (@Size(max=20), @Pattern)
+        // Bien do dai: 20 (max valid), 21 (max+1 invalid)
+        // Bien pattern: chu khong hop le
+        // =====================================================================
+
+        /** BVA-UP-PH-01: phoneNumber length=20 -> 200 */
     @Test
     void updateProfileJson_phoneLength20_returns200() throws Exception {
         mockUpdateSuccess("alice");
@@ -133,6 +154,7 @@ class UserProfileBvaTest {
                 .andExpect(jsonPath("$.code").value(200));
     }
 
+        /** BVA-UP-PH-02: phoneNumber length=21 -> 400 */
     @Test
     void updateProfileJson_phoneLength21_returns400() throws Exception {
         String phone21 = "1".repeat(21);
@@ -146,6 +168,7 @@ class UserProfileBvaTest {
         verify(userProfileService, never()).updateUserProfile(eq("alice"), any());
     }
 
+        /** BVA-UP-PH-03: phoneNumber sai pattern -> 400 */
     @Test
     void updateProfileJson_phonePatternInvalid_returns400() throws Exception {
         String json = "{\"email\":\"alice@example.com\",\"phoneNumber\":\"123abc\"}";
@@ -158,6 +181,12 @@ class UserProfileBvaTest {
         verify(userProfileService, never()).updateUserProfile(eq("alice"), any());
     }
 
+        // =====================================================================
+        // PHAN 4 - email (@NotNull, @Email)
+        // Bien: null invalid, format invalid
+        // =====================================================================
+
+        /** BVA-UP-EM-01: email null -> 400 */
     @Test
     void updateProfileJson_emailMissing_returns400() throws Exception {
         String json = "{\"firstName\":\"Alice\"}";
@@ -170,6 +199,7 @@ class UserProfileBvaTest {
         verify(userProfileService, never()).updateUserProfile(eq("alice"), any());
     }
 
+        /** BVA-UP-EM-02: email sai format -> 400 */
     @Test
     void updateProfileJson_emailInvalidFormat_returns400() throws Exception {
         String json = "{\"email\":\"invalid-email\"}";
@@ -181,6 +211,10 @@ class UserProfileBvaTest {
 
         verify(userProfileService, never()).updateUserProfile(eq("alice"), any());
     }
+
+        // =====================================================================
+        // Helper
+        // =====================================================================
 
     private void mockUpdateSuccess(String username) {
         UserProfileResponse existing = UserProfileResponse.builder()
