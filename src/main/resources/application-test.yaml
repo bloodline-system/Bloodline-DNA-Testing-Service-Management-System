@@ -4,7 +4,9 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop # mỗi lần test reset DB
+      # `create` still resets schema on startup, but avoids slow schema drop on JVM shutdown
+      # which can make Maven Surefire force-kill the forked JVM in CI.
+      ddl-auto: create
     show-sql: false
 
   # Disable mail sending in tests

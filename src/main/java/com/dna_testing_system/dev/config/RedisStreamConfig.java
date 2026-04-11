@@ -30,7 +30,7 @@ import java.time.Duration;
 @ConditionalOnProperty(name = "app.redis.enabled", havingValue = "true")
 public class RedisStreamConfig {
 
-    @Bean
+        @Bean(destroyMethod = "stop")
     public StreamMessageListenerContainer<String, MapRecord<String, String, String>> mailStreamListenerContainer(
             RedisConnectionFactory connectionFactory,
             StringRedisTemplate redisTemplate,
