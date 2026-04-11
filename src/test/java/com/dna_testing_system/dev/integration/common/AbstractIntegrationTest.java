@@ -7,12 +7,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.containers.wait.strategy.Wait;
 
 /**
  * Base class for integration tests that provides shared MySQL and Redis Testcontainers.
@@ -27,7 +25,11 @@ import org.testcontainers.containers.wait.strategy.Wait;
  */
 @SpringBootTest(properties = {
     // Ensure test profile wins even if application.yaml sets spring.profiles.active via ENVIRONMENT_CONFIG
-    "spring.profiles.active=test"
+    "spring.profiles.active=test",
+    // Redis is provided by the CI pipeline service container (localhost:6379)
+    "app.redis.enabled=true",
+    "spring.redis.host=localhost",
+    "spring.redis.port=6379"
 })
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
@@ -40,16 +42,11 @@ public abstract class AbstractIntegrationTest {
             .withUsername("root")
             .withPassword("password123");
 
-    @Container
-    static GenericContainer<?> redis = new GenericContainer<>("redis:7.2.4-alpine")
-            .withExposedPorts(6379)
-            .waitingFor(Wait.forListeningPort());
-
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         // Testcontainers are started by the JUnit extension, but DynamicPropertySource may be evaluated
         // before that happens. Start containers here to deterministically register mapped ports.
-        Startables.deepStart(mysql, redis).join();
+        Startables.deepStart(mysql).join();
 
         // MySQL configuration
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
@@ -60,11 +57,6 @@ public abstract class AbstractIntegrationTest {
         // (foreign-key heavy schemas). Since the DB lives in a disposable container anyway,
         // `create` provides the same isolation with much faster shutdown.
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create");
-
-        // Redis configuration
-        registry.add("spring.redis.host", redis::getHost);
-        registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
-        registry.add("app.redis.enabled", () -> true);
     }
 
     @Autowired
