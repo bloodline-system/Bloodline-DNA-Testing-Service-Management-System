@@ -70,14 +70,16 @@ public class UserEntityListener {
     /**
      * Check if Redis publishing is enabled via the app.redis.enabled property.
      * This allows non-integration tests to run without Redis being available.
+     * Defaults to false for safety - only enable if explicitly configured.
      */
     private boolean isRedisEnabled() {
         try {
             Environment environment = ApplicationContextHolder.getBean(Environment.class);
-            return environment.getProperty("app.redis.enabled", Boolean.class, true);
+            Boolean enabled = environment.getProperty("app.redis.enabled", Boolean.class);
+            return enabled != null ? enabled : false; // Default to false for safety
         } catch (Exception e) {
-            log.warn("Unable to determine Redis enabled status, defaulting to true", e);
-            return true;
+            log.warn("Unable to determine Redis enabled status, defaulting to false (safe fallback)", e);
+            return false; // Fail-safe: disable Redis if we can't read the property
         }
     }
 }

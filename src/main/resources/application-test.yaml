@@ -38,6 +38,11 @@ spring:
       pool:
         size: 1
 
+# Application configuration for tests
+app:
+  redis:
+    enabled: false  # Tests should run without Redis by default, @DynamicPropertySource can override for integration tests
+
 # Disable Redis publishing in non-integration tests
 app:
   redis:
