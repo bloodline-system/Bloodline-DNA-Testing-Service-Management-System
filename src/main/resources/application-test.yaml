@@ -37,3 +37,8 @@ spring:
     scheduling:
       pool:
         size: 1
+
+# Disable Redis publishing in non-integration tests
+app:
+  redis:
+    enabled: false

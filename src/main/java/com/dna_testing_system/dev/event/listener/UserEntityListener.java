@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.PostPersist;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.HashMap;
@@ -23,6 +24,11 @@ public class UserEntityListener {
 
     @PostPersist
     public void onUserCreated(User user) {
+        // Skip Redis publishing if disabled (non-integration tests)
+        if (!isRedisEnabled()) {
+            return;
+        }
+        
         try {
             String name = user.getProfile() != null
                     ? user.getProfile().getFirstName() + " " + user.getProfile().getLastName()
@@ -53,5 +59,19 @@ public class UserEntityListener {
         StringRedisTemplate redisTemplate = ApplicationContextHolder.getBean(StringRedisTemplate.class);
         String payload = objectMapper.writeValueAsString(event);
         redisTemplate.opsForStream().add(StreamConstants.NOTIFICATION_STREAM, Map.of("payload", payload));
+    }
+
+    /**
+     * Check if Redis publishing is enabled via the app.redis.enabled property.
+     * This allows non-integration tests to run without Redis being available.
+     */
+    private boolean isRedisEnabled() {
+        try {
+            Environment environment = ApplicationContextHolder.getBean(Environment.class);
+            return environment.getProperty("app.redis.enabled", Boolean.class, true);
+        } catch (Exception e) {
+            log.warn("Unable to determine Redis enabled status, defaulting to true", e);
+            return true;
+        }
     }
 }

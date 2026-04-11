@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostUpdate;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.HashMap;
@@ -26,11 +27,19 @@ public class SignUpEntityListener {
 
     @PostPersist
     public void onSignUpCreated(SignUp signUp) {
+        // Skip Redis publishing if disabled (non-integration tests)
+        if (!isRedisEnabled()) {
+            return;
+        }
         publishVerifyUserEvent(signUp);
     }
 
     @PostUpdate
     public void onSignUpUpdated(SignUp signUp) {
+        // Skip Redis publishing if disabled (non-integration tests)
+        if (!isRedisEnabled()) {
+            return;
+        }
         if (SignUpStatus.PENDING.equals(signUp.getStatus())) {
             publishVerifyUserEvent(signUp);
         }
@@ -61,5 +70,19 @@ public class SignUpEntityListener {
         StringRedisTemplate redisTemplate = ApplicationContextHolder.getBean(StringRedisTemplate.class);
         String payload = objectMapper.writeValueAsString(event);
         redisTemplate.opsForStream().add(StreamConstants.NOTIFICATION_STREAM, Map.of("payload", payload));
+    }
+
+    /**
+     * Check if Redis publishing is enabled via the app.redis.enabled property.
+     * This allows non-integration tests to run without Redis being available.
+     */
+    private boolean isRedisEnabled() {
+        try {
+            Environment environment = ApplicationContextHolder.getBean(Environment.class);
+            return environment.getProperty("app.redis.enabled", Boolean.class, true);
+        } catch (Exception e) {
+            log.warn("Unable to determine Redis enabled status, defaulting to true", e);
+            return true;
+        }
     }
 }

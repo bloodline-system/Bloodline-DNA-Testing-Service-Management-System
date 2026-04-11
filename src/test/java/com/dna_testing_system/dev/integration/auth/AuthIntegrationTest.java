@@ -8,6 +8,7 @@ import com.dna_testing_system.dev.dto.request.auth.VerificationOptRequestDTO;
 import com.dna_testing_system.dev.dto.response.auth.AuthTokensResponseDTO;
 import com.dna_testing_system.dev.dto.response.auth.OtpDebugResponseDTO;
 import com.dna_testing_system.dev.dto.response.auth.RegisterResponseDTO;
+import com.dna_testing_system.dev.integration.common.AbstractIntegrationTest;
 import com.dna_testing_system.dev.repository.SignUpRepository;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.dna_testing_system.dev.service.auth.AuthenticationService;
@@ -17,18 +18,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,28 +32,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration tests for the Authentication feature using Testcontainers.
  * Tests the full auth flow including login, sign-up, verification, token refresh, and logout
- * against a real MySQL database container.
+ * against a real MySQL database and Redis container.
+ * 
+ * Extends AbstractIntegrationTest to share MySQL and Redis containers across integration tests.
  */
-@SpringBootTest
-@Testcontainers
-@ActiveProfiles("test")
 @DisplayName("Authentication Integration Tests with Testcontainers")
-class AuthIntegrationTest {
-
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest")
-            .withDatabaseName("dna_testing_db")
-            .withUsername("root")
-            .withPassword("password123");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
+class AuthIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -67,8 +45,8 @@ class AuthIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
-        @Autowired
-        private SignUpRepository signUpRepository;
+    @Autowired
+    private SignUpRepository signUpRepository;
 
     @Autowired
     private AuthenticationService authenticationService;
@@ -84,7 +62,7 @@ class AuthIntegrationTest {
     private static final String VERIFICATION_ENDPOINT = AUTH_API + "/verification";
     private static final String REFRESH_TOKEN_ENDPOINT = AUTH_API + "/refresh-token";
     private static final String LOGOUT_ENDPOINT = AUTH_API + "/logout";
-        private static final String OTP_DEBUG_ENDPOINT = "/api/debug/otp/{signUpId}";
+    private static final String OTP_DEBUG_ENDPOINT = "/api/debug/otp/{signUpId}";
 
     @BeforeEach
     void setUp() {
@@ -93,6 +71,8 @@ class AuthIntegrationTest {
         // Clear user database before each test
         userRepository.deleteAll();
         signUpRepository.deleteAll();
+        // Flush Redis data before each test for isolation
+        flushRedis();
     }
 
     private void registerAndVerifyUser(RegisterRequestDTO signUpRequest) throws Exception {
