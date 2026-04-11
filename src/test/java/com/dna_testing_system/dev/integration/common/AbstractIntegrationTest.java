@@ -50,19 +50,45 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         
-        // Redis configuration - only enable if container is running
-        try {
-            if (redis.isRunning()) {
+        // Redis configuration - only enable if container is actually available
+        // This is defensive against CI environments without Docker
+        boolean redisAvailable = isRedisAvailable();
+        
+        if (redisAvailable) {
+            try {
                 registry.add("spring.redis.host", redis::getHost);
                 registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
                 registry.add("app.redis.enabled", () -> true);
-            } else {
-                // Containers not available (e.g., CI without Docker)
+            } catch (Exception e) {
+                // If accessing container properties fails, disable Redis
                 registry.add("app.redis.enabled", () -> false);
             }
-        } catch (Exception e) {
-            // Redis container failed to start - disable Redis
+        } else {
+            // Redis container not available (e.g., CI without Docker) - disable via default setting
+            // The property will already be false from application-test.yaml
             registry.add("app.redis.enabled", () -> false);
+        }
+    }
+    
+    /**
+     * Checks if Redis container is available and healthy.
+     * This is more robust than just checking isRunning() in CI environments.
+     */
+    private static boolean isRedisAvailable() {
+        try {
+            // Check if the container is running
+            if (!redis.isRunning()) {
+                return false;
+            }
+            // Additional check: verify container has been properly initialized
+            // If we can get the host and port without exception, it's likely available
+            String host = redis.getHost();
+            int port = redis.getMappedPort(6379);
+            // Both succeeded - Redis is likely available
+            return host != null && !host.isEmpty();
+        } catch (Exception e) {
+            // Any exception means Redis is not available
+            return false;
         }
     }
 

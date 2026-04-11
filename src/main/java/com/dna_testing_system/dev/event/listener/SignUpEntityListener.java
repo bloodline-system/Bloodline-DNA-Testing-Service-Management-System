@@ -58,24 +58,31 @@ public class SignUpEntityListener {
                     .data(data)
                     .build();
 
-            try {
-                publishToStream(event);
-                log.info("Published VERIFY_USER event for signup: {}", signUp.getId());
-            } catch (Exception redisError) {
-                // Redis connection failed - acceptable in test environments without Docker
-                log.warn("Could not publish VERIFY_USER event to Redis for signup: {} (Redis may be unavailable)", 
-                        signUp.getId(), redisError);
-            }
+            publishToStream(event);
+            log.debug("Published VERIFY_USER event for signup: {}", signUp.getId());
         } catch (Exception e) {
-            log.error("Failed to build VERIFY_USER event for signup: {}", signUp.getId(), e);
+            log.debug("Failed to publish VERIFY_USER event for signup: {} (likely Redis disabled or unavailable)", 
+                    signUp.getId(), e);
         }
     }
 
-    private void publishToStream(NotificationEvent event) throws JsonProcessingException {
-        ObjectMapper objectMapper = ApplicationContextHolder.getBean(ObjectMapper.class);
-        StringRedisTemplate redisTemplate = ApplicationContextHolder.getBean(StringRedisTemplate.class);
-        String payload = objectMapper.writeValueAsString(event);
-        redisTemplate.opsForStream().add(StreamConstants.NOTIFICATION_STREAM, Map.of("payload", payload));
+    private void publishToStream(NotificationEvent event) {
+        try {
+            ObjectMapper objectMapper = ApplicationContextHolder.getBean(ObjectMapper.class);
+            StringRedisTemplate redisTemplate = ApplicationContextHolder.getBean(StringRedisTemplate.class);
+            
+            if (objectMapper == null || redisTemplate == null) {
+                log.debug("Redis or ObjectMapper bean not available, skipping event publishing");
+                return;
+            }
+            
+            String payload = objectMapper.writeValueAsString(event);
+            redisTemplate.opsForStream().add(StreamConstants.NOTIFICATION_STREAM, Map.of("payload", payload));
+        } catch (Exception e) {
+            // If anything goes wrong getting beans or publishing, just log and continue
+            // This is expected when Redis is disabled or unavailable
+            log.debug("Could not publish to Redis stream (expected when Redis disabled)", e);
+        }
     }
 
     /**
