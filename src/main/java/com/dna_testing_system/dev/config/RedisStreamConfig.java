@@ -3,6 +3,7 @@ package com.dna_testing_system.dev.config;
 import com.dna_testing_system.dev.constant.StreamConstants;
 import com.dna_testing_system.dev.event.consumer.MailEventConsumer;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -20,12 +21,16 @@ import java.time.Duration;
 /**
  * Configures the Redis Stream listener container and initialises the consumer group.
  * Uses the MKSTREAM flag so the stream is created automatically on startup.
+ * 
+ * This configuration is only active when app.redis.enabled is true, allowing
+ * non-integration tests to run without Redis.
  */
 @Slf4j
 @Configuration
+@ConditionalOnProperty(name = "app.redis.enabled", havingValue = "true")
 public class RedisStreamConfig {
 
-    @Bean
+        @Bean(destroyMethod = "stop")
     public StreamMessageListenerContainer<String, MapRecord<String, String, String>> mailStreamListenerContainer(
             RedisConnectionFactory connectionFactory,
             StringRedisTemplate redisTemplate,
