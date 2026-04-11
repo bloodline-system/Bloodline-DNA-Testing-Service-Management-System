@@ -53,7 +53,7 @@
                   "    const expiry = new Date(expiresIn).getTime();",
                   "    if (!token || Date.now() > expiry) {",
                   "        pm.sendRequest({",
-                  "            url: pm.environment.get(\"base_url\") + \"/api/v1/auth/refresh\",",
+                  "            url: pm.environment.get(\"baseUrl\") + \"/api/v1/auth/refresh\",",
                   "            method: \"POST\",",
                   "            header: { \"Content-Type\": \"application/json\" },",
                   "            body: {",
@@ -89,7 +89,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin1234\",\n  \"rememberMe\": true\n}",
+              "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -266,7 +266,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080"
+      "value": ""
     },
     {
       "key": "access_token",

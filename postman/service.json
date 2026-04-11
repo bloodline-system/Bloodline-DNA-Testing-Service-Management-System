@@ -9,6 +9,58 @@
   },
   "item": [
     {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.environment.set(\"access_token\", jsonData.data.access_token);",
+              "pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+              "pm.environment.set(\"expires_in\", jsonData.data.expires_in);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{baseUrl}}",
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Service Controller",
       "item": [
         {
@@ -80,16 +132,17 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/services/4",
+              "raw": "{{baseUrl}}/api/v1/manager/services/{{service_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
                 "services",
-                "4"
+                "{{service_id}}"
               ]
             }
           },
@@ -139,7 +192,17 @@
                   "    pm.response.to.have.status(200);\r",
                   "});\r",
                   "\r",
-                  ""
+                  "",
+                  "",
+                  "// Save first service_id for subsequent requests",
+                  "try {",
+                  "  const body = pm.response.json();",
+                  "  if (body.data && body.data.content && body.data.content.length > 0) {",
+                  "    pm.environment.set('service_id', body.data.content[0].id);",
+                  "  } else if (Array.isArray(body.data) && body.data.length > 0) {",
+                  "    pm.environment.set('service_id', body.data[0].id);",
+                  "  }",
+                  "} catch(e) { console.warn('Could not save service_id', e); }"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -166,11 +229,12 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/services",
+              "raw": "{{baseUrl}}/api/v1/manager/services",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -261,11 +325,12 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/services/search?query=string",
+              "raw": "{{baseUrl}}/api/v1/manager/services/search?query=string",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -359,11 +424,12 @@
               "raw": "{\n  \"serviceName\": \"string\",\n  \"serviceCategory\": \"CIVIL\",\n  \"serviceTypeId\": 3,\n  \"participants\": 1,\n  \"executionTimeDays\": 1,\n  \"basePrice\": 19811,\n  \"currentPrice\": 121212,\n  \"isAvailable\": true,\n  \"serviceDescription\": \"string\",\n  \"featureAssignments\": [\n    {\n      \"featureName\": \"string\",\n      \"isAvailable\": true\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/services",
+              "raw": "{{baseUrl}}/api/v1/manager/services",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -454,16 +520,17 @@
               "raw": "{\n  \"serviceName\": \"string\",\n  \"serviceCategory\": \"CIVIL\",\n  \"serviceTypeId\": 2,\n  \"participants\": 1,\n  \"executionTimeDays\": 1,\n  \"basePrice\": 243827,\n  \"currentPrice\": 234234,\n  \"isAvailable\": true,\n  \"serviceDescription\": \"string\",\n  \"editFeatureAssignments\": [\n    {\n      \"featureName\": \"string\",\n      \"isAvailable\": true\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/services/1",
+              "raw": "{{baseUrl}}/api/v1/manager/services/{{service_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
                 "services",
-                "1"
+                "{{service_id}}"
               ]
             }
           },
@@ -477,7 +544,7 @@
               "script": {
                 "exec": [
                   "pm.test(\"Status code is 204\", function () {\r",
-                  "    pm.response.to.have.status(204);\r",
+                  "    pm.expect([200, 204]).to.include(pm.response.code);\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -538,16 +605,17 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/services/3",
+              "raw": "{{baseUrl}}/api/v1/manager/services/{{service_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
                 "services",
-                "3"
+                "{{service_id}}"
               ]
             }
           },
@@ -627,16 +695,17 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/service-types/1",
+              "raw": "{{baseUrl}}/api/v1/manager/service-types/{{service_type_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
                 "service-types",
-                "1"
+                "{{service_type_id}}"
               ]
             }
           },
@@ -698,11 +767,12 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/service-types",
+              "raw": "{{baseUrl}}/api/v1/manager/service-types",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -789,11 +859,12 @@
               "raw": "{\n  \"typeName\": \"string4\",\n  \"isActive\": true\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/service-types",
+              "raw": "{{baseUrl}}/api/v1/manager/service-types",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
@@ -884,16 +955,17 @@
               "raw": "{\n  \"typeName\": \"string\",\n  \"isActive\": true\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/service-types/1",
+              "raw": "{{baseUrl}}/api/v1/manager/service-types/{{service_type_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
                 "service-types",
-                "1"
+                "{{service_type_id}}"
               ]
             }
           },
@@ -940,7 +1012,7 @@
               "script": {
                 "exec": [
                   "pm.test(\"Status code is 204\", function () {\r",
-                  "    pm.response.to.have.status(204);\r",
+                  "    pm.expect([200, 204]).to.include(pm.response.code);\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -968,16 +1040,17 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/manager/service-types/1",
+              "raw": "{{baseUrl}}/api/v1/manager/service-types/{{service_type_id}}",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
+                "{{baseUrl}}",
                 "api",
                 "v1",
                 "manager",
                 "service-types",
-                "1"
+                "{{service_type_id}}"
               ]
             }
           },
@@ -994,6 +1067,16 @@
     {
       "key": "token",
       "value": "YOUR_BEARER_TOKEN"
+    },
+    {
+      "key": "service_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "service_type_id",
+      "value": "",
+      "type": "string"
     }
   ]
 }

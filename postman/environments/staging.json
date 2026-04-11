@@ -1,58 +1,112 @@
 {
-	"id": "83fdcbb2-12f1-4fba-ba64-ae9efe630afb",
-	"name": "Staging",
-	"values": [
-		{
-			"key": "baseUrl",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "username",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "password",
-			"value": "",
-			"type": "secret",
-			"enabled": true
-		},
-		{
-			"key": "access_token",
-			"value": "",
-			"type": "secret",
-			"enabled": true
-		},
-		{
-			"key": "refresh_token",
-			"value": "",
-			"type": "secret",
-			"enabled": true
-		},
-		{
-			"key": "expires_in",
-			"value": "",
-			"type": "any",
-			"enabled": true
-		},
-		{
-			"key": "rememberMe",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		},
-		{
-			"key": "test_kit_id",
-			"value": "",
-			"type": "default",
-			"enabled": true
-		}
-	],
-	"color": null,
-	"_postman_variable_scope": "environment",
-	"_postman_exported_at": "2026-03-21T16:00:34.944Z",
-	"_postman_exported_using": "Postman/12.2.4"
+  "id": "83fdcbb2-12f1-4fba-ba64-ae9efe630afb",
+  "name": "Staging",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "https://44.205.114.232",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "username",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "password",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "expires_in",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "rememberMe",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "test_kit_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "base_url",
+      "value": "{{baseUrl}}",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "sample_filename",
+      "value": "your_actual_file_on_staging.pdf",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "report_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "analysis_staff_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "collect_staff_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "service_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "service_type_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "post_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "color": null,
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-03-21T16:00:34.944Z",
+  "_postman_exported_using": "Postman/12.2.4"
 }

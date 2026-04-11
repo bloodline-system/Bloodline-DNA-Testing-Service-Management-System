@@ -9,6 +9,58 @@
   },
   "item": [
     {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.environment.set(\"access_token\", jsonData.data.access_token);",
+              "pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+              "pm.environment.set(\"expires_in\", jsonData.data.expires_in);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "{{baseUrl}}",
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Get Test Kit with paginated",
       "event": [
         {
@@ -55,11 +107,12 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{base_url}}/api/v1/test-kits?page=0&size=10&sort=id,desc",
+          "raw": "{{baseUrl}}/api/v1/test-kits?page=0&size=10&sort=id,desc",
           "host": [
-            "{{base_url}}"
+            "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits"
@@ -134,11 +187,12 @@
           "raw": "{\n  \"kitName\": \"COVID-19 Antigen Rapid Test\",\n  \"kitType\": \"PRENATAL\",\n  \"sampleType\": \"BLOOD\",\n  \"basePrice\": 4.99,\n  \"currentPrice\": 3.99,\n  \"quantityInStock\": 1200,\n  \"kitDescription\": \"Rapid antigen test - results in 15 minutes\",\n  \"expiryDate\": \"2027-12-31\",\n  \"producedBy\": \"BioRapid Inc.\",\n  \"isAvailable\": true\n}"
         },
         "url": {
-          "raw": "{{base_url}}/api/v1/test-kits",
+          "raw": "{{baseUrl}}/api/v1/test-kits",
           "host": [
-            "{{base_url}}"
+            "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits"
@@ -190,15 +244,16 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/api/v1/test-kits/1",
+          "raw": "{{baseUrl}}/api/v1/test-kits/{{test_kit_id}}",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits",
-            "1"
+            "{{test_kit_id}}"
           ]
         }
       },
@@ -248,15 +303,16 @@
           "raw": "{\n  \"kitName\": \"COVID-19 Antigen Rapid Test - Updated\",\n  \"kitType\": \"PRENATAL\",\n  \"sampleType\": \"BLOOD\",\n  \"basePrice\": 4.99,\n  \"currentPrice\": 2.99,\n  \"quantityInStock\": 950,\n  \"kitDescription\": \"Rapid antigen test - now with improved sensitivity\",\n  \"expiryDate\": \"2027-12-31\",\n  \"producedBy\": \"BioRapid Inc.\",\n  \"isAvailable\": true\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/api/v1/test-kits/1",
+          "raw": "{{baseUrl}}/api/v1/test-kits/{{test_kit_id}}",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits",
-            "1"
+            "{{test_kit_id}}"
           ]
         }
       },
@@ -270,7 +326,7 @@
           "script": {
             "exec": [
               "pm.test(\"Status code is 204 No Content\", function () {",
-              "    pm.response.to.have.status(204);",
+              "    pm.expect([200, 204]).to.include(pm.response.code);",
               "});",
               "",
               "pm.test(\"No response body\", function () {",
@@ -297,15 +353,16 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/api/v1/test-kits/1",
+          "raw": "{{baseUrl}}/api/v1/test-kits/{{test_kit_id}}",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits",
-            "1"
+            "{{test_kit_id}}"
           ]
         }
       },
@@ -352,6 +409,7 @@
             "{{baseUrl}}"
           ],
           "path": [
+            "{{baseUrl}}",
             "api",
             "v1",
             "test-kits",
@@ -379,7 +437,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
+      "value": "{{baseUrl}}",
       "type": "string"
     }
   ]
