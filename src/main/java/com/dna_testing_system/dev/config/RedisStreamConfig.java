@@ -27,7 +27,7 @@ import java.time.Duration;
  */
 @Slf4j
 @Configuration
-@ConditionalOnProperty(name = "app.redis.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.redis.enabled", havingValue = "true")
 public class RedisStreamConfig {
 
     @Bean
