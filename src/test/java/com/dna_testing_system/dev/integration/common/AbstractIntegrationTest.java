@@ -94,8 +94,12 @@ public abstract class AbstractIntegrationTest {
                 return false;
             }
             
-            // All checks passed - Redis should be available
-            return true;
+            // Critical: Try to actually connect to Redis to verify it's accepting connections
+            // This catches cases where the container object exists but Docker daemon is unavailable (e.g., in CI)
+            try (java.net.Socket socket = new java.net.Socket()) {
+                socket.connect(new java.net.InetSocketAddress(host, port), 2000); // 2 second timeout
+                return true;
+            }
         } catch (Exception e) {
             // Any exception means Redis is definitely not available
             // Log at debug level to avoid noise in tests
