@@ -50,12 +50,20 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         
-        // Redis configuration
-        registry.add("spring.redis.host", redis::getHost);
-        registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
-        
-        // Enable Redis for integration tests
-        registry.add("app.redis.enabled", () -> true);
+        // Redis configuration - only enable if container is running
+        try {
+            if (redis.isRunning()) {
+                registry.add("spring.redis.host", redis::getHost);
+                registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
+                registry.add("app.redis.enabled", () -> true);
+            } else {
+                // Containers not available (e.g., CI without Docker)
+                registry.add("app.redis.enabled", () -> false);
+            }
+        } catch (Exception e) {
+            // Redis container failed to start - disable Redis
+            registry.add("app.redis.enabled", () -> false);
+        }
     }
 
     @Autowired

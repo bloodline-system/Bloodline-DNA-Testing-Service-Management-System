@@ -47,10 +47,16 @@ public class UserEntityListener {
                     .data(data)
                     .build();
 
-            publishToStream(event);
-            log.info("Published COMPLETE_USER event for user: {}", user.getId());
+            try {
+                publishToStream(event);
+                log.info("Published COMPLETE_USER event for user: {}", user.getId());
+            } catch (Exception redisError) {
+                // Redis connection failed - acceptable in test environments without Docker
+                log.warn("Could not publish COMPLETE_USER event to Redis for user: {} (Redis may be unavailable)", 
+                        user.getId(), redisError);
+            }
         } catch (Exception e) {
-            log.error("Failed to publish COMPLETE_USER event for user: {}", user.getId(), e);
+            log.error("Failed to build COMPLETE_USER event for user: {}", user.getId(), e);
         }
     }
 

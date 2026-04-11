@@ -58,10 +58,16 @@ public class SignUpEntityListener {
                     .data(data)
                     .build();
 
-            publishToStream(event);
-            log.info("Published VERIFY_USER event for signup: {}", signUp.getId());
+            try {
+                publishToStream(event);
+                log.info("Published VERIFY_USER event for signup: {}", signUp.getId());
+            } catch (Exception redisError) {
+                // Redis connection failed - acceptable in test environments without Docker
+                log.warn("Could not publish VERIFY_USER event to Redis for signup: {} (Redis may be unavailable)", 
+                        signUp.getId(), redisError);
+            }
         } catch (Exception e) {
-            log.error("Failed to publish VERIFY_USER event for signup: {}", signUp.getId(), e);
+            log.error("Failed to build VERIFY_USER event for signup: {}", signUp.getId(), e);
         }
     }
 
