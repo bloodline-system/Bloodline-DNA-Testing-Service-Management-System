@@ -30,22 +30,16 @@
         }
       ],
       "request": {
-        "auth": {
-          "type": "noauth"
-        },
+        "auth": { "type": "noauth" },
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/auth/login",
+<<<<<<< HEAD
           "host": [
             "{{baseUrl}}"
           ],
@@ -56,6 +50,10 @@
             "auth",
             "login"
           ]
+=======
+          "host": [ "{{baseUrl}}" ],
+          "path": ["api","v1","auth","login"]
+>>>>>>> 0e77c821 (unit test)
         }
       },
       "response": []
@@ -244,7 +242,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/api/v1/test-kits/{{test_kit_id}}",
+          "raw": "{{baseUrl}}/api/v1/test-kits/1",
           "host": [
             "{{baseUrl}}"
           ],
@@ -253,7 +251,7 @@
             "api",
             "v1",
             "test-kits",
-            "{{test_kit_id}}"
+            "1"
           ]
         }
       },
@@ -303,7 +301,7 @@
           "raw": "{\n  \"kitName\": \"COVID-19 Antigen Rapid Test - Updated\",\n  \"kitType\": \"PRENATAL\",\n  \"sampleType\": \"BLOOD\",\n  \"basePrice\": 4.99,\n  \"currentPrice\": 2.99,\n  \"quantityInStock\": 950,\n  \"kitDescription\": \"Rapid antigen test - now with improved sensitivity\",\n  \"expiryDate\": \"2027-12-31\",\n  \"producedBy\": \"BioRapid Inc.\",\n  \"isAvailable\": true\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/api/v1/test-kits/{{test_kit_id}}",
+          "raw": "{{baseUrl}}/api/v1/test-kits/1",
           "host": [
             "{{baseUrl}}"
           ],
@@ -312,7 +310,7 @@
             "api",
             "v1",
             "test-kits",
-            "{{test_kit_id}}"
+            "1"
           ]
         }
       },
@@ -326,7 +324,7 @@
           "script": {
             "exec": [
               "pm.test(\"Status code is 204 No Content\", function () {",
-              "    pm.expect([200, 204]).to.include(pm.response.code);",
+              "    pm.response.to.have.status(204);",
               "});",
               "",
               "pm.test(\"No response body\", function () {",
@@ -353,7 +351,7 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/api/v1/test-kits/{{test_kit_id}}",
+          "raw": "{{baseUrl}}/api/v1/test-kits/1",
           "host": [
             "{{baseUrl}}"
           ],
@@ -362,7 +360,7 @@
             "api",
             "v1",
             "test-kits",
-            "{{test_kit_id}}"
+            "1"
           ]
         }
       },
@@ -437,7 +435,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "{{baseUrl}}",
+      "value": "http://localhost:8080",
       "type": "string"
     }
   ]

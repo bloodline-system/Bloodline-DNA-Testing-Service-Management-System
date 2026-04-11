@@ -92,8 +92,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
             }
           },
           "response": []
@@ -164,8 +171,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/users?page=0&size=20&sortBy=createdAt&sortDir=desc",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "users"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -233,8 +248,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/users?search=staff&page=0&size=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "users"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users"
+              ],
               "query": [
                 {
                   "key": "search",
@@ -301,8 +324,17 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "users", "{{admin_user_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
             }
           },
           "response": []
@@ -362,8 +394,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/profiles",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "profiles"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profiles"
+              ]
             }
           },
           "response": []
@@ -419,8 +458,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/profiles/staff1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "profiles", "staff1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profiles",
+                "staff1"
+              ]
             }
           },
           "response": []
@@ -495,8 +542,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "users", "{{admin_user_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
             }
           },
           "response": []
@@ -558,8 +614,16 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/profiles/staff1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "profiles", "staff1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profiles",
+                "staff1"
+              ]
             }
           },
           "response": []
@@ -627,8 +691,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "users", "{{admin_user_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
             }
           },
           "response": []
@@ -691,8 +764,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "users", "{{admin_user_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
             }
           },
           "response": []
@@ -760,8 +842,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "users", "{{admin_user_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
             }
           },
           "response": []
@@ -824,8 +915,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/users/{{admin_user_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "users", "{{admin_user_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "users",
+                "{{admin_user_id}}"
+              ]
             }
           },
           "response": []
@@ -875,8 +975,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/profiles/{{staff_username}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "profiles", "{{staff_username}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profiles",
+                "{{staff_username}}"
+              ]
             }
           },
           "response": []
@@ -934,8 +1042,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/staff/orders?page=0&size=10&sort=id,desc",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "staff", "orders"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "orders"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -999,8 +1114,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/staff/orders?status=COMPLETED&page=0&size=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "staff", "orders"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "orders"
+              ],
               "query": [
                 {
                   "key": "status",
@@ -1067,8 +1189,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/staff/test-results?page=0&size=10&sort=id,desc",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "staff", "test-results"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "test-results"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1135,8 +1264,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/staff/sample-collections?page=0&size=10&sort=collectionId,desc",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "staff", "sample-collections"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "sample-collections"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1202,8 +1338,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/stats",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "stats"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "stats"
+              ]
             }
           },
           "response": []
@@ -1253,8 +1397,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/dashboard/recent-activities",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "admin", "dashboard", "recent-activities"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard",
+                "recent-activities"
+              ]
             }
           },
           "response": []
@@ -1268,7 +1420,9 @@
       "script": {
         "type": "text/javascript",
         "requests": {},
-        "exec": [""]
+        "exec": [
+          ""
+        ]
       }
     },
     {
@@ -1276,7 +1430,9 @@
       "script": {
         "type": "text/javascript",
         "requests": {},
-        "exec": [""]
+        "exec": [
+          ""
+        ]
       }
     }
   ],
