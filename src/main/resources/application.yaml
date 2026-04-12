@@ -48,6 +48,10 @@ mail:
   sender:
     from: ${MAIL_SENDER_FROM:dnatestingnotification@gmail.com}
 
+app:
+  redis:
+    enabled: true
+
 management:
   endpoints:
     web:

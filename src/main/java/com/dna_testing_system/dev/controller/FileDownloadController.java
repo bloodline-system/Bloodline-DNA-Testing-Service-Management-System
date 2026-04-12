@@ -1,4 +1,5 @@
 package com.dna_testing_system.dev.controller;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,12 +26,15 @@ public class FileDownloadController {
     @GetMapping("/download")
     public ResponseEntity<Resource> downloadFile(@RequestParam String filename) {
         try {
+            if (filename == null || filename.trim().isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
             // Đảm bảo chỉ lấy tên file, không cho phép truyền ../ để bảo mật
-            if (filename.contains("..")) {
+            if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
                 return ResponseEntity.badRequest().build();
             }
             Path filePath = Paths.get(UPLOAD_DIR).resolve(filename).normalize();
-            if (!Files.exists(filePath)) {
+            if (!Files.exists(filePath) || Files.isDirectory(filePath)) {
                 return ResponseEntity.notFound().build();
             }
             Resource resource = new UrlResource(filePath.toUri());
@@ -45,13 +49,16 @@ public class FileDownloadController {
     @GetMapping("/view")
     public ResponseEntity<Resource> viewFile(@RequestParam String filename) {
         try {
+            if (filename == null || filename.trim().isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
             // Bảo mật: chỉ cho phép tên file, không chứa ký tự đặc biệt
             if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
                 return ResponseEntity.badRequest().build();
             }
             Path uploadDirPath = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
             Path filePath = uploadDirPath.resolve(filename).normalize();
-            if (!filePath.startsWith(uploadDirPath) || !Files.exists(filePath)) {
+            if (!filePath.startsWith(uploadDirPath) || !Files.exists(filePath) || Files.isDirectory(filePath)) {
                 return ResponseEntity.notFound().build();
             }
             Resource resource = new UrlResource(filePath.toUri());
@@ -61,7 +68,8 @@ public class FileDownloadController {
                 contentType = "application/octet-stream";
             }
 
-            // Content-Disposition: inline để xem trực tiếp (ví dụ PDF sẽ hiển thị trên trình duyệt)
+            // Content-Disposition: inline để xem trực tiếp (ví dụ PDF sẽ hiển thị trên
+            // trình duyệt)
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
