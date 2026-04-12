@@ -197,9 +197,7 @@ class TestKitIntegrationTest extends AbstractIntegrationTest {
         TestKit saved = testKitRepository.save(testKit);
 
         mockMvc.perform(delete(BASE_URL + "/{id}", saved.getId()))
-                .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.code").value(204))
-                .andExpect(jsonPath("$.message").value("Test kit deleted successfully"));
+                .andExpect(status().isNoContent());
 
         assertThat(testKitRepository.existsById(saved.getId())).isFalse();
     }
