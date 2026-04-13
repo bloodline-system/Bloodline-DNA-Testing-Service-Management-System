@@ -8,15 +8,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.lifecycle.Startables;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Base class for integration tests that provides shared MySQL and Redis Testcontainers.
  * 
  * This class sets up:
- * - MySQL database container for data persistence testing
+ * - MySQL database container for data persistence testing (shared across all test classes)
  * - Redis container for caching and event streaming
  * - Automatic flushRedis() cleanup between tests for reuse
  * 
@@ -29,25 +27,26 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     // Redis is provided by the CI pipeline service container (localhost:6379)
     "app.redis.enabled=true",
     "spring.redis.host=localhost",
-    "spring.redis.port=6379"
+    "spring.redis.port=6379",
+    // HikariCP connection pool settings for multi-test scenarios
+    "spring.datasource.hikari.connection-test-query=SELECT 1",
+    "spring.datasource.hikari.max-lifetime=600000",
+    "spring.datasource.hikari.idle-timeout=60000",
+    "spring.datasource.hikari.max-pool-size=10",
+    "spring.datasource.hikari.connection-timeout=30000",
+    "spring.datasource.hikari.validation-interval=5000",
+    "spring.datasource.hikari.leak-detection-threshold=300000"
 })
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
 
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest")
-            .withDatabaseName("dna_testing_db")
-            .withUsername("root")
-            .withPassword("password123");
+    // Shared container instance across all test classes
+    static MySQLContainer<?> mysql = SharedTestContainer.getInstance();
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        // Testcontainers are started by the JUnit extension, but DynamicPropertySource may be evaluated
-        // before that happens. Start containers here to deterministically register mapped ports.
-        Startables.deepStart(mysql).join();
-
         // MySQL configuration
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
         registry.add("spring.datasource.username", mysql::getUsername);

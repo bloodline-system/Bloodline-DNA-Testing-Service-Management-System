@@ -32,7 +32,6 @@ import java.util.Set;
 @Slf4j
 @Configuration
 @Component
-@Profile("!test")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigurer {
