@@ -6,6 +6,7 @@ import com.dna_testing_system.dev.entity.User;
 import com.dna_testing_system.dev.enums.PostCategory;
 import com.dna_testing_system.dev.enums.PostStatus;
 import com.dna_testing_system.dev.enums.PostTag;
+import com.dna_testing_system.dev.integration.common.AbstractIntegrationTest;
 import com.dna_testing_system.dev.repository.ContentPostRepository;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,9 +37,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-class ManagerPostIntegrationTest {
+class ManagerPostIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
         WebApplicationContext webApplicationContext;
@@ -67,20 +67,6 @@ class ManagerPostIntegrationTest {
     @BeforeEach
     void seedManagerUser() {
                 mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-
-        // Avoid userRepository.save(...) because UserEntityListener publishes to Redis on @PostPersist.
-        jdbcTemplate.update("DELETE FROM tbl_users WHERE username = ?", "manager");
-
-        String userId = UUID.randomUUID().toString();
-        jdbcTemplate.update(
-                "INSERT INTO tbl_users (user_id, username, password_hash, is_active, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
-                userId,
-                "manager",
-                "x",
-                true
-        );
-
-        // Defensive: clean posts for clarity (transaction rolls back anyway).
         contentPostRepository.deleteAll();
     }
 
