@@ -3,6 +3,7 @@ package com.dna_testing_system.dev.service.impl;
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
 import com.dna_testing_system.dev.dto.response.UserProfileResponse;
 import com.dna_testing_system.dev.dto.response.UserResponse;
+import com.dna_testing_system.dev.dto.response.profile.ProfileResponse;
 import com.dna_testing_system.dev.entity.User;
 import com.dna_testing_system.dev.entity.UserProfile;
 import com.dna_testing_system.dev.exception.ErrorCode;
@@ -124,5 +125,12 @@ public class UserProfileServiceImpl implements UserProfileService {
         return users.stream()
                 .map(userProfileMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ProfileResponse getProfile(String username)  {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
+        return userProfileMapper.toProfileResponse(user);
     }
 }

@@ -4,6 +4,7 @@ package com.dna_testing_system.dev.controller;
 import com.dna_testing_system.dev.dto.ApiResponse;
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
 import com.dna_testing_system.dev.dto.response.*;
+import com.dna_testing_system.dev.dto.response.profile.ProfileResponse;
 import com.dna_testing_system.dev.dto.response.staff.TestResultsResponse;
 import com.dna_testing_system.dev.entity.TestResult;
 import com.dna_testing_system.dev.service.ContentPostService;
@@ -23,6 +24,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +59,21 @@ public class UserController {
         return ResponseEntity.ok(
                 ApiResponse.success(HttpStatus.OK.value(), "Get all profiles successfully", profiles)
         );
+    }
+
+    @GetMapping("/me")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<ProfileResponse>> getMyProfile(HttpServletRequest request) {
+        try {
+            String currentUsername = currentUsername();
+            ProfileResponse userProfile = userProfileService.getProfile(currentUsername);
+            return ResponseEntity.ok(
+                    ApiResponse.success(HttpStatus.OK.value(), "Get my profile successfully", userProfile)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", request.getRequestURI()));
+        }
     }
 
     @GetMapping("/search")
@@ -193,5 +211,10 @@ public class UserController {
         return ResponseEntity.ok(
                 ApiResponse.success(HttpStatus.OK.value(), "Delete profile successfully", true)
         );
+    }
+
+    private String currentUsername() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth.getName();
     }
 }
