@@ -46,6 +46,10 @@ public class ManagerOrderController {
         try {
             // Authenticate user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Not authenticated", request.getRequestURI()));
+            }
             User currentUser = userRepository.findByUsername(auth.getName())
                     .map(u -> userRepository.findById(u.getId())
                             .orElseThrow(() -> new RuntimeException("User not found")))
@@ -95,6 +99,10 @@ public class ManagerOrderController {
         try {
             // Authenticate user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Not authenticated", request.getRequestURI()));
+            }
             User currentUser = userRepository.findByUsername(auth.getName())
                     .map(u -> userRepository.findById(u.getId())
                             .orElseThrow(() -> new RuntimeException("User not found")))
@@ -149,6 +157,10 @@ public class ManagerOrderController {
         try {
             // Authenticate user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Not authenticated", request.getRequestURI()));
+            }
             User currentUser = userRepository.findByUsername(auth.getName())
                     .map(u -> userRepository.findById(u.getId())
                             .orElseThrow(() -> new RuntimeException("User not found")))
@@ -197,6 +209,10 @@ public class ManagerOrderController {
         try {
             // Authenticate user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Not authenticated", request.getRequestURI()));
+            }
             User currentUser = userRepository.findByUsername(auth.getName())
                     .map(u -> userRepository.findById(u.getId())
                             .orElseThrow(() -> new RuntimeException("User not found")))

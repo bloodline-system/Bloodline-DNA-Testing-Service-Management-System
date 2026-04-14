@@ -20,7 +20,6 @@ public class NewReportRequest {
     String reportName;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 100)
     @NotNull
     ReportType reportType;
 
@@ -28,7 +27,6 @@ public class NewReportRequest {
     @NotNull
     String reportCategory;
 
-    @NotNull
     User generatedByUser;
 
     @NotNull

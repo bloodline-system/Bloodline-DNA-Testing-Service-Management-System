@@ -13,6 +13,7 @@ import com.dna_testing_system.dev.exception.ErrorCode;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.dna_testing_system.dev.service.SystemReportService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -116,6 +117,9 @@ public class ManagerReportController {
                         .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Report not found", request.getRequestURI()));
             }
             return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Report loaded", report));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Report not found", request.getRequestURI()));
         } catch (Exception e) {
             log.error("Error loading report details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -124,10 +128,14 @@ public class ManagerReportController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<SystemReportResponse>> createReport(@RequestBody NewReportRequest reportRequest,
+    public ResponseEntity<ApiResponse<SystemReportResponse>> createReport(@Valid @RequestBody NewReportRequest reportRequest,
                                                                           HttpServletRequest request) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Not authenticated", request.getRequestURI()));
+            }
             User currentUser = userRepository.findByUsername(auth.getName())
                     .map(u -> userRepository.findById(u.getId())
                             .orElseThrow(() -> new RuntimeException("User not found")))
@@ -162,6 +170,10 @@ public class ManagerReportController {
 
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "Not authenticated", request.getRequestURI()));
+            }
             String currentUserId = userRepository.findByUsername(auth.getName())
                     .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_EXISTS))
                     .getId();
@@ -191,6 +203,10 @@ public class ManagerReportController {
             return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "Report status updated", response));
 
         } catch (EntityNotFoundException e) {
+            if (e.getErrorCode() == ErrorCode.RESOURCE_NOT_FOUND) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Report not found", request.getRequestURI()));
+            }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "User not found", request.getRequestURI()));
         } catch (Exception e) {
