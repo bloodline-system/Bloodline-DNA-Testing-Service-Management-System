@@ -15,11 +15,16 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.core.env.Environment;
+
+import org.springframework.context.annotation.Profile;
+
 /**
  * JPA entity listener that publishes COMPLETE_USER notification events to Redis Stream
  * when a new {@link User} is created after successful signup verification.
  */
 @Slf4j
+@Profile("!test")
 public class UserEntityListener {
 
     @PostPersist
@@ -30,6 +35,13 @@ public class UserEntityListener {
         }
         
         try {
+            // Skip Redis operations in test environment
+            Environment environment = ApplicationContextHolder.getBean(Environment.class);
+            if (environment != null && environment.matchesProfiles("test")) {
+                log.info("Skipping Redis event publishing in test environment for user: {}", user.getId());
+                return;
+            }
+
             String name = user.getProfile() != null
                     ? user.getProfile().getFirstName() + " " + user.getProfile().getLastName()
                     : user.getUsername();
@@ -90,3 +102,4 @@ public class UserEntityListener {
         }
     }
 }
+

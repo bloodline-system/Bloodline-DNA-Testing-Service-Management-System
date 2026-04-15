@@ -4,13 +4,13 @@
 	"values": [
 		{
 			"key": "baseUrl",
-			"value": "",
+			"value": "http://localhost:8080",
 			"type": "default",
 			"enabled": true
 		},
 		{
 			"key": "username",
-			"value": "",
+			"value": "manager2",
 			"type": "any",
 			"enabled": true
 		},
@@ -22,7 +22,7 @@
 		},
 		{
 			"key": "password",
-			"value": "",
+			"value": "manager2",
 			"type": "any",
 			"enabled": true
 		},
@@ -35,6 +35,30 @@
 		{
 			"key": "otp_code",
 			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "expires_in",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "sample_filename",
+			"value": "1751859442505_View_Serializability.pdf",
 			"type": "any",
 			"enabled": true
 		}

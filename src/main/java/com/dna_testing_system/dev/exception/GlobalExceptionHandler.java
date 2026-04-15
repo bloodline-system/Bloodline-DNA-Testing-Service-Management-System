@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,6 +35,13 @@ class GlobalExceptionHandler {
     })
     ResponseEntity<ApiResponse<Void>> handleNotFoundsException(RuntimeException ex, WebRequest request) {
         return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({
+            AuthorizationDeniedException.class
+    })
+    ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(RuntimeException ex, WebRequest request) {
+        return ExceptionHandlerUtils.generateErrorResponse(ex, request, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({
