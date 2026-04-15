@@ -33,7 +33,7 @@ public class FileDownloadController {
                 return ResponseEntity.badRequest().build();
             }
             Path filePath = Paths.get(UPLOAD_DIR).resolve(filename).normalize();
-            if (!Files.exists(filePath)) {
+            if (!Files.exists(filePath) || Files.isDirectory(filePath)) {
                 return ResponseEntity.notFound().build();
             }
             Resource resource = new UrlResource(filePath.toUri());
@@ -54,7 +54,7 @@ public class FileDownloadController {
             }
             Path uploadDirPath = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
             Path filePath = uploadDirPath.resolve(filename).normalize();
-            if (!filePath.startsWith(uploadDirPath) || !Files.exists(filePath)) {
+            if (!filePath.startsWith(uploadDirPath) || !Files.exists(filePath) || Files.isDirectory(filePath)) {
                 return ResponseEntity.notFound().build();
             }
             Resource resource = new UrlResource(filePath.toUri());
