@@ -39,21 +39,8 @@
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/auth/login",
-<<<<<<< HEAD
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "{{baseUrl}}",
-            "api",
-            "v1",
-            "auth",
-            "login"
-          ]
-=======
           "host": ["{{baseUrl}}"],
           "path": ["api", "v1", "auth", "login"]
->>>>>>> 0e77c821 (unit test)
         }
       },
       "response": []
