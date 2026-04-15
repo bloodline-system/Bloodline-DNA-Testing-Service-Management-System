@@ -5,7 +5,7 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 COPY uploads ./uploads
-COPY uploads_information ./uploads_information
+# COPY uploads_information ./uploads_information  # Commented out as directory is empty
 
 RUN mvn clean package -DskipTests
 
