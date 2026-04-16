@@ -3,6 +3,7 @@ package com.dna_testing_system.dev.controller;
 
 import com.dna_testing_system.dev.dto.ApiResponse;
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
+import com.dna_testing_system.dev.exception.ResourceNotFoundException;
 import com.dna_testing_system.dev.dto.response.*;
 import com.dna_testing_system.dev.dto.response.profile.ProfileResponse;
 import com.dna_testing_system.dev.dto.response.staff.TestResultsResponse;
@@ -174,6 +175,12 @@ public class UserController {
             return ResponseEntity.ok(
                     ApiResponse.success(HttpStatus.OK.value(), "Update profile successfully", updatedProfile)
             );
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), e.getMessage(), httpServletRequest.getRequestURI()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), e.getMessage(), httpServletRequest.getRequestURI()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error updating profile: " + e.getMessage(), httpServletRequest.getRequestURI()));
