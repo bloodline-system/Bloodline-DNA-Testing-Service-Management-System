@@ -1,6 +1,5 @@
 package com.dna_testing_system.dev.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +20,7 @@ public class UserProfileRequest {
     @Size(max = 100, message = "Last name must not exceed 100 characters")
     String lastName;
 
+    @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
     String email;
 

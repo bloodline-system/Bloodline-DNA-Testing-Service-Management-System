@@ -2,6 +2,7 @@ package com.dna_testing_system.dev.service.user;
 
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
 import com.dna_testing_system.dev.dto.response.UserProfileResponse;
+import com.dna_testing_system.dev.entity.SignUp;
 import com.dna_testing_system.dev.entity.User;
 import com.dna_testing_system.dev.entity.UserProfile;
 import com.dna_testing_system.dev.exception.ErrorCode;
@@ -48,7 +49,8 @@ class UserProfileServiceImplTest {
 
     @Test
     void updateUserProfile_profileNull_createsNewAndPreservesEmailWhenMissingInRequest() {
-        User user = User.builder().id("u1").username("alice").passwordHash("x").build();
+        SignUp signUp = SignUp.builder().email("signup@example.com").build();
+        User user = User.builder().id("u1").username("alice").passwordHash("x").signUp(signUp).build();
         user.setProfile(null);
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
 
@@ -66,6 +68,7 @@ class UserProfileServiceImplTest {
         verify(userRepository).save(captor.capture());
         assertThat(captor.getValue().getProfile()).isNotNull();
         assertThat(captor.getValue().getProfile().getUser()).isSameAs(user);
+        assertThat(captor.getValue().getProfile().getEmail()).isEqualTo("signup@example.com");
         verify(userProfileMapper).updateUserProfileFromDto(eq(req), any(UserProfile.class));
     }
 
