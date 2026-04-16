@@ -36,36 +36,46 @@ public class UserProfileServiceImpl implements UserProfileService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
         UserProfile profile = user.getProfile();
-        
-        // Preserve current email BEFORE modifying profile
+
         String currentEmail = profile != null ? profile.getEmail() : null;
-        
+        String signUpEmail = user.getSignUp() != null ? user.getSignUp().getEmail() : null;
+
+        String requestEmail = request.getEmail() != null ? request.getEmail().trim() : null;
+        if (requestEmail != null && requestEmail.isEmpty()) {
+            requestEmail = null;
+        }
+
         if (profile == null) {
             profile = new UserProfile();
             profile.setUser(user);
             user.setProfile(profile);
         }
-        
-        // Preserve email if not provided in request (required field in database)
-        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            request.setEmail(currentEmail);
-        } else {
-            // Validate email uniqueness if email is being updated
-            String newEmail = request.getEmail().trim();
-            
-            // Only check uniqueness if email is actually changing
-            if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
-                // Check if another user already has this email
-                boolean emailExists = userProfileRepository.findAll().stream()
-                        .filter(up -> up.getEmail() != null)
-                        .anyMatch(up -> up.getEmail().equalsIgnoreCase(newEmail) && !up.getUser().getId().equals(user.getId()));
-                
-                if (emailExists) {
-                    throw new RuntimeException("Email already in use by another user");
-                }
+
+        // Ensure email is never null (DB requires it)
+        String effectiveEmail = requestEmail;
+        if (effectiveEmail == null || effectiveEmail.isBlank()) {
+            if (currentEmail != null && !currentEmail.isBlank()) {
+                effectiveEmail = currentEmail;
+            } else if (signUpEmail != null && !signUpEmail.isBlank()) {
+                effectiveEmail = signUpEmail;
+            } else {
+                throw new IllegalArgumentException("Email is required");
             }
         }
-        
+        request.setEmail(effectiveEmail.trim());
+
+        // Validate email uniqueness if email is being updated
+        String newEmail = request.getEmail();
+        if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
+            boolean emailExists = userProfileRepository.findAll().stream()
+                    .filter(up -> up.getEmail() != null)
+                    .anyMatch(up -> up.getEmail().equalsIgnoreCase(newEmail) && !up.getUser().getId().equals(user.getId()));
+
+            if (emailExists) {
+                throw new IllegalArgumentException("Email already in use by another user");
+            }
+        }
+
         userProfileMapper.updateUserProfileFromDto(request, profile);
         userRepository.save(user);
         return true;
