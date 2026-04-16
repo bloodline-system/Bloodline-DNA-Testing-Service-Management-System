@@ -9,6 +9,8 @@ import com.dna_testing_system.dev.entity.User;
 import com.dna_testing_system.dev.entity.UserProfile;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
@@ -49,6 +51,7 @@ public interface UserProfileMapper {
     ProfileResponse toProfileResponse(User user);
 
     void updateUserProfileFromDto(UpdateProfileRequest request, @MappingTarget UserProfile userProfile);
+    @Mapping(target = "email", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserProfileFromDto(UserProfileRequest request, @MappingTarget UserProfile userProfile);
 
     default String getFirstRoleName(User user) {

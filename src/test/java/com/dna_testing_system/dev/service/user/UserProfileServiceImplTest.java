@@ -55,7 +55,7 @@ class UserProfileServiceImplTest {
         UserProfileRequest req = UserProfileRequest.builder()
                 .firstName("A")
                 .lastName("B")
-                .email(null)
+                .email("alice@example.com")
                 .dateOfBirth(LocalDate.of(2000, 1, 1))
                 .build();
 
@@ -100,7 +100,7 @@ class UserProfileServiceImplTest {
         other.setProfile(otherProfile);
 
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(userProfileRepository.findAll()).thenReturn(List.of(profile, otherProfile));
+        when(userProfileRepository.existsByEmailIgnoreCaseAndUserIdNot("new@ex.com", "u1")).thenReturn(false);
 
         UserProfileRequest req = UserProfileRequest.builder()
                 .email("new@ex.com")
@@ -124,7 +124,7 @@ class UserProfileServiceImplTest {
         other.setProfile(otherProfile);
 
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(userProfileRepository.findAll()).thenReturn(List.of(profile, otherProfile));
+        when(userProfileRepository.existsByEmailIgnoreCaseAndUserIdNot("dup@ex.com", "u1")).thenReturn(true);
 
         UserProfileRequest req = UserProfileRequest.builder()
                 .email("dup@ex.com")

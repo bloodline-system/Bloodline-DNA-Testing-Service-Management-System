@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
     Optional<UserProfile> findByUser(User user);
     boolean existsByEmail(String email);
+    boolean existsByEmailIgnoreCaseAndUserIdNot(String email, String userId);
     Optional<List<UserProfile>> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
 }
