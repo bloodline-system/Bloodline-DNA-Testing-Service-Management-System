@@ -21,7 +21,6 @@ public class UserProfileRequest {
     @Size(max = 100, message = "Last name must not exceed 100 characters")
     String lastName;
 
-    @NotNull
     @Email(message = "Email must be valid")
     String email;
 
