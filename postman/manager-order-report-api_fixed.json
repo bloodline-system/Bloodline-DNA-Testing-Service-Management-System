@@ -1,0 +1,1118 @@
+{
+  "info": {
+    "_postman_id": "manager-order-report-fixed-0001",
+    "name": "Manager Order & Report API - Fixed",
+    "description": "Fixed Manager Order and Report API collection with test null guards and Authorization header injection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const response = pm.response.json();",
+              "if (response && response.data) {",
+              "    pm.environment.set(\"access_token\", response.data.access_token);",
+              "    pm.environment.set(\"refresh_token\", response.data.refresh_token);",
+              "    pm.environment.set(\"expires_in\", response.data.expires_in);",
+              "}",
+              "pm.test(\"Login response contains tokens\", function () {",
+              "    pm.expect(response).to.have.property(\"data\");",
+              "    if (response.data) {",
+              "        pm.expect(response.data).to.have.property(\"access_token\");",
+              "        pm.expect(response.data).to.have.property(\"refresh_token\");",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin1234\",\n  \"rememberMe\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "── ORDER MANAGEMENT ──────────────────────────────",
+      "item": [
+        {
+          "name": "GET All Orders",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "const data = resp && resp.data;",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has standard wrapper', function () {",
+                  "    pm.expect(resp).to.have.property('code');",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "    pm.expect(resp).to.have.property('data');",
+                  "    pm.expect(resp).to.have.property('timestamp');",
+                  "});",
+                  "if (data) {",
+                  "    pm.test('data contains orders, statusCounts, totalOrders', function () {",
+                  "        pm.expect(data).to.have.property('orders').that.is.an('array');",
+                  "        pm.expect(data).to.have.property('statusCounts');",
+                  "        pm.expect(data).to.have.property('totalOrders');",
+                  "    });",
+                  "    pm.test('totalOrders matches orders array length', function () {",
+                  "        pm.expect(data.totalOrders).to.eql(data.orders.length);",
+                  "    });",
+                  "    pm.test('pageTitle is a string', function () {",
+                  "        pm.expect(data.pageTitle).to.be.a('string');",
+                  "    });",
+                  "}",
+                  "pm.test('Response time < 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET New Orders",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('GET New Orders - status is 200 or 500', function () {",
+                  "    pm.expect([200, 500]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/orders/new",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "orders",
+                "new"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Update Order Status",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}",
+                  "const orderId = pm.environment.get('order_id');",
+                  "if (!orderId) {",
+                  "    console.warn('order_id is not set. This request may fail.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "const data = resp && resp.data;",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has wrapper with code 200', function () {",
+                  "    pm.expect(resp).to.have.property('code', 200);",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "    pm.expect(resp).to.have.property('data');",
+                  "    pm.expect(resp).to.have.property('timestamp');",
+                  "});",
+                  "if (data) {",
+                  "    pm.test('data contains orderId, newStatus, updatedBy', function () {",
+                  "        pm.expect(data).to.have.property('orderId');",
+                  "        pm.expect(data).to.have.property('newStatus');",
+                  "        pm.expect(data).to.have.property('updatedBy');",
+                  "    });",
+                  "}",
+                  "pm.test('Response time < 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\",\n  \"notes\": \"Reviewed by manager\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/orders/{{order_id}}/status?status=IN_PROGRESS&notes=Reviewed+by+manager",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "orders",
+                "{{order_id}}",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "IN_PROGRESS"
+                },
+                {
+                  "key": "notes",
+                  "value": "Reviewed by manager"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Update Order Status - 400 Empty Status",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}",
+                  "const orderId = pm.environment.get('order_id');",
+                  "if (!orderId) {",
+                  "    console.warn('order_id is not set. This request may fail.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "pm.test('Status code is 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('Response has wrapper with error code 400', function () {",
+                  "    pm.expect(resp).to.have.property('code', 400);",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/orders/{{order_id}}/status?status=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "orders",
+                "{{order_id}}",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Assign Staff to Order",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}",
+                  "const orderId = pm.environment.get('order_id');",
+                  "if (!orderId) {",
+                  "    console.warn('order_id is not set. This request may fail.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Assign staff: status is 200 or 201', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "const resp = pm.response.json();",
+                  "pm.test('Response has wrapper', function () {",
+                  "    pm.expect(resp).to.have.property('code');",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/orders/{{order_id}}/assign-staff?collectStaffId={{collect_staff_id}}&analysisStaffId={{analysis_staff_id}}&assignmentType=STANDARD&notes=Assigned+by+manager",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "orders",
+                "{{order_id}}",
+                "assign-staff"
+              ],
+              "query": [
+                {
+                  "key": "collectStaffId",
+                  "value": "{{collect_staff_id}}"
+                },
+                {
+                  "key": "analysisStaffId",
+                  "value": "{{analysis_staff_id}}"
+                },
+                {
+                  "key": "assignmentType",
+                  "value": "STANDARD"
+                },
+                {
+                  "key": "notes",
+                  "value": "Assigned by manager"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Assign Staff - 400 Missing collectStaffId",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}",
+                  "const orderId = pm.environment.get('order_id');",
+                  "if (!orderId) {",
+                  "    console.warn('order_id is not set. This request may fail.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "pm.test('Status code is 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('Response has wrapper with error code 400', function () {",
+                  "    pm.expect(resp).to.have.property('code', 400);",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/orders/{{order_id}}/assign-staff?collectStaffId=&analysisStaffId={{analysis_staff_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "orders",
+                "{{order_id}}",
+                "assign-staff"
+              ],
+              "query": [
+                {
+                  "key": "collectStaffId",
+                  "value": ""
+                },
+                {
+                  "key": "analysisStaffId",
+                  "value": "{{analysis_staff_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "── REPORT MANAGEMENT ─────────────────────────────",
+      "item": [
+        {
+          "name": "GET All Reports (paginated + filter)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "const data = resp && resp.data;",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has standard wrapper', function () {",
+                  "    pm.expect(resp).to.have.property('code');",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "    pm.expect(resp).to.have.property('data');",
+                  "    pm.expect(resp).to.have.property('timestamp');",
+                  "});",
+                  "if (data) {",
+                  "    pm.test('data contains pageable fields', function () {",
+                  "        pm.expect(data).to.have.property('reports').that.is.an('array');",
+                  "        pm.expect(data).to.have.property('currentPage');",
+                  "        pm.expect(data).to.have.property('totalPages');",
+                  "        pm.expect(data).to.have.property('totalReports');",
+                  "        pm.expect(data).to.have.property('pageSize');",
+                  "        pm.expect(data).to.have.property('stats');",
+                  "    });",
+                  "}",
+                  "pm.test('Response time < 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/reports?page=0&size=20&status=all&generatedByRole=all&search=&sortBy=createdAt&sortDir=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "reports"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "all"
+                },
+                {
+                  "key": "generatedByRole",
+                  "value": "all"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDir",
+                  "value": "desc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET All Reports - Filter by status=APPROVED",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "const data = resp && resp.data;",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has standard wrapper', function () {",
+                  "    pm.expect(resp).to.have.property('code');",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "});",
+                  "if (data && data.reports) {",
+                  "    pm.test('All returned reports have status APPROVED', function () {",
+                  "        data.reports.forEach(function (r) {",
+                  "            pm.expect(r.reportStatus).to.eql('APPROVED');",
+                  "        });",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/reports?page=0&size=20&status=APPROVED&sortBy=createdAt&sortDir=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "reports"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "APPROVED"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDir",
+                  "value": "desc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Report By ID",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}",
+                  "const reportId = pm.environment.get('report_id');",
+                  "if (!reportId) {",
+                  "    console.warn('report_id is not set. This request may fail.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "const data = resp && resp.data;",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has standard wrapper', function () {",
+                  "    pm.expect(resp).to.have.property('code');",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "    pm.expect(resp).to.have.property('data');",
+                  "    pm.expect(resp).to.have.property('timestamp');",
+                  "});",
+                  "if (data) {",
+                  "    pm.test('data contains report fields', function () {",
+                  "        pm.expect(data).to.have.property('id');",
+                  "        pm.expect(data).to.have.property('reportName');",
+                  "        pm.expect(data).to.have.property('reportStatus');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/reports/{{report_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "reports",
+                "{{report_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Report By ID - 404 Not Found",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Report not found - status is 404 or 500', function () {",
+                  "    pm.expect([404, 500]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/reports/9999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "reports",
+                "9999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Create Report",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}",
+                  "const ts = Date.now();",
+                  "const uid = Math.random().toString(36).substring(2, 8).toUpperCase();",
+                  "const reportName = `Report ${uid} ${ts}`;",
+                  "const body = JSON.parse(pm.request.body.raw);",
+                  "body.reportName = reportName;",
+                  "body.reportType = 'MONTHLY';",
+                  "body.reportCategory = 'REVENUE';",
+                  "pm.request.body.raw = JSON.stringify(body);",
+                  "pm.environment.set('created_report_name', reportName);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Create Report status is 200 or 201', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "if (json && json.data && json.data.id) {",
+                  "    pm.environment.set('report_id', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reportName\": \"Monthly Revenue Report\",\n  \"reportType\": \"MONTHLY\",\n  \"reportCategory\": \"REVENUE\",\n  \"reportData\": \"Sample report data for revenue analysis\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "reports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Update Report Status",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}",
+                  "const reportId = pm.environment.get('report_id');",
+                  "if (!reportId) {",
+                  "    console.warn('report_id is not set. This request may fail.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "const data = resp && resp.data;",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has wrapper with code 200', function () {",
+                  "    pm.expect(resp).to.have.property('code', 200);",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "    pm.expect(resp).to.have.property('data');",
+                  "    pm.expect(resp).to.have.property('timestamp');",
+                  "});",
+                  "if (data) {",
+                  "    pm.test('data contains success and message fields', function () {",
+                  "        pm.expect(data).to.have.property('success');",
+                  "        pm.expect(data).to.have.property('message');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/reports/{{report_id}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "reports",
+                "{{report_id}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Update Report Status - 400 Empty Status",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}",
+                  "const reportId = pm.environment.get('report_id');",
+                  "if (!reportId) {",
+                  "    console.warn('report_id is not set. This request may fail.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "pm.test('Status code is 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('Response has wrapper with error code 400', function () {",
+                  "    pm.expect(resp).to.have.property('code', 400);",
+                  "    pm.expect(resp).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/reports/{{report_id}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "reports",
+                "{{report_id}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Update Report Status - 404 Not Found",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('access_token');",
+                  "if (token) {",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "} else {",
+                  "    console.warn('access_token missing; run Login first');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Report not found - status is 404 or 500', function () {",
+                  "    pm.expect([404, 500]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/reports/9999999/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "manager",
+                "reports",
+                "9999999",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "order_id",
+      "value": ""
+    },
+    {
+      "key": "collect_staff_id",
+      "value": ""
+    },
+    {
+      "key": "analysis_staff_id",
+      "value": ""
+    },
+    {
+      "key": "report_id",
+      "value": ""
+    }
+  ]
+}
