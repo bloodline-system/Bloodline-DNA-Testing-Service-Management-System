@@ -32,6 +32,7 @@ import java.util.Set;
 @Slf4j
 @Configuration
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigurer {
@@ -105,7 +106,7 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
             // Create and save the User entity with minimal information
             User user = User.builder()
                     .username("staff1")
-                    .passwordHash(PasswordUtil.encode("staff123"))
+                    .passwordHash(PasswordUtil.encode("staff"))
                     .isActive(true)
                     .userRoles(new HashSet<>())
                     .build();
@@ -184,7 +185,7 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
             // Create and save the User entity with minimal information
             User user = User.builder()
                     .username("manager")
-                    .passwordHash(PasswordUtil.encode("manager123"))
+                    .passwordHash(PasswordUtil.encode("manager"))
                     .isActive(true)
                     .userRoles(new HashSet<>())
                     .build();

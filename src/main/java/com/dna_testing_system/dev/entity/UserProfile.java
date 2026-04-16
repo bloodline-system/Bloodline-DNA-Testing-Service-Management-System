@@ -51,7 +51,8 @@ public class UserProfile {
     String profileImageUrl;
 
     @Size(max = 100)
-    @Column(name = "email", nullable = true)
+    @NotNull
+    @Column(name = "email", nullable = false)
     String email;
 
     @Size(max = 20)
