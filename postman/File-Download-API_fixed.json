@@ -20,49 +20,35 @@
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
-                  "const jsonData = pm.response.json();",
-                  "if (jsonData.data) {",
-                  "    pm.environment.set(\"access_token\", jsonData.data.access_token);",
-                  "    pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
-                  "    pm.environment.set(\"expires_in\", jsonData.data.expires_in);",
-                  "}",
+                  "var jsonData = pm.response.json();",
                   "pm.test(\"Login response contains tokens\", function () {",
                   "    pm.expect(jsonData).to.have.property(\"data\");",
                   "    if (jsonData.data) {",
                   "        pm.expect(jsonData.data).to.have.property(\"access_token\");",
                   "        pm.expect(jsonData.data).to.have.property(\"refresh_token\");",
                   "    }",
-                  "});"
+                  "});",
+                  "if (jsonData.data && jsonData.data.access_token) {",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.data.access_token);",
+                  "    pm.collectionVariables.set(\"refresh_token\", jsonData.data.refresh_token);",
+                  "    pm.collectionVariables.set(\"expires_in\", jsonData.data.expires_in);",
+                  "}"
                 ]
               }
             }
           ],
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": { "type": "noauth" },
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin1234\",\n  \"rememberMe\": true\n}"
+              "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
             }
           }
         }
@@ -79,9 +65,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "var token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
-                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}"
@@ -97,11 +83,11 @@
                   "    pm.response.to.have.status(200);",
                   "});",
                   "pm.test('Response has Content-Disposition attachment', function () {",
-                  "    const disposition = pm.response.headers.get('Content-Disposition');",
-                  "    pm.expect(disposition).to.include('attachment');",
+                  "    var disposition = pm.response.headers.get('Content-Disposition');",
+                  "    pm.expect(disposition).to.be.a('string').and.include('attachment');",
                   "});",
                   "pm.test('Response has proper content type', function () {",
-                  "    const contentType = pm.response.headers.get('Content-Type');",
+                  "    var contentType = pm.response.headers.get('Content-Type');",
                   "    pm.expect(contentType).to.not.be.null;",
                   "});"
                 ]
@@ -109,26 +95,14 @@
             }
           ],
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": { "type": "noauth" },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/files/download?filename={{sample_filename}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "files",
-                "download"
-              ],
-              "query": [
-                {
-                  "key": "filename",
-                  "value": "{{sample_filename}}"
-                }
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["files", "download"],
+              "query": [{ "key": "filename", "value": "{{sample_filename}}" }]
             }
           }
         },
@@ -140,9 +114,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "var token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
-                  "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}"
@@ -158,11 +132,11 @@
                   "    pm.response.to.have.status(200);",
                   "});",
                   "pm.test('Response has Content-Disposition inline', function () {",
-                  "    const disposition = pm.response.headers.get('Content-Disposition');",
-                  "    pm.expect(disposition).to.include('inline');",
+                  "    var disposition = pm.response.headers.get('Content-Disposition');",
+                  "    pm.expect(disposition).to.be.a('string').and.include('inline');",
                   "});",
                   "pm.test('Response has proper content type', function () {",
-                  "    const contentType = pm.response.headers.get('Content-Type');",
+                  "    var contentType = pm.response.headers.get('Content-Type');",
                   "    pm.expect(contentType).to.not.be.null;",
                   "});"
                 ]
@@ -170,26 +144,14 @@
             }
           ],
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": { "type": "noauth" },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/files/view?filename={{sample_filename}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "files",
-                "view"
-              ],
-              "query": [
-                {
-                  "key": "filename",
-                  "value": "{{sample_filename}}"
-                }
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["files", "view"],
+              "query": [{ "key": "filename", "value": "{{sample_filename}}" }]
             }
           }
         }
@@ -197,13 +159,10 @@
     }
   ],
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8080"
-    },
-    {
-      "key": "sample_filename",
-      "value": "1751859442505_View_Serializability.pdf"
-    }
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "sample_filename", "value": "1751859442505_View_Serializability.pdf" },
+    { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "expires_in", "value": "" }
   ]
 }
