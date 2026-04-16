@@ -1,8 +1,12 @@
 package com.dna_testing_system.dev.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
 import com.dna_testing_system.dev.dto.response.UserProfileResponse;
-import com.dna_testing_system.dev.dto.response.UserResponse;
 import com.dna_testing_system.dev.dto.response.profile.ProfileResponse;
 import com.dna_testing_system.dev.entity.User;
 import com.dna_testing_system.dev.entity.UserProfile;
@@ -12,14 +16,10 @@ import com.dna_testing_system.dev.mapper.UserProfileMapper;
 import com.dna_testing_system.dev.repository.UserProfileRepository;
 import com.dna_testing_system.dev.repository.UserRepository;
 import com.dna_testing_system.dev.service.UserProfileService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,47 +37,38 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.USER_NOT_EXISTS));
         UserProfile profile = user.getProfile();
 
-        String currentEmail = profile != null ? profile.getEmail() : null;
-        String signUpEmail = user.getSignUp() != null ? user.getSignUp().getEmail() : null;
-
-        String requestEmail = request.getEmail() != null ? request.getEmail().trim() : null;
-        if (requestEmail != null && requestEmail.isEmpty()) {
-            requestEmail = null;
-        }
-
         if (profile == null) {
             profile = new UserProfile();
             profile.setUser(user);
             user.setProfile(profile);
         }
 
-        // Ensure email is never null (DB requires it)
-        String effectiveEmail = requestEmail;
-        if (effectiveEmail == null || effectiveEmail.isBlank()) {
-            if (currentEmail != null && !currentEmail.isBlank()) {
-                effectiveEmail = currentEmail;
-            } else if (signUpEmail != null && !signUpEmail.isBlank()) {
-                effectiveEmail = signUpEmail;
-            } else {
-                throw new IllegalArgumentException("Email is required");
-            }
-        }
-        request.setEmail(effectiveEmail.trim());
+        // Email handling rules
+        String newEmail = request.getEmail() != null ? request.getEmail().trim() : null;
 
-        // Validate email uniqueness if email is being updated
-        String newEmail = request.getEmail();
-        if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
-            boolean emailExists = userProfileRepository.findAll().stream()
-                    .filter(up -> up.getEmail() != null)
-                    .anyMatch(up -> up.getEmail().equalsIgnoreCase(newEmail) && !up.getUser().getId().equals(user.getId()));
+        if (newEmail != null && !newEmail.isEmpty()) {
+            String currentEmail = profile.getEmail();
 
-            if (emailExists) {
-                throw new IllegalArgumentException("Email already in use by another user");
+            if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
+                // Check if another user already has this email
+                boolean emailExists = userProfileRepository.existsByEmailIgnoreCaseAndUserIdNot(newEmail, user.getId());
+                if (emailExists) {
+                    throw new ResourceNotFoundException(ErrorCode.EMAIL_EXISTS);
+                }
             }
         }
 
+        // Mapper must always be called
         userProfileMapper.updateUserProfileFromDto(request, profile);
+
+        // Avoid storing whitespace-only email
+        if (request.getEmail() != null && request.getEmail().trim().isEmpty()) {
+            profile.setEmail(null);
+        }
+
+        // Save user
         userRepository.save(user);
+
         return true;
     }
 
@@ -99,7 +90,6 @@ public class UserProfileServiceImpl implements UserProfileService {
             user.setProfile(null);
             userRepository.save(user);
         }
-        // Nếu muốn xóa luôn user thì có thể gọi userRepository.delete(user);
         return true;
     }
 
@@ -107,7 +97,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Transactional(readOnly = true)
     public List<UserProfileResponse> getUserProfileByName(String name) {
         if (name == null || name.isBlank()) {
-            return getUserProfiles();
+            List<User> users = userRepository.findAll();
+            return users.stream()
+                    .map(userProfileMapper::toDto)
+                    .toList();
         }
 
         String keyword = name.trim().toLowerCase();
@@ -125,7 +118,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                             || (!fullName.isEmpty() && fullName.toLowerCase().contains(keyword));
                 })
                 .map(userProfileMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -134,7 +127,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         List<User> users = userRepository.findAll();
         return users.stream()
                 .map(userProfileMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

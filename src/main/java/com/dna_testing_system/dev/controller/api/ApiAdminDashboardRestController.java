@@ -4,13 +4,10 @@ import com.dna_testing_system.dev.dto.ApiResponse;
 import com.dna_testing_system.dev.dto.request.UserProfileRequest;
 import com.dna_testing_system.dev.dto.response.UserProfileResponse;
 import com.dna_testing_system.dev.entity.User;
-import com.dna_testing_system.dev.entity.UserRole;
 import com.dna_testing_system.dev.enums.RoleType;
 import com.dna_testing_system.dev.repository.RoleRepository;
 import com.dna_testing_system.dev.repository.UserRepository;
-import com.dna_testing_system.dev.repository.UserRoleRepository;
 import com.dna_testing_system.dev.service.OrderTaskManagementService;
-import com.dna_testing_system.dev.service.SystemReportService;
 import com.dna_testing_system.dev.service.UserProfileService;
 import com.dna_testing_system.dev.service.service.MedicalServiceManageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,9 +18,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,11 +48,9 @@ public class ApiAdminDashboardRestController {
 
     MedicalServiceManageService medicalServiceManageService;
     OrderTaskManagementService orderTaskManagementService;
-    SystemReportService systemReportService;
     UserProfileService userProfileService;
     UserRepository userRepository;
     RoleRepository roleRepository;
-    UserRoleRepository userRoleRepository;
 
     // ==================== DASHBOARD ENDPOINTS ====================
 

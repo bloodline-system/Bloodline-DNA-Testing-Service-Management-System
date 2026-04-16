@@ -2,8 +2,6 @@ package com.dna_testing_system.dev.controller.api;
 
 import com.dna_testing_system.dev.config.ApplicationInitConfig;
 import com.dna_testing_system.dev.config.RedisStreamConfig;
-import com.dna_testing_system.dev.controller.NotificationController;
-import com.dna_testing_system.dev.controller.api.ApiAdminDashboardRestController;
 import com.dna_testing_system.dev.entity.Role;
 import com.dna_testing_system.dev.entity.User;
 import com.dna_testing_system.dev.entity.UserProfile;
@@ -48,7 +46,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 // - Không sửa code controller, chỉ kiểm tra hành vi hiện tại (response wrapper, status, message, data)
 @WebMvcTest(controllers = ApiAdminDashboardRestController.class, excludeFilters = {
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ApplicationInitConfig.class),
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = NotificationController.class),
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationFilter.class),
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = RedisStreamConfig.class)
 })

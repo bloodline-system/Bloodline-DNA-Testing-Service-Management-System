@@ -33,5 +33,6 @@ public class Permission {
     String permissionDescription;
 
     @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     Set<RolePermission> rolePermissions = new HashSet<>();
 }
