@@ -43,40 +43,22 @@ public class UserProfileServiceImpl implements UserProfileService {
             user.setProfile(profile);
         }
 
-        // Ensure email is never null (DB requires it)
-        String effectiveEmail = requestEmail;
-        if (effectiveEmail == null || effectiveEmail.isBlank()) {
-            if (currentEmail != null && !currentEmail.isBlank()) {
-                effectiveEmail = currentEmail;
-            } else if (signUpEmail != null && !signUpEmail.isBlank()) {
-                effectiveEmail = signUpEmail;
-            } else {
-                throw new IllegalArgumentException("Email is required");
-            }
-        }
-        request.setEmail(effectiveEmail.trim());
+        // Email handling rules
+        String newEmail = request.getEmail() != null ? request.getEmail().trim() : null;
 
-        // Validate email uniqueness if email is being updated
-        String newEmail = request.getEmail();
-        if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
-            boolean emailExists = userProfileRepository.findAll().stream()
-                    .filter(up -> up.getEmail() != null)
-                    .anyMatch(up -> up.getEmail().equalsIgnoreCase(newEmail) && !up.getUser().getId().equals(user.getId()));
+        if (newEmail != null && !newEmail.isEmpty()) {
+            String currentEmail = profile.getEmail();
 
-<<<<<<< HEAD
-            if (emailExists) {
-                throw new IllegalArgumentException("Email already in use by another user");
-=======
             if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
                 // Check if another user already has this email
                 boolean emailExists = userProfileRepository.existsByEmailIgnoreCaseAndUserIdNot(newEmail, user.getId());
                 if (emailExists) {
                     throw new ResourceNotFoundException(ErrorCode.EMAIL_EXISTS);
                 }
->>>>>>> 22765be9 (sua test case)
             }
         }
 
+        // Mapper must always be called
         userProfileMapper.updateUserProfileFromDto(request, profile);
 
         // Avoid storing whitespace-only email
