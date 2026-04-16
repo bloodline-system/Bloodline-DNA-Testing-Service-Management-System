@@ -55,7 +55,7 @@ public class UserProfile {
     @Column(name = "email", nullable = false)
     String email;
 
-    @Size(max = 10)
+    @Size(max = 20)
     @Column(name = "phone_number", length = 20)
     String phoneNumber;
 
