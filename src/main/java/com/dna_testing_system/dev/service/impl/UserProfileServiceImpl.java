@@ -43,22 +43,31 @@ public class UserProfileServiceImpl implements UserProfileService {
             user.setProfile(profile);
         }
 
-        // Email handling rules
-        String newEmail = request.getEmail() != null ? request.getEmail().trim() : null;
+        // Ensure email is never null (DB requires it)
+        String effectiveEmail = requestEmail;
+        if (effectiveEmail == null || effectiveEmail.isBlank()) {
+            if (currentEmail != null && !currentEmail.isBlank()) {
+                effectiveEmail = currentEmail;
+            } else if (signUpEmail != null && !signUpEmail.isBlank()) {
+                effectiveEmail = signUpEmail;
+            } else {
+                throw new IllegalArgumentException("Email is required");
+            }
+        }
+        request.setEmail(effectiveEmail.trim());
 
-        if (newEmail != null && !newEmail.isEmpty()) {
-            String currentEmail = profile.getEmail();
+        // Validate email uniqueness if email is being updated
+        String newEmail = request.getEmail();
+        if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
+            boolean emailExists = userProfileRepository.findAll().stream()
+                    .filter(up -> up.getEmail() != null)
+                    .anyMatch(up -> up.getEmail().equalsIgnoreCase(newEmail) && !up.getUser().getId().equals(user.getId()));
 
-            if (currentEmail == null || !currentEmail.equalsIgnoreCase(newEmail)) {
-                // Check if another user already has this email
-                boolean emailExists = userProfileRepository.existsByEmailIgnoreCaseAndUserIdNot(newEmail, user.getId());
-                if (emailExists) {
-                    throw new RuntimeException("Email already in use by another user");
-                }
+            if (emailExists) {
+                throw new IllegalArgumentException("Email already in use by another user");
             }
         }
 
-        // Mapper must always be called
         userProfileMapper.updateUserProfileFromDto(request, profile);
 
         // Avoid storing whitespace-only email
