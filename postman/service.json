@@ -2,8 +2,1048 @@
   "info": {
     "_postman_id": "5e923162-d594-4ec1-b86d-039bb744400c",
     "name": "Service Management API",
-    "description": "Minimal Service Management API collection with only login request.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "description": "Postman collection for Service and Service Type APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34182990",
+    "_collection_link": "https://go.postman.co/collection/34182990-5e923162-d594-4ec1-b86d-039bb744400c?source=collection_link"
   },
-  "item": []
+  "item": [
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const jsonData = pm.response.json();",
+              "pm.environment.set(\"access_token\", jsonData.data.access_token);",
+              "pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+              "pm.environment.set(\"expires_in\", jsonData.data.expires_in);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Service Controller",
+      "disabled": true,
+      "item": [
+        {
+          "name": "Get Service By ID",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Your test name\", function () {\r",
+                  "    var jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.data.id).to.eql(1);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/manager/services/4",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "services",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Services",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/services",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "services"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Services",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"page\": 0,\r\n  \"size\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/services/search?query=string",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "services",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Service",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 202]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceName\": \"string\",\n  \"serviceCategory\": \"CIVIL\",\n  \"serviceTypeId\": 3,\n  \"participants\": 1,\n  \"executionTimeDays\": 1,\n  \"basePrice\": 19811,\n  \"currentPrice\": 121212,\n  \"isAvailable\": true,\n  \"serviceDescription\": \"string\",\n  \"featureAssignments\": [\n    {\n      \"featureName\": \"string\",\n      \"isAvailable\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/services",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "services"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Body matches string\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"Service updated successfully\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceName\": \"string\",\n  \"serviceCategory\": \"CIVIL\",\n  \"serviceTypeId\": 2,\n  \"participants\": 1,\n  \"executionTimeDays\": 1,\n  \"basePrice\": 243827,\n  \"currentPrice\": 234234,\n  \"isAvailable\": true,\n  \"serviceDescription\": \"string\",\n  \"editFeatureAssignments\": [\n    {\n      \"featureName\": \"string\",\n      \"isAvailable\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/services/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "services",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Service",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {\r",
+                  "    pm.response.to.have.status(204);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/services/3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "services",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service Type Controller",
+      "disabled": true,
+      "item": [
+        {
+          "name": "Get Service Type By ID",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/service-types/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "service-types",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Service Types",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/service-types",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "service-types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Service Type",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 202]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeName\": \"string4\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/service-types",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "service-types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service Type",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Body matches string\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"Service type updated successfully\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeName\": \"string\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/service-types/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "service-types",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Service Type",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Tự động refresh token nếu hết hạn\r",
+                  "const token = pm.environment.get(\"access_token\");\r",
+                  "const expiresIn = pm.environment.get(\"expires_in\");\r",
+                  "\r",
+                  "if (!token || Date.now() > expiresIn) {\r",
+                  "  // Gọi API refresh token\r",
+                  "    try {\r",
+                  "        const response = await pm.execution.runRequest(\"34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb\");\r",
+                  "\r",
+                  "        console.log(response.json());\r",
+                  "    } catch (err) {\r",
+                  "        console.error(err);\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "34182990-fd961599-b8e3-4e9c-ba48-98b2d7a73aeb": {
+                    "workspace": "9cdfda82-5f5a-49d5-9fd1-3a9b5197bbd8",
+                    "collection": "34182990-97f2d62c-1e51-4ec9-92a8-65d4c366d453",
+                    "location": [
+                      "Auth API",
+                      "Refresh Token"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 204\", function () {\r",
+                  "    pm.response.to.have.status(204);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/manager/service-types/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "{{baseUrl}}",
+                "api",
+                "v1",
+                "manager",
+                "service-types",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_BEARER_TOKEN"
+    }
+  ]
 }
