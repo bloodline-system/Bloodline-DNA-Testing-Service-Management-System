@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,7 +45,12 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
+    private static final String UPLOAD_API_PREFIX = "/api/upload/files/";
+    private static final String UPLOAD_STATIC_PREFIX = "/uploads/";
+    private static final Pattern SAFE_UPLOAD_FILE_NAME = Pattern.compile("^[a-zA-Z0-9._-]+$");
+
     UserProfileService userProfileService;
+    UploadImageService uploadImageService;
     OrderService orderService;
     OrderKitService orderKitService;
     OrderParticipantService orderParticipantService;
@@ -124,29 +130,30 @@ public class UserController {
                                                                                    HttpServletRequest httpServletRequest) {
         try {
             UserProfileResponse existingProfile = userProfileService.getUserProfile(username);
-            String oldImageUrl = null;
+            String oldImageUrl = existingProfile.getProfileImageUrl();
 
-            // Handle file upload and get new image URL (before transaction)
-            if (file != null && file.getOriginalFilename() != null && !file.getOriginalFilename().isEmpty()) {
+            boolean hasNewFile = file != null && !file.isEmpty();
+            String requestedImageUrl = userProfile.getProfileImageUrl();
+            boolean hasRequestedImageUrl =
+                    requestedImageUrl != null && !requestedImageUrl.trim().isEmpty();
+
+            if (hasNewFile) {
                 try {
-                    String uploadsDir = "uploads/";
-                    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                    Path uploadPath = Paths.get(uploadsDir);
-
-                    Files.createDirectories(uploadPath);
-                    Path filePath = uploadPath.resolve(fileName);
-                    file.transferTo(filePath.toFile());
-
-                    String newImageUrl = "/uploads/" + fileName;
-                    oldImageUrl = existingProfile.getProfileImageUrl();
-                    userProfile.setProfileImageUrl(newImageUrl);
+                    String generatedFileName = uploadImageService.saveImage(file);
+                    userProfile.setProfileImageUrl(UPLOAD_API_PREFIX + generatedFileName);
                 } catch (Exception e) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "File upload failed: " + e.getMessage(), httpServletRequest.getRequestURI()));
                 }
+            } else if (hasRequestedImageUrl) {
+                String normalizedImageUrl = normalizeProfileImageUrl(requestedImageUrl);
+                if (normalizedImageUrl == null) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Invalid profileImageUrl", httpServletRequest.getRequestURI()));
+                }
+                userProfile.setProfileImageUrl(normalizedImageUrl);
             } else {
-                // Keep existing image if no new file uploaded
-                userProfile.setProfileImageUrl(existingProfile.getProfileImageUrl());
+                userProfile.setProfileImageUrl(oldImageUrl);
             }
 
             // Preserve dateOfBirth if not provided
@@ -166,12 +173,16 @@ public class UserController {
                         .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Profile not found", httpServletRequest.getRequestURI()));
             }
 
+            UserProfileResponse updatedProfile = userProfileService.getUserProfile(username);
+
             // Delete old image file AFTER successful transaction (non-transactional cleanup)
-            if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
+            String newImageUrl = updatedProfile.getProfileImageUrl();
+            if (oldImageUrl != null && !oldImageUrl.isBlank()
+                    && newImageUrl != null && !newImageUrl.isBlank()
+                    && !oldImageUrl.equals(newImageUrl)) {
                 deleteOldProfileImage(oldImageUrl);
             }
 
-            UserProfileResponse updatedProfile = userProfileService.getUserProfile(username);
             return ResponseEntity.ok(
                     ApiResponse.success(HttpStatus.OK.value(), "Update profile successfully", updatedProfile)
             );
@@ -187,18 +198,58 @@ public class UserController {
         }
     }
 
+    private String normalizeProfileImageUrl(String rawUrl) {
+        String fileName = extractUploadedFileName(rawUrl);
+        if (fileName == null) return null;
+
+        Path uploadsDir = Paths.get("uploads").toAbsolutePath().normalize();
+        Path imagePath = uploadsDir.resolve(fileName).normalize();
+        if (!imagePath.startsWith(uploadsDir)) return null;
+        if (!Files.exists(imagePath)) return null;
+
+        return UPLOAD_API_PREFIX + fileName;
+    }
+
+    private String extractUploadedFileName(String imageUrl) {
+        if (imageUrl == null) return null;
+
+        String trimmed = imageUrl.trim();
+        if (trimmed.isEmpty()) return null;
+
+        String fileName;
+        if (trimmed.startsWith(UPLOAD_API_PREFIX)) {
+            fileName = trimmed.substring(UPLOAD_API_PREFIX.length());
+        } else if (trimmed.startsWith(UPLOAD_STATIC_PREFIX)) {
+            fileName = trimmed.substring(UPLOAD_STATIC_PREFIX.length());
+        } else {
+            return null;
+        }
+
+        if (fileName.isEmpty() || fileName.length() > 255) return null;
+        if (fileName.contains("..")) return null;
+        if (!SAFE_UPLOAD_FILE_NAME.matcher(fileName).matches()) return null;
+
+        return fileName;
+    }
+
     /**
      * Delete old profile image file asynchronously (non-transactional cleanup)
      * Failures in this operation do not affect the main transaction
      */
     private void deleteOldProfileImage(String imageUrl) {
         try {
-            if (imageUrl != null && !imageUrl.isEmpty() && imageUrl.startsWith("/uploads/")) {
-                // Convert URL path to file system path
-                String fileSystemPath = imageUrl.substring(1); // Remove leading slash: "/uploads/file.jpg" -> "uploads/file.jpg"
-                Path imagePath = Paths.get(fileSystemPath);
-                Files.deleteIfExists(imagePath);
+            String fileName = extractUploadedFileName(imageUrl);
+            if (fileName == null) {
+                return;
             }
+
+            Path uploadsDir = Paths.get("uploads").toAbsolutePath().normalize();
+            Path imagePath = uploadsDir.resolve(fileName).normalize();
+            if (!imagePath.startsWith(uploadsDir)) {
+                return;
+            }
+
+            Files.deleteIfExists(imagePath);
         } catch (Exception e) {
             // Log the error but don't fail the request - old file deletion is not critical
             System.err.println("Warning: Failed to delete old profile image: " + e.getMessage());

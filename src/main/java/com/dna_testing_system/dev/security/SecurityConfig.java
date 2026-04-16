@@ -4,6 +4,7 @@ import com.dna_testing_system.dev.dto.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.dna_testing_system.dev.properties.JwtProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,6 +55,7 @@ public class SecurityConfig {
                                 "/docs",
                                 "/health/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/upload/files/**", "/uploads/**").permitAll()
                         .anyRequest().authenticated()
                 )
                     .exceptionHandling(exception -> exception
