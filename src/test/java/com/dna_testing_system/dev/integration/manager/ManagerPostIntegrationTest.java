@@ -55,7 +55,7 @@ class ManagerPostIntegrationTest extends AbstractIntegrationTest {
      * The real bean comes from RedisStreamConfig.mailStreamListenerContainer(...), which connects to Redis.
      */
     @MockitoBean
-    StreamMessageListenerContainer<String, MapRecord<String, String, String>> mailStreamListenerContainer;
+    StreamMessageListenerContainer<String, ?> mailStreamListenerContainer;
 
     @BeforeEach
     void seedManagerUser() {
