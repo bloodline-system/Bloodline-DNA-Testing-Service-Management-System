@@ -38,8 +38,9 @@ class UserProfileServiceImplTest {
     @Test
     void updateUserProfile_userNotFound_throwsResourceNotFound() {
         when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+        UserProfileRequest request = UserProfileRequest.builder().email("a@ex.com").build();
 
-        assertThatThrownBy(() -> service.updateUserProfile("ghost", UserProfileRequest.builder().email("a@ex.com").build()))
+        assertThatThrownBy(() -> service.updateUserProfile("ghost", request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage(ErrorCode.USER_NOT_EXISTS.getMessage());
 
@@ -66,7 +67,7 @@ class UserProfileServiceImplTest {
         verify(userRepository).save(captor.capture());
         assertThat(captor.getValue().getProfile()).isNotNull();
         assertThat(captor.getValue().getProfile().getUser()).isSameAs(user);
-        verify(userProfileMapper).updateUserProfileFromDto(eq(req), any(UserProfile.class));
+        verify(userProfileMapper).updateUserProfileFromDto(req, captor.getValue().getProfile());
     }
 
     @Test
@@ -86,7 +87,7 @@ class UserProfileServiceImplTest {
         assertThat(result).isTrue();
         verify(userRepository).save(user);
         verify(userProfileRepository, never()).findAll();
-        verify(userProfileMapper).updateUserProfileFromDto(eq(req), eq(profile));
+        verify(userProfileMapper).updateUserProfileFromDto(req, profile);
     }
 
     @Test
@@ -110,7 +111,7 @@ class UserProfileServiceImplTest {
 
         assertThat(result).isTrue();
         verify(userRepository).save(user);
-        verify(userProfileMapper).updateUserProfileFromDto(eq(req), eq(profile));
+        verify(userProfileMapper).updateUserProfileFromDto(req, profile);
     }
 
     @Test
@@ -125,14 +126,11 @@ class UserProfileServiceImplTest {
 
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
         when(userProfileRepository.existsByEmailIgnoreCaseAndUserIdNot("dup@ex.com", "u1")).thenReturn(true);
-
-        UserProfileRequest req = UserProfileRequest.builder()
-                .email("dup@ex.com")
-                .build();
+        UserProfileRequest req = UserProfileRequest.builder().email("dup@ex.com").build();
 
         assertThatThrownBy(() -> service.updateUserProfile("alice", req))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Email already in use by another user");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage(ErrorCode.EMAIL_EXISTS.getMessage());
 
         verify(userRepository, never()).save(any());
         verify(userProfileMapper, never()).updateUserProfileFromDto(any(UserProfileRequest.class), any(UserProfile.class));
@@ -141,7 +139,7 @@ class UserProfileServiceImplTest {
     @Test
     void getUserProfile_userNotFound_throwsResourceNotFound() {
         when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
-
+        
         assertThatThrownBy(() -> service.getUserProfile("ghost"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage(ErrorCode.USER_NOT_EXISTS.getMessage());

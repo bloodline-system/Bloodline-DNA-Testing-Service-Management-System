@@ -21,6 +21,7 @@ public class PaymentResponse {
     String promotionCode;
     String paymentMethod;
     BigDecimal grossAmount;
+    @Builder.Default
     BigDecimal discountAmount = BigDecimal.ZERO;
     BigDecimal netAmount;
     String paymentStatus;
