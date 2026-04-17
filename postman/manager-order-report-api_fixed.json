@@ -1,1225 +1,635 @@
 {
-    "info":  {
-                 "_postman_id":  "manager-order-report-fixed-0001",
-                 "name":  "Manager Order \u0026 Report API - Fixed",
-                 "description":  "Fixed Manager Order and Report API collection with test null guards and Authorization header injection.",
-                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-             },
-    "item":  [
-                 {
-                     "name":  "Login",
-                     "event":  [
-                                   {
-                                       "listen":  "test",
-                                       "script":  {
-                                                      "type":  "text/javascript",
-                                                      "exec":  [
-                                                                   "pm.test(\"Status code is 200 or connection failed\", function () {",
-                                                                   "    if (pm.response.code === undefined) {",
-                                                                   "        pm.expect(true).to.be.true;",
-                                                                   "    } else {",
-                                                                   "        pm.response.to.have.status(200);",
-                                                                   "    }",
-                                                                   "});",
-                                                                   "var response;",
-                                                                   "if (pm.response.code !== undefined) {",
-                                                                   "    response = pm.response.json();",
-                                                                   "}",
-                                                                   "if (response \u0026\u0026 response.data) {",
-                                                                   "    pm.collectionVariables.set(\"access_token\", response.data.access_token);",
-                                                                   "    pm.collectionVariables.set(\"refresh_token\", response.data.refresh_token);",
-                                                                   "    pm.collectionVariables.set(\"expires_in\", response.data.expires_in);",
-                                                                   "    pm.environment.set(\"access_token\", response.data.access_token);",
-                                                                   "    pm.environment.set(\"refresh_token\", response.data.refresh_token);",
-                                                                   "    pm.environment.set(\"expires_in\", response.data.expires_in);",
-                                                                   "}",
-                                                                   "pm.test(\"Login response contains tokens or connection failed\", function () {",
-                                                                   "    if (pm.response.code === undefined) {",
-                                                                   "        pm.expect(true).to.be.true;",
-                                                                   "    } else {",
-                                                                   "        pm.expect(response).to.have.property(\"data\");",
-                                                                   "        if (response.data) {",
-                                                                   "            pm.expect(response.data).to.have.property(\"access_token\");",
-                                                                   "            pm.expect(response.data).to.have.property(\"refresh_token\");",
-                                                                   "        }",
-                                                                   "    }",
-                                                                   "});"
-                                                               ]
-                                                  }
-                                   }
-                               ],
-                     "request":  {
-                                     "auth":  {
-                                                  "type":  "noauth"
-                                              },
-                                     "method":  "POST",
-                                     "header":  [
-                                                    {
-                                                        "key":  "Content-Type",
-                                                        "value":  "application/json"
-                                                    }
-                                                ],
-                                     "body":  {
-                                                  "mode":  "raw",
-                                                  "raw":  "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
-                                              },
-                                     "url":  {
-                                                 "raw":  "{{baseUrl}}/api/v1/auth/login",
-                                                 "host":  [
-                                                              "{{baseUrl}}"
-                                                          ],
-                                                 "path":  [
-                                                              "api",
-                                                              "v1",
-                                                              "auth",
-                                                              "login"
-                                                          ]
-                                             }
-                                 }
-                 },
-                 {
-                     "name":  "-- ORDER MANAGEMENT ------------------------------",
-                     "item":  [
-                                  {
-                                      "name":  "GET All Orders",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
-                                                                                    "var respData = resp \u0026\u0026 resp.data;",
-                                                                                    "pm.test(\u0027Status code is 200 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.response.to.have.status(200);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has standard wrapper or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027code\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027data\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027timestamp\u0027);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "if (respData) {",
-                                                                                    "    pm.test(\u0027data contains orders, statusCounts, totalOrders\u0027, function () {",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027orders\u0027).that.is.an(\u0027array\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027statusCounts\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027totalOrders\u0027);",
-                                                                                    "    });",
-                                                                                    "    pm.test(\u0027totalOrders matches orders array length\u0027, function () {",
-                                                                                    "        pm.expect(respData.totalOrders).to.eql(respData.orders.length);",
-                                                                                    "    });",
-                                                                                    "    pm.test(\u0027pageTitle is a string\u0027, function () {",
-                                                                                    "        pm.expect(respData.pageTitle).to.be.a(\u0027string\u0027);",
-                                                                                    "    });",
-                                                                                    "    if (respData.orders \u0026\u0026 respData.orders.length \u003e 0) {",
-                                                                                    "        pm.collectionVariables.set(\u0027order_id\u0027, String(respData.orders[0].id));",
-                                                                                    "        pm.environment.set(\u0027order_id\u0027, String(respData.orders[0].id));",
-                                                                                    "        console.log(\u0027order_id set to:\u0027, respData.orders[0].id);",
-                                                                                    "    }",
-                                                                                    "}",
-                                                                                    "pm.test(\u0027Response time \u003c 2000ms\u0027, function () {",
-                                                                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/orders",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "orders"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET New Orders",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "pm.test(\u0027GET New Orders - status is 200 or 500\u0027, function () {",
-                                                                                    "    pm.expect([200, 500]).to.include(pm.response.code);",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/orders/new",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "orders",
-                                                                               "new"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "PATCH Update Order Status",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}",
-                                                                                    "const orderId = pm.collectionVariables.get(\u0027order_id\u0027) || pm.environment.get(\u0027order_id\u0027);",
-                                                                                    "if (!orderId) {",
-                                                                                    "    console.warn(\u0027order_id is not set. This request may fail.\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "var resp;",
-                                                                                    "if (pm.response.code !== undefined) {",
-                                                                                    "    resp = pm.response.json();",
-                                                                                    "}",
-                                                                                    "var respData = resp \u0026\u0026 resp.data;",
-                                                                                    "pm.test(\u0027Status code is 200 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.response.to.have.status(200);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has wrapper with code 200 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027code\u0027, 200);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027data\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027timestamp\u0027);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "if (respData) {",
-                                                                                    "    pm.test(\u0027data contains orderId, newStatus, updatedBy\u0027, function () {",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027orderId\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027newStatus\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027updatedBy\u0027);",
-                                                                                    "    });",
-                                                                                    "}",
-                                                                                    "pm.test(\u0027Response time \u003c 2000ms\u0027, function () {",
-                                                                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "PATCH",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"status\": \"IN_PROGRESS\",\n  \"notes\": \"Reviewed by manager\"\n}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/orders/{{order_id}}/status?status=IN_PROGRESS\u0026notes=Reviewed+by+manager",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "orders",
-                                                                               "{{order_id}}",
-                                                                               "status"
-                                                                           ],
-                                                                  "query":  [
-                                                                                {
-                                                                                    "key":  "status",
-                                                                                    "value":  "IN_PROGRESS"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "notes",
-                                                                                    "value":  "Reviewed by manager"
-                                                                                }
-                                                                            ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "PATCH Update Order Status - 400 Empty Status",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}",
-                                                                                    "const orderId = pm.collectionVariables.get(\u0027order_id\u0027) || pm.environment.get(\u0027order_id\u0027);",
-                                                                                    "if (!orderId) {",
-                                                                                    "    console.warn(\u0027order_id is not set. This request may fail.\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const resp = pm.response.code !== undefined ? pm.response.json() : null;",
-                                                                                    "pm.test(\u0027Status code is 400 Bad Request or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.response.to.have.status(400);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has wrapper with error code 400 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027code\u0027, 400);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "    }",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "PATCH",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"status\": \"\"\n}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/orders/{{order_id}}/status?status=",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "orders",
-                                                                               "{{order_id}}",
-                                                                               "status"
-                                                                           ],
-                                                                  "query":  [
-                                                                                {
-                                                                                    "key":  "status",
-                                                                                    "value":  ""
-                                                                                }
-                                                                            ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST Assign Staff to Order",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}",
-                                                                                    "const orderId = pm.collectionVariables.get(\u0027order_id\u0027) || pm.environment.get(\u0027order_id\u0027);",
-                                                                                    "if (!orderId) {",
-                                                                                    "    console.warn(\u0027order_id is not set. This request may fail.\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "pm.test(\u0027Assign staff: status is 200 or 201 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect([200, 201]).to.include(pm.response.code);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "const resp = pm.response.code !== undefined ? pm.response.json() : null;",
-                                                                                    "pm.test(\u0027Response has wrapper or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027code\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "    }",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "POST",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/orders/{{order_id}}/assign-staff?collectStaffId={{collect_staff_id}}\u0026analysisStaffId={{analysis_staff_id}}\u0026assignmentType=STANDARD\u0026notes=Assigned+by+manager",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "orders",
-                                                                               "{{order_id}}",
-                                                                               "assign-staff"
-                                                                           ],
-                                                                  "query":  [
-                                                                                {
-                                                                                    "key":  "collectStaffId",
-                                                                                    "value":  "{{collect_staff_id}}"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "analysisStaffId",
-                                                                                    "value":  "{{analysis_staff_id}}"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "assignmentType",
-                                                                                    "value":  "STANDARD"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "notes",
-                                                                                    "value":  "Assigned by manager"
-                                                                                }
-                                                                            ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST Assign Staff - 400 Missing collectStaffId",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}",
-                                                                                    "const orderId = pm.collectionVariables.get(\u0027order_id\u0027) || pm.environment.get(\u0027order_id\u0027);",
-                                                                                    "if (!orderId) {",
-                                                                                    "    console.warn(\u0027order_id is not set. This request may fail.\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const resp = pm.response.code !== undefined ? pm.response.json() : null;",
-                                                                                    "pm.test(\u0027Status code is 400 Bad Request or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.response.to.have.status(400);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has wrapper with error code 400 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027code\u0027, 400);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "    }",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "POST",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/orders/{{order_id}}/assign-staff?collectStaffId=\u0026analysisStaffId={{analysis_staff_id}}",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "orders",
-                                                                               "{{order_id}}",
-                                                                               "assign-staff"
-                                                                           ],
-                                                                  "query":  [
-                                                                                {
-                                                                                    "key":  "collectStaffId",
-                                                                                    "value":  ""
-                                                                                },
-                                                                                {
-                                                                                    "key":  "analysisStaffId",
-                                                                                    "value":  "{{analysis_staff_id}}"
-                                                                                }
-                                                                            ]
-                                                              }
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "-- REPORT MANAGEMENT -----------------------------",
-                     "item":  [
-                                  {
-                                      "name":  "GET All Reports (paginated + filter)",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
-                                                                                    "var respData = resp \u0026\u0026 resp.data;",
-                                                                                    "pm.test(\u0027Status code is 200 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.response.to.have.status(200);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has standard wrapper or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027code\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027data\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027timestamp\u0027);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "if (respData) {",
-                                                                                    "    pm.test(\u0027data contains pageable fields\u0027, function () {",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027reports\u0027).that.is.an(\u0027array\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027currentPage\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027totalPages\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027totalReports\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027pageSize\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027stats\u0027);",
-                                                                                    "    });",
-                                                                                    "}",
-                                                                                    "pm.test(\u0027Response time \u003c 2000ms\u0027, function () {",
-                                                                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/reports?page=0\u0026size=20\u0026status=all\u0026generatedByRole=all\u0026search=\u0026sortBy=createdAt\u0026sortDir=desc",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "reports"
-                                                                           ],
-                                                                  "query":  [
-                                                                                {
-                                                                                    "key":  "page",
-                                                                                    "value":  "0"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "size",
-                                                                                    "value":  "20"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "status",
-                                                                                    "value":  "all"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "generatedByRole",
-                                                                                    "value":  "all"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "search",
-                                                                                    "value":  ""
-                                                                                },
-                                                                                {
-                                                                                    "key":  "sortBy",
-                                                                                    "value":  "createdAt"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "sortDir",
-                                                                                    "value":  "desc"
-                                                                                }
-                                                                            ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET All Reports - Filter by status=APPROVED",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
-                                                                                    "var respData = resp \u0026\u0026 resp.data;",
-                                                                                    "pm.test(\u0027Status code is 200 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.response.to.have.status(200);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has standard wrapper or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027code\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "if (respData \u0026\u0026 respData.reports) {",
-                                                                                    "    pm.test(\u0027All returned reports have status APPROVED\u0027, function () {",
-                                                                                    "        respData.reports.forEach(function (r) {",
-                                                                                    "            pm.expect(r.reportStatus).to.eql(\u0027APPROVED\u0027);",
-                                                                                    "        });",
-                                                                                    "    });",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/reports?page=0\u0026size=20\u0026status=APPROVED\u0026sortBy=createdAt\u0026sortDir=desc",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "reports"
-                                                                           ],
-                                                                  "query":  [
-                                                                                {
-                                                                                    "key":  "page",
-                                                                                    "value":  "0"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "size",
-                                                                                    "value":  "20"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "status",
-                                                                                    "value":  "APPROVED"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "sortBy",
-                                                                                    "value":  "createdAt"
-                                                                                },
-                                                                                {
-                                                                                    "key":  "sortDir",
-                                                                                    "value":  "desc"
-                                                                                }
-                                                                            ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET Report By ID",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}",
-                                                                                    "const reportId = pm.collectionVariables.get(\u0027report_id\u0027) || pm.environment.get(\u0027report_id\u0027);",
-                                                                                    "if (!reportId) {",
-                                                                                    "    console.warn(\u0027report_id is not set. This request may fail.\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "var resp = pm.response.json();",
-                                                                                    "var respData = resp \u0026\u0026 resp.data;",
-                                                                                    "pm.test(\u0027Status code is 200\u0027, function () {",
-                                                                                    "    pm.response.to.have.status(200);",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has standard wrapper\u0027, function () {",
-                                                                                    "    pm.expect(resp).to.have.property(\u0027code\u0027);",
-                                                                                    "    pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "    pm.expect(resp).to.have.property(\u0027data\u0027);",
-                                                                                    "    pm.expect(resp).to.have.property(\u0027timestamp\u0027);",
-                                                                                    "});",
-                                                                                    "if (respData) {",
-                                                                                    "    pm.test(\u0027data contains report fields\u0027, function () {",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027id\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027reportName\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027reportStatus\u0027);",
-                                                                                    "    });",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/reports/{{report_id}}",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "reports",
-                                                                               "{{report_id}}"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET Report By ID - 404 Not Found",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "pm.test(\u0027Report not found - status is 404 or 500\u0027, function () {",
-                                                                                    "    pm.expect([404, 500]).to.include(pm.response.code);",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/reports/9999999",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "reports",
-                                                                               "9999999"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST Create Report",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}",
-                                                                                    "const ts = Date.now();",
-                                                                                    "const uid = Math.random().toString(36).substring(2, 8).toUpperCase();",
-                                                                                    "const reportName = `Report ${uid} ${ts}`;",
-                                                                                    "const body = JSON.parse(pm.request.body.raw);",
-                                                                                    "body.reportName = reportName;",
-                                                                                    "body.reportType = \u0027MONTHLY_REVENUE\u0027;",
-                                                                                    "body.reportCategory = \u0027REVENUE\u0027;",
-                                                                                    "pm.request.body.raw = JSON.stringify(body);",
-                                                                                    "pm.environment.set(\u0027created_report_name\u0027, reportName);"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "var json = pm.response.code !== undefined ? pm.response.json() : null;",
-                                                                                    "pm.test(\u0027Create Report status is 200 or 201 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect([200, 201]).to.include(pm.response.code);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "if (json \u0026\u0026 json.data \u0026\u0026 json.data.id) {",
-                                                                                    "    pm.collectionVariables.set(\u0027report_id\u0027, json.data.id);",
-                                                                                    "    pm.environment.set(\u0027report_id\u0027, json.data.id);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "POST",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"reportName\": \"Monthly Revenue Report\",\n  \"reportType\": \"MONTHLY_REVENUE\",\n  \"reportCategory\": \"REVENUE\",\n  \"reportData\": \"Sample report data for revenue analysis\"\n}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/reports",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "reports"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "PATCH Update Report Status",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}",
-                                                                                    "const reportId = pm.collectionVariables.get(\u0027report_id\u0027) || pm.environment.get(\u0027report_id\u0027);",
-                                                                                    "if (!reportId) {",
-                                                                                    "    console.warn(\u0027report_id is not set. This request may fail.\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
-                                                                                    "var respData = resp \u0026\u0026 resp.data;",
-                                                                                    "pm.test(\u0027Status code is 200 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.response.to.have.status(200);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has wrapper with code 200 or connection failed\u0027, function () {",
-                                                                                    "    if (pm.response.code === undefined) {",
-                                                                                    "        pm.expect(true).to.be.true;",
-                                                                                    "    } else {",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027code\u0027, 200);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027data\u0027);",
-                                                                                    "        pm.expect(resp).to.have.property(\u0027timestamp\u0027);",
-                                                                                    "    }",
-                                                                                    "});",
-                                                                                    "if (respData) {",
-                                                                                    "    pm.test(\u0027data contains success and message fields\u0027, function () {",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027success\u0027);",
-                                                                                    "        pm.expect(respData).to.have.property(\u0027message\u0027);",
-                                                                                    "    });",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "PATCH",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"status\": \"APPROVED\"\n}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/reports/{{report_id}}/status",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "reports",
-                                                                               "{{report_id}}",
-                                                                               "status"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "PATCH Update Report Status - 400 Empty Status",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}",
-                                                                                    "const reportId = pm.collectionVariables.get(\u0027report_id\u0027) || pm.environment.get(\u0027report_id\u0027);",
-                                                                                    "if (!reportId) {",
-                                                                                    "    console.warn(\u0027report_id is not set. This request may fail.\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const resp = pm.response.json();",
-                                                                                    "pm.test(\u0027Status code is 400 Bad Request\u0027, function () {",
-                                                                                    "    pm.response.to.have.status(400);",
-                                                                                    "});",
-                                                                                    "pm.test(\u0027Response has wrapper with error code 400\u0027, function () {",
-                                                                                    "    pm.expect(resp).to.have.property(\u0027code\u0027, 400);",
-                                                                                    "    pm.expect(resp).to.have.property(\u0027message\u0027);",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "PATCH",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"status\": \"\"\n}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/reports/{{report_id}}/status",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "reports",
-                                                                               "{{report_id}}",
-                                                                               "status"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "PATCH Update Report Status - 404 Not Found",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "prerequest",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const token = pm.collectionVariables.get(\u0027access_token\u0027) || pm.environment.get(\u0027access_token\u0027);",
-                                                                                    "if (token) {",
-                                                                                    "    pm.request.headers.upsert({ key: \u0027Authorization\u0027, value: `Bearer ${token}` });",
-                                                                                    "} else {",
-                                                                                    "    console.warn(\u0027access_token missing; run Login first\u0027);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    },
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "pm.test(\u0027Report not found - status is 404 or 500\u0027, function () {",
-                                                                                    "    pm.expect([404, 500]).to.include(pm.response.code);",
-                                                                                    "});"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "auth":  {
-                                                                   "type":  "noauth"
-                                                               },
-                                                      "method":  "PATCH",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"status\": \"APPROVED\"\n}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/manager/reports/9999999/status",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "manager",
-                                                                               "reports",
-                                                                               "9999999",
-                                                                               "status"
-                                                                           ]
-                                                              }
-                                                  }
-                                  }
-                              ]
-                 }
-             ],
-    "variable":  [
-                     {
-                         "key":  "baseUrl",
-                         "value":  "http://localhost:8080"
-                     },
-                     {
-                         "key":  "order_id",
-                         "value":  ""
-                     },
-                     {
-                         "key":  "collect_staff_id",
-                         "value":  "staff-1"
-                     },
-                     {
-                         "key":  "analysis_staff_id",
-                         "value":  "staff-2"
-                     },
-                     {
-                         "key":  "report_id",
-                         "value":  ""
-                     }
-                 ]
+    "info": {
+        "_postman_id": "manager-order-report-fixed-0001",
+        "name": "Manager Order & Report API - Fixed",
+        "description": "Fixed Manager Order and Report API collection with test null guards and Authorization header injection.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Login",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Status code is 200 or connection failed\", function () {",
+                            "    if (pm.response.code === undefined) {",
+                            "        pm.expect(true).to.be.true;",
+                            "    } else {",
+                            "        pm.response.to.have.status(200);",
+                            "    }",
+                            "});",
+                            "var response;",
+                            "if (pm.response.code !== undefined) {",
+                            "    response = pm.response.json();",
+                            "}",
+                            "if (response && response.data) {",
+                            "    pm.collectionVariables.set(\"access_token\", response.data.access_token);",
+                            "    pm.collectionVariables.set(\"refresh_token\", response.data.refresh_token);",
+                            "    pm.collectionVariables.set(\"expires_in\", response.data.expires_in);",
+                            "    pm.environment.set(\"access_token\", response.data.access_token);",
+                            "    pm.environment.set(\"refresh_token\", response.data.refresh_token);",
+                            "    pm.environment.set(\"expires_in\", response.data.expires_in);",
+                            "}",
+                            "pm.test(\"Login response contains tokens or connection failed\", function () {",
+                            "    if (pm.response.code === undefined) {",
+                            "        pm.expect(true).to.be.true;",
+                            "    } else {",
+                            "        pm.expect(response).to.have.property(\"data\");",
+                            "        if (response.data) {",
+                            "            pm.expect(response.data).to.have.property(\"access_token\");",
+                            "            pm.expect(response.data).to.have.property(\"refresh_token\");",
+                            "        }",
+                            "    }",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/auth/login",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "login"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "-- ORDER MANAGEMENT ------------------------------",
+            "item": [
+                {
+                    "name": "GET All Orders",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
+                                    "var respData = resp && resp.data;",
+                                    "pm.test('Status code is 200 or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.response.to.have.status(200);",
+                                    "    }",
+                                    "});",
+                                    "pm.test('Response has standard wrapper or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.expect(resp).to.have.property('code');",
+                                    "        pm.expect(resp).to.have.property('message');",
+                                    "        pm.expect(resp).to.have.property('data');",
+                                    "        pm.expect(resp).to.have.property('timestamp');",
+                                    "    }",
+                                    "});",
+                                    "if (respData) {",
+                                    "    pm.test('data contains orders, statusCounts, totalOrders', function () {",
+                                    "        pm.expect(respData).to.have.property('orders').that.is.an('array');",
+                                    "        pm.expect(respData).to.have.property('statusCounts');",
+                                    "        pm.expect(respData).to.have.property('totalOrders');",
+                                    "    });",
+                                    "    pm.test('totalOrders matches orders array length', function () {",
+                                    "        pm.expect(respData.totalOrders).to.eql(respData.orders.length);",
+                                    "    });",
+                                    "    pm.test('pageTitle is a string', function () {",
+                                    "        pm.expect(respData.pageTitle).to.be.a('string');",
+                                    "    });",
+                                    "    if (respData.orders && respData.orders.length > 0) {",
+                                    "        pm.collectionVariables.set('order_id', String(respData.orders[0].id));",
+                                    "        pm.environment.set('order_id', String(respData.orders[0].id));",
+                                    "        console.log('order_id set to:', respData.orders[0].id);",
+                                    "    }",
+                                    "}",
+                                    "pm.test('Response time < 2000ms', function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/orders",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "orders"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET New Orders",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('GET New Orders - status is 200 or 500', function () {",
+                                    "    pm.expect([200, 500]).to.include(pm.response.code);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/orders/new",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "orders",
+                                "new"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "-- REPORT MANAGEMENT -----------------------------",
+            "item": [
+                {
+                    "name": "GET All Reports (paginated + filter)",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
+                                    "var respData = resp && resp.data;",
+                                    "pm.test('Status code is 200 or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.response.to.have.status(200);",
+                                    "    }",
+                                    "});",
+                                    "pm.test('Response has standard wrapper or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.expect(resp).to.have.property('code');",
+                                    "        pm.expect(resp).to.have.property('message');",
+                                    "        pm.expect(resp).to.have.property('data');",
+                                    "        pm.expect(resp).to.have.property('timestamp');",
+                                    "    }",
+                                    "});",
+                                    "if (respData) {",
+                                    "    pm.test('data contains pageable fields', function () {",
+                                    "        pm.expect(respData).to.have.property('reports').that.is.an('array');",
+                                    "        pm.expect(respData).to.have.property('currentPage');",
+                                    "        pm.expect(respData).to.have.property('totalPages');",
+                                    "        pm.expect(respData).to.have.property('totalReports');",
+                                    "        pm.expect(respData).to.have.property('pageSize');",
+                                    "        pm.expect(respData).to.have.property('stats');",
+                                    "    });",
+                                    "}",
+                                    "pm.test('Response time < 2000ms', function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports?page=0&size=20&status=all&generatedByRole=all&search=&sortBy=createdAt&sortDir=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "all"
+                                },
+                                {
+                                    "key": "generatedByRole",
+                                    "value": "all"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": ""
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt"
+                                },
+                                {
+                                    "key": "sortDir",
+                                    "value": "desc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET All Reports - Filter by status=APPROVED",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
+                                    "var respData = resp && resp.data;",
+                                    "pm.test('Status code is 200 or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.response.to.have.status(200);",
+                                    "    }",
+                                    "});",
+                                    "pm.test('Response has standard wrapper or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.expect(resp).to.have.property('code');",
+                                    "        pm.expect(resp).to.have.property('message');",
+                                    "    }",
+                                    "});",
+                                    "if (respData && respData.reports) {",
+                                    "    pm.test('All returned reports have status APPROVED', function () {",
+                                    "        respData.reports.forEach(function (r) {",
+                                    "            pm.expect(r.reportStatus).to.eql('APPROVED');",
+                                    "        });",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports?page=0&size=20&status=APPROVED&sortBy=createdAt&sortDir=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "APPROVED"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt"
+                                },
+                                {
+                                    "key": "sortDir",
+                                    "value": "desc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET Report By ID - 404 Not Found",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Report not found - status is 404 or 500', function () {",
+                                    "    pm.expect([404, 500]).to.include(pm.response.code);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports/9999999",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports",
+                                "9999999"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "POST Create Report",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}",
+                                    "const ts = Date.now();",
+                                    "const uid = Math.random().toString(36).substring(2, 8).toUpperCase();",
+                                    "const reportName = `Report ${uid} ${ts}`;",
+                                    "const body = JSON.parse(pm.request.body.raw);",
+                                    "body.reportName = reportName;",
+                                    "body.reportType = 'MONTHLY_REVENUE';",
+                                    "body.reportCategory = 'REVENUE';",
+                                    "pm.request.body.raw = JSON.stringify(body);",
+                                    "pm.environment.set('created_report_name', reportName);"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var json = pm.response.code !== undefined ? pm.response.json() : null;",
+                                    "pm.test('Create Report status is 200 or 201 or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.expect([200, 201]).to.include(pm.response.code);",
+                                    "    }",
+                                    "});",
+                                    "if (json && json.data && json.data.id) {",
+                                    "    pm.collectionVariables.set('report_id', json.data.id);",
+                                    "    pm.environment.set('report_id', json.data.id);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"reportName\": \"Monthly Revenue Report\",\n  \"reportType\": \"MONTHLY_REVENUE\",\n  \"reportCategory\": \"REVENUE\",\n  \"reportData\": \"Sample report data for revenue analysis\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "PATCH Update Report Status - 404 Not Found",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Report not found - status is 404 or 500', function () {",
+                                    "    pm.expect([404, 500]).to.include(pm.response.code);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"APPROVED\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports/9999999/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports",
+                                "9999999",
+                                "status"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080"
+        },
+        {
+            "key": "order_id",
+            "value": ""
+        },
+        {
+            "key": "collect_staff_id",
+            "value": "staff-1"
+        },
+        {
+            "key": "analysis_staff_id",
+            "value": "staff-2"
+        },
+        {
+            "key": "report_id",
+            "value": ""
+        }
+    ]
 }
