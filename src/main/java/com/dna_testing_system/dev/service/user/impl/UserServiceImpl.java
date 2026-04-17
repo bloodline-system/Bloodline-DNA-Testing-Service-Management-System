@@ -94,6 +94,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
+    @Override
+    public void updatePassword(String userName, String encodedPassword) {
+        User user = getUserByUserName(userName);
+        user.setPasswordHash(encodedPassword);
+        userRepository.save(user);
+    }
+
     private void assignRoles(User user, Set<RoleType> roleTypes) {
 
         if (roleTypes == null || roleTypes.isEmpty()) {

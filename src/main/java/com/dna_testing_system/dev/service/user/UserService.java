@@ -13,4 +13,5 @@ public interface UserService {
     User getUserByUserName(String userName);
     UserResponse toUserResponse(User user);
     User updateProfile(String userId, UpdateProfileRequest request);
+    void updatePassword(String userName, String encodedPassword);
 }
