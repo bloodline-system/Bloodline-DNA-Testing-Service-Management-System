@@ -17,5 +17,9 @@ public class OtpDebugController {
         OtpDebugResponseDTO responseDTO = authenticationService.getOtpForDebugging(signUpId);
         return ApiResponse.success(200, "OTP code retrieved successfully", responseDTO);
     }
-
+    @GetMapping("/otp/username/{username}")
+    public ApiResponse<OtpDebugResponseDTO> getOtpDebugUsername(@PathVariable String username) {
+        OtpDebugResponseDTO responseDTO = authenticationService.getOtpForDebuggingWithUsername(username);
+        return ApiResponse.success(200, "OTP code retrieved successfully", responseDTO);
+    }
 }

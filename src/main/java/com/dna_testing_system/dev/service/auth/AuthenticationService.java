@@ -20,4 +20,5 @@ public interface AuthenticationService {
         void changePassword(String username, ChangePasswordRequestDTO request);
 
         OtpDebugResponseDTO getOtpForDebugging(String signUpId);
+        OtpDebugResponseDTO getOtpForDebuggingWithUsername(String username);
 }

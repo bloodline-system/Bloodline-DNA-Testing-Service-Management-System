@@ -13,4 +13,5 @@ public interface SignUpRepository extends JpaRepository<SignUp,String> {
     boolean existsByUsernameAndStatusIn(String username, List<SignUpStatus> statuses);
     boolean existsByEmailAndStatusIn(String email, List<SignUpStatus> statuses);
     Optional<SignUp> findByIdAndStatus(String id, SignUpStatus status);
+    Optional<SignUp> findByUsernameAndStatus(String username, SignUpStatus status);
 }

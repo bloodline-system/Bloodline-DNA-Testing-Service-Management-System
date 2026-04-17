@@ -285,6 +285,42 @@ public class ApplicationInitConfig implements ApplicationRunner, WebMvcConfigure
             user.setProfile(userProfile);
             userRepository.save(user);
         }
+
+        if (!userRepository.existsByUsername("admin2")) {
+            Role role = roleRepository.findByRoleName(RoleType.ADMIN.name())
+                    .orElseThrow(() -> new RuntimeException("Default role ADMIN not found in database"));
+
+            // Create and save the User entity with minimal information
+            User user = User.builder()
+                    .username("admin2")
+                    .passwordHash(PasswordUtil.encode("admin123@"))
+                    .isActive(true)
+                    .userRoles(new HashSet<>())
+                    .build();
+
+            user = userRepository.save(user);
+
+            UserRole userRoleForCreate = UserRole.builder()
+                    .user(user)
+                    .role(role)
+                    .isActive(true)
+                    .build();
+            UserRole userRole = userRoleRepository.save(userRoleForCreate);
+            user.getUserRoles().add(userRole);
+            userRepository.save(user);
+
+            // Create and save minimal UserProfile
+            UserProfile userProfile = UserProfile.builder()
+                    .user(user)
+                    .firstName("ADMIN")
+                    .email("admin@gmail.com")
+                    .build();
+
+            userProfileRepository.save(userProfile);
+
+            user.setProfile(userProfile);
+            userRepository.save(user);
+        }
     }
 
     private void launchBrowser() throws Exception{
