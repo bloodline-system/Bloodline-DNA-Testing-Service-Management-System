@@ -49,17 +49,31 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
             }
           }
         }
@@ -67,125 +81,29 @@
     },
     {
       "name": "2. Tải Xuống Tài Liệu",
-      "item": [
-        {
-          "name": "Download File (Attachment)",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "var token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
-                  "if (token) {",
-                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
-                  "} else {",
-                  "    console.warn('access_token missing; run Login first');",
-                  "}"
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status code is 200 or 404 or connection failed', function () {",
-                  "    if (pm.response.code === undefined) {",
-                  "        pm.expect(true).to.be.true;",
-                  "    } else {",
-                  "        pm.expect([200, 404]).to.include(pm.response.code);",
-                  "    }",
-                  "});",
-                  "pm.test('Download response is either binary or not found or connection failed', function () {",
-                  "    if (pm.response.code === undefined) {",
-                  "        pm.expect(true).to.be.true;",
-                  "    } else if (pm.response.code === 200) {",
-                  "        var contentType = pm.response.headers.get('Content-Type');",
-                  "        pm.expect(contentType).to.not.be.null;",
-                  "    } else {",
-                  "        pm.expect(pm.response.text()).to.include('Not Found');",
-                  "    }",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/files/download?filename={{sample_filename}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["files", "download"],
-              "query": [{ "key": "filename", "value": "{{sample_filename}}" }]
-            }
-          }
-        },
-        {
-          "name": "View File (Inline)",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "var token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
-                  "if (token) {",
-                  "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
-                  "} else {",
-                  "    console.warn('access_token missing; run Login first');",
-                  "}"
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status code is 200 or 404 or connection failed', function () {",
-                  "    if (pm.response.code === undefined) {",
-                  "        pm.expect(true).to.be.true;",
-                  "    } else {",
-                  "        pm.expect([200, 404]).to.include(pm.response.code);",
-                  "    }",
-                  "});",
-                  "pm.test('View response is either inline binary or not found or connection failed', function () {",
-                  "    if (pm.response.code === undefined) {",
-                  "        pm.expect(true).to.be.true;",
-                  "    } else if (pm.response.code === 200) {",
-                  "        var contentType = pm.response.headers.get('Content-Type');",
-                  "        pm.expect(contentType).to.not.be.null;",
-                  "    } else {",
-                  "        pm.expect(pm.response.text()).to.include('Not Found');",
-                  "    }",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/files/view?filename={{sample_filename}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["files", "view"],
-              "query": [{ "key": "filename", "value": "{{sample_filename}}" }]
-            }
-          }
-        }
-      ]
+      "item": []
     }
   ],
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "sample_filename", "value": "sample.pdf" },
-    { "key": "access_token", "value": "" },
-    { "key": "refresh_token", "value": "" },
-    { "key": "expires_in", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "sample_filename",
+      "value": "sample.pdf"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "expires_in",
+      "value": ""
+    }
   ]
 }
