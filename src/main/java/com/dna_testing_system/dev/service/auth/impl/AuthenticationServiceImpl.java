@@ -2,6 +2,7 @@ package com.dna_testing_system.dev.service.auth.impl;
 
 import com.dna_testing_system.dev.constant.OptConstants;
 import com.dna_testing_system.dev.dto.request.auth.AuthenticationRequestDTO;
+import com.dna_testing_system.dev.dto.request.auth.ChangePasswordRequestDTO;
 import com.dna_testing_system.dev.dto.request.auth.RefreshTokenRequestDTO;
 import com.dna_testing_system.dev.dto.request.auth.RegisterRequestDTO;
 import com.dna_testing_system.dev.dto.request.auth.VerificationOptRequestDTO;
@@ -162,6 +163,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         signUpEntity.setCountAttemptVerificationToken(signUpEntity.getCountAttemptVerificationToken() + 1);
         signUpRepository.save(signUpEntity);
         log.info("Verification token resent successfully for signUpId: {}", signUpId);
+    }
+
+    @Override
+    public void changePassword(String username, ChangePasswordRequestDTO request) {
+        log.info("Changing password for user: {}", username);
+
+        User user = userService.getUserByUserName(username);
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("New password and confirm password do not match");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("New password must be different from the current password");
+        }
+
+        userService.updatePassword(username, passwordEncoder.encode(request.getNewPassword()));
+        log.info("Password changed successfully for user: {}", username);
     }
 
     @Override

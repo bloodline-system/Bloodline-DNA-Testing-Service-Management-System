@@ -21,10 +21,7 @@ public final class ContentPostSpecifications {
             }
 
             String q = "%" + query.trim().toLowerCase() + "%";
-            return cb.or(
-                    cb.like(cb.lower(root.get("postTitle")), q),
-                    cb.like(cb.lower(root.get("postContent")), q)
-            );
+            return cb.like(cb.lower(root.get("postTitle")), q);
         };
     }
 
