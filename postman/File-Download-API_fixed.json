@@ -160,7 +160,7 @@
   ],
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "sample_filename", "value": "1751859442505_View_Serializability.pdf" },
+    { "key": "sample_filename", "value": "sample.pdf" },
     { "key": "access_token", "value": "" },
     { "key": "refresh_token", "value": "" },
     { "key": "expires_in", "value": "" }
