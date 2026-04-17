@@ -67,7 +67,7 @@
       }
     },
     {
-      "name": "── ORDER MANAGEMENT ──────────────────────────────",
+      "name": "\u2500\u2500 ORDER MANAGEMENT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
       "item": [
         {
           "name": "GET All Orders",
@@ -77,7 +77,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
@@ -116,6 +116,7 @@
                   "    });",
                   "    if (respData.orders && respData.orders.length > 0) {",
                   "        pm.collectionVariables.set('order_id', String(respData.orders[0].id));",
+                  "        pm.environment.set('order_id', String(respData.orders[0].id));",
                   "        console.log('order_id set to:', respData.orders[0].id);",
                   "    }",
                   "}",
@@ -154,7 +155,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
@@ -204,13 +205,13 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}",
-                  "const orderId = pm.environment.get('order_id');",
+                  "const orderId = pm.collectionVariables.get('order_id') || pm.environment.get('order_id');",
                   "if (!orderId) {",
                   "    console.warn('order_id is not set. This request may fail.');",
                   "}"
@@ -296,13 +297,13 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}",
-                  "const orderId = pm.environment.get('order_id');",
+                  "const orderId = pm.collectionVariables.get('order_id') || pm.environment.get('order_id');",
                   "if (!orderId) {",
                   "    console.warn('order_id is not set. This request may fail.');",
                   "}"
@@ -371,13 +372,13 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}",
-                  "const orderId = pm.environment.get('order_id');",
+                  "const orderId = pm.collectionVariables.get('order_id') || pm.environment.get('order_id');",
                   "if (!orderId) {",
                   "    console.warn('order_id is not set. This request may fail.');",
                   "}"
@@ -449,13 +450,13 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}",
-                  "const orderId = pm.environment.get('order_id');",
+                  "const orderId = pm.collectionVariables.get('order_id') || pm.environment.get('order_id');",
                   "if (!orderId) {",
                   "    console.warn('order_id is not set. This request may fail.');",
                   "}"
@@ -514,7 +515,7 @@
       ]
     },
     {
-      "name": "── REPORT MANAGEMENT ─────────────────────────────",
+      "name": "\u2500\u2500 REPORT MANAGEMENT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
       "item": [
         {
           "name": "GET All Reports (paginated + filter)",
@@ -524,7 +525,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
@@ -624,7 +625,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
@@ -708,13 +709,13 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}",
-                  "const reportId = pm.environment.get('report_id');",
+                  "const reportId = pm.collectionVariables.get('report_id') || pm.environment.get('report_id');",
                   "if (!reportId) {",
                   "    console.warn('report_id is not set. This request may fail.');",
                   "}"
@@ -777,7 +778,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
@@ -827,7 +828,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
@@ -838,7 +839,7 @@
                   "const reportName = `Report ${uid} ${ts}`;",
                   "const body = JSON.parse(pm.request.body.raw);",
                   "body.reportName = reportName;",
-                  "body.reportType = 'MONTHLY';",
+                  "body.reportType = 'MONTHLY_REVENUE';",
                   "body.reportCategory = 'REVENUE';",
                   "pm.request.body.raw = JSON.stringify(body);",
                   "pm.environment.set('created_report_name', reportName);"
@@ -856,6 +857,7 @@
                   "});",
                   "if (json && json.data && json.data.id) {",
                   "    pm.collectionVariables.set('report_id', json.data.id);",
+                  "    pm.environment.set('report_id', json.data.id);",
                   "}"
                 ]
               }
@@ -874,7 +876,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reportName\": \"Monthly Revenue Report\",\n  \"reportType\": \"MONTHLY\",\n  \"reportCategory\": \"REVENUE\",\n  \"reportData\": \"Sample report data for revenue analysis\"\n}"
+              "raw": "{\n  \"reportName\": \"Monthly Revenue Report\",\n  \"reportType\": \"MONTHLY_REVENUE\",\n  \"reportCategory\": \"REVENUE\",\n  \"reportData\": \"Sample report data for revenue analysis\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/manager/reports",
@@ -898,13 +900,13 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}",
-                  "const reportId = pm.environment.get('report_id');",
+                  "const reportId = pm.collectionVariables.get('report_id') || pm.environment.get('report_id');",
                   "if (!reportId) {",
                   "    console.warn('report_id is not set. This request may fail.');",
                   "}"
@@ -976,13 +978,13 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
                   "    console.warn('access_token missing; run Login first');",
                   "}",
-                  "const reportId = pm.environment.get('report_id');",
+                  "const reportId = pm.collectionVariables.get('report_id') || pm.environment.get('report_id');",
                   "if (!reportId) {",
                   "    console.warn('report_id is not set. This request may fail.');",
                   "}"
@@ -1045,7 +1047,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "const token = pm.environment.get('access_token');",
+                  "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
                   "if (token) {",
                   "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
                   "} else {",
@@ -1111,11 +1113,11 @@
     },
     {
       "key": "collect_staff_id",
-      "value": ""
+      "value": "staff-1"
     },
     {
       "key": "analysis_staff_id",
-      "value": ""
+      "value": "staff-2"
     },
     {
       "key": "report_id",

@@ -435,7 +435,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"{{$randomFirstName}}\",\n  \"lastName\": \"{{$randomLastName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"dateOfBirth\": \"2026-03-22\",\n  \"phoneNumber\": \"123777123\",\n  \"password\": \"strings12t\",\n  \"profileImageUrl\": \"string\"\n}"
+              "raw": "{\n  \"firstName\": \"{{$randomFirstName}}\",\n  \"lastName\": \"{{$randomLastName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"dateOfBirth\": \"2026-03-22\",\n  \"phoneNumber\": \"123777123\",\n  \"password\": \"strings12t\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/profiles/{{username}}",
