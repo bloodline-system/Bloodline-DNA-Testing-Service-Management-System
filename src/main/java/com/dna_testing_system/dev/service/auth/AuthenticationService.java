@@ -18,4 +18,5 @@ public interface AuthenticationService {
         void resendUserVerificationOTP(String signUpId);
 
         OtpDebugResponseDTO getOtpForDebugging(String signUpId);
+        OtpDebugResponseDTO getOtpForDebuggingWithUsername(String username);
 }

@@ -182,6 +182,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
     }
 
+    @Override
+    public OtpDebugResponseDTO getOtpForDebuggingWithUsername(String username) {
+        log.info("Retrieving OTP for debugging with username: {}", username);
+        SignUp signUpEntity = signUpRepository.findByUsernameAndStatus(username, SignUpStatus.PENDING)
+                .orElseThrow(() -> {
+                    log.warn("SignUp not found for username: {}", username);
+                    return new OptFailException("Invalid username or user already verified");
+                });
+        log.info("OTP retrieved successfully for debugging for username: {}", username);
+        return OtpDebugResponseDTO.builder()
+                .otpCode(signUpEntity.getCurrentVerificationToken())
+                .build();
+    }
+
 
     private void checkExistingSignUpUser(RegisterRequestDTO dto) {
         List<SignUpStatus> validStatuses = List.of(SignUpStatus.PENDING, SignUpStatus.VERIFIED);

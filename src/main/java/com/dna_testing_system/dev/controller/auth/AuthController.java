@@ -56,8 +56,7 @@ public class AuthController {
         RegisterResponseDTO response = authenticationService.register(registerDTO);
         return ApiResponse.success(HttpStatus.OK.value(), "User registered successfully", response);
     }
-
-
+    
     @PostMapping("/verification")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<Void> verifyUser(@Valid @RequestBody VerificationOptRequestDTO verificationOptRequestDTO) {
