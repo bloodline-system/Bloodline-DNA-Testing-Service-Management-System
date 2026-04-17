@@ -104,7 +104,7 @@
                   "        var contentType = pm.response.headers.get('Content-Type');",
                   "        pm.expect(contentType).to.not.be.null;",
                   "    } else {",
-                  "        pm.expect(pm.response.text()).to.include('Not Found');",
+                  "        pm.expect(pm.response.code).to.eql(404);",
                   "    }",
                   "});"
                 ]
@@ -159,7 +159,7 @@
                   "        var contentType = pm.response.headers.get('Content-Type');",
                   "        pm.expect(contentType).to.not.be.null;",
                   "    } else {",
-                  "        pm.expect(pm.response.text()).to.include('Not Found');",
+                  "        pm.expect(pm.response.code).to.eql(404);",
                   "    }",
                   "});"
                 ]
