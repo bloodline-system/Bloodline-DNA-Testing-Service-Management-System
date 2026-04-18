@@ -9,14 +9,15 @@ spring:
   mail:
     host: ${HOST_SMTP:smtp.gmail.com}
     port: ${PORT_SMTP:587}
-    username: ${USERNAME_SMTP:dnatestingnotification@gmail.com}
-    password: ${PASSWORD_SMTP:ugltgfcsfppohwam}
+    username: ${USERNAME_SMTP:mentorbookingnotification@gmail.com}
+    password: ${PASSWORD_SMTP:idejizktdncupvmd}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+
   websocket:
     sockjs:
       enabled: true
@@ -46,7 +47,7 @@ identity:
 
 mail:
   sender:
-    from: ${MAIL_SENDER_FROM:dnatestingnotification@gmail.com}
+    from: ${MAIL_SENDER_FROM:mentorbookingnotification@gmail.com}
 
 app:
   redis:
