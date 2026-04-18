@@ -84,6 +84,7 @@ jobs:
               -e DBMS_PASSWORD=$DBMS_PASSWORD \
               -e REDIS_HOST=$REDIS_HOST \
               -e REDIS_PASSWORD=$REDIS_PASSWORD \
+              -e MAIL_SENDER_FROM=$MAIL_SENDER_FROM \
               $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             
             docker images $ECR_REGISTRY/$ECR_REPOSITORY --format "{{.ID}}" \
@@ -106,4 +107,5 @@ jobs:
           USERNAME_SMTP: ${{ secrets.USERNAME_SMTP }}
           PASSWORD_SMTP: ${{ secrets.PASSWORD_SMTP }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          MAIL_SENDER_FROM: ${{ secrets.MAIL_SENDER_FROM }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
