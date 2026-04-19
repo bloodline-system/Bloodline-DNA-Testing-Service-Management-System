@@ -1,4 +1,10 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      ssl:
+        enabled: false
   datasource:
     url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/dna_testing_system}
     username: ${DBMS_USERNAME:root}

@@ -45,7 +45,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("https://dnabloodline.me", "https://www.dnabloodline.me"));
+        config.setAllowedOrigins(List.of("https://dnabloodline.me", "https://www.dnabloodline.me","http://localhost:5173",   // ← thêm
+                "http://localhost:5174",   // ← thêm
+                "http://localhost:3000"    // ← thêm
+                ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
