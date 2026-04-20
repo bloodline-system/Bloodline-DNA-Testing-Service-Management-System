@@ -1,0 +1,367 @@
+{
+    "info": {
+        "_postman_id": "c1d2e3f4-a5b6-7890-cdef-123456789abc",
+        "name": "Manager Order & Report API",
+        "description": "ManagerOrderController + ManagerReportController endpoints\nWith unit test scripts for status, structure and content validation\nBase path: /api/v1/manager\nRole required: MANAGER\nCurrent date context: March 2026",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "45600405"
+    },
+    "item": [
+        {
+            "name": "Login",
+            "disabled": true,
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "// ── STATUS ──────────────────────────────────────────",
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "// ── WRAPPER STRUCTURE ───────────────────────────────",
+                            "pm.test(\"Response has standard wrapper\", function () {",
+                            "    const resp = pm.response.json();",
+                            "    pm.expect(resp).to.have.property(\"code\", 200);",
+                            "    pm.expect(resp).to.have.property(\"message\");",
+                            "    pm.expect(resp).to.have.property(\"data\");",
+                            "    pm.expect(resp).to.have.property(\"timestamp\");",
+                            "});",
+                            "",
+                            "// ── TOKEN FIELDS ────────────────────────────────────",
+                            "pm.test(\"data has access_token, refresh_token, expires_in\", function () {",
+                            "    const tokenData = pm.response.json().data;",
+                            "    pm.expect(tokenData).to.have.property(\"access_token\").that.is.a(\"string\").and.not.empty;",
+                            "    pm.expect(tokenData).to.have.property(\"refresh_token\").that.is.a(\"string\").and.not.empty;",
+                            "    pm.expect(tokenData).to.have.property(\"expires_in\");",
+                            "});",
+                            "",
+                            "pm.test(\"access_token is a valid JWT (3 parts)\", function () {",
+                            "    const token = pm.response.json().data.access_token;",
+                            "    pm.expect(token.split(\".\")).to.have.lengthOf(3);",
+                            "});",
+                            "",
+                            "// ── SAVE TO ENV ─────────────────────────────────────",
+                            "const tokenData = pm.response.json().data;",
+                            "if (tokenData && tokenData.access_token) {",
+                            "    pm.environment.set(\"access_token\",  tokenData.access_token);",
+                            "    pm.environment.set(\"refresh_token\", tokenData.refresh_token);",
+                            "    pm.environment.set(\"expires_in\",    tokenData.expires_in);",
+                            "    console.log(\"✅ Token saved to environment\");",
+                            "}"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {},
+                        "requests": {}
+                    }
+                },
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [
+                            ""
+                        ],
+                        "type": "text/javascript",
+                        "packages": {},
+                        "requests": {}
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"manager2\",\n    \"password\": \"manager2\",\n    \"rememberMe\": true\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/auth/login",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "login"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "── ORDER MANAGEMENT ──────────────────────────────",
+            "disabled": true,
+            "item": [
+                {
+                    "name": "GET All Orders",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// ── AUTO REFRESH TOKEN NẾU HẾT HẠN ────────────────────",
+                                    "const token     = pm.environment.get(\"access_token\");",
+                                    "const refreshTk = pm.environment.get(\"refresh_token\");",
+                                    "const baseUrl   = pm.environment.get(\"baseUrl\");",
+                                    "",
+                                    "if (!token) {",
+                                    "    console.warn(\"⚠️  Không có access_token. Hãy chạy Login trước.\");",
+                                    "} else {",
+                                    "    try {",
+                                    "        const payload = JSON.parse(atob(token.split(\".\")[1]));",
+                                    "        const ttlSec  = Math.floor((payload.exp * 1000 - Date.now()) / 1000);",
+                                    "        console.log(`🕐 Token TTL: ${ttlSec}s`);",
+                                    "        if (ttlSec < 60 && refreshTk) {",
+                                    "            pm.sendRequest({",
+                                    "                url: `${baseUrl}/api/v1/auth/refresh`,",
+                                    "                method: \"POST\",",
+                                    "                header: { \"Content-Type\": \"application/json\" },",
+                                    "                body: { mode: \"raw\", raw: JSON.stringify({ refreshToken: refreshTk }) }",
+                                    "            }, function(err, res) {",
+                                    "                if (!err && res.code === 200) {",
+                                    "                    const d = res.json().data;",
+                                    "                    pm.environment.set(\"access_token\",  d.access_token);",
+                                    "                    pm.environment.set(\"refresh_token\", d.refresh_token);",
+                                    "                    console.log(\"✅ Token refreshed\");",
+                                    "                } else {",
+                                    "                    console.warn(\"❌ Refresh thất bại, chạy lại Login\");",
+                                    "                }",
+                                    "            });",
+                                    "        }",
+                                    "    } catch(e) {",
+                                    "        console.warn(\"⚠️  Không decode được token:\", e.message);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript",
+                                "packages": {},
+                                "requests": {}
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "(function () {",
+                                    "const resp = pm.response.json();",
+                                    "const data = resp.data;",
+                                    "",
+                                    "// ── STATUS ──────────────────────────────────────────",
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "// ── WRAPPER STRUCTURE ───────────────────────────────",
+                                    "pm.test(\"Response has standard wrapper\", function () {",
+                                    "    pm.expect(resp).to.have.property(\"code\", 200);",
+                                    "    pm.expect(resp).to.have.property(\"message\");",
+                                    "    pm.expect(resp).to.have.property(\"data\");",
+                                    "    pm.expect(resp).to.have.property(\"timestamp\");",
+                                    "});",
+                                    "",
+                                    "// ── DATA STRUCTURE ──────────────────────────────────",
+                                    "pm.test(\"data contains orders, statusCounts, totalOrders\", function () {",
+                                    "    pm.expect(data).to.be.an(\"object\");",
+                                    "    pm.expect(data).to.have.property(\"orders\").that.is.an(\"array\");",
+                                    "    pm.expect(data).to.have.property(\"statusCounts\").that.is.an(\"object\");",
+                                    "    pm.expect(data).to.have.property(\"totalOrders\");",
+                                    "    pm.expect(data).to.have.property(\"pageTitle\");",
+                                    "});",
+                                    "",
+                                    "pm.test(\"totalOrders matches orders array length\", function () {",
+                                    "    pm.expect(data.totalOrders).to.eql(data.orders.length);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"totalOrders >= 0\", function () {",
+                                    "    pm.expect(data.totalOrders).to.be.at.least(0);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"pageTitle is 'Order Management'\", function () {",
+                                    "    pm.expect(data.pageTitle).to.eql(\"Order Management\");",
+                                    "});",
+                                    "",
+                                    "// ── ITEM SCHEMA (nếu có data) ────────────────────────",
+                                    "if (data.orders && data.orders.length > 0) {",
+                                    "    const firstOrder = data.orders[0];",
+                                    "",
+                                    "    pm.test(\"Each order has required fields\", function () {",
+                                    "        pm.expect(firstOrder).to.include.all.keys(",
+                                    "            \"id\", \"orderStatus\"",
+                                    "        );",
+                                    "    });",
+                                    "",
+                                    "    pm.test(\"order id is a positive number\", function () {",
+                                    "        pm.expect(firstOrder.id).to.be.a(\"number\").and.above(0);",
+                                    "    });",
+                                    "",
+                                    "    // Lưu order_id để dùng ở các request sau",
+                                    "    pm.environment.set(\"order_id\", String(firstOrder.id));",
+                                    "    console.log(\"✅ order_id set to:\", firstOrder.id);",
+                                    "}",
+                                    "",
+                                    "// ── PERFORMANCE ─────────────────────────────────────",
+                                    "pm.test(\"Response time < 2000ms\", function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                                    "});",
+                                    "}());"
+                                ],
+                                "type": "text/javascript",
+                                "packages": {},
+                                "requests": {}
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/orders",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "orders"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "── REPORT MANAGEMENT ─────────────────────────────",
+            "disabled": true,
+            "item": [
+                {
+                    "name": "GET All Reports - Filter by status=APPROVED",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    ""
+                                ],
+                                "type": "text/javascript",
+                                "packages": {},
+                                "requests": {}
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "(function () {",
+                                    "const resp = pm.response.json();",
+                                    "const data = resp.data;",
+                                    "",
+                                    "// ── STATUS ──────────────────────────────────────────",
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has standard wrapper\", function () {",
+                                    "    pm.expect(resp).to.have.property(\"code\", 200);",
+                                    "    pm.expect(resp).to.have.property(\"data\");",
+                                    "});",
+                                    "",
+                                    "// ── FILTER VALIDATION ────────────────────────────────",
+                                    "if (data.reports && data.reports.length > 0) {",
+                                    "    pm.test(\"All returned reports have status APPROVED\", function () {",
+                                    "        data.reports.forEach(function (r) {",
+                                    "            pm.expect(r.reportStatus).to.eql(\"APPROVED\");",
+                                    "        });",
+                                    "    });",
+                                    "}",
+                                    "",
+                                    "pm.test(\"totalReports >= 0\", function () {",
+                                    "    pm.expect(data.totalReports).to.be.at.least(0);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response time < 2000ms\", function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                                    "});",
+                                    "}());"
+                                ],
+                                "type": "text/javascript",
+                                "packages": {},
+                                "requests": {}
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports?page=0&size=20&status=APPROVED&sortBy=createdAt&sortDir=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "APPROVED"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt"
+                                },
+                                {
+                                    "key": "sortDir",
+                                    "value": "desc"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

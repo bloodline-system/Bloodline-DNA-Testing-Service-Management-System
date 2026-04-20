@@ -1,0 +1,46 @@
+spring:
+  # DATABASE CONFIGURATION IS PROVIDED DYNAMICALLY BY @DynamicPropertySource IN TESTS
+  # This avoids conflicts between test profile and testcontainers setup
+
+  jpa:
+    hibernate:
+      # `create` still resets schema on startup, but avoids slow schema drop on JVM shutdown
+      # which can make Maven Surefire force-kill the forked JVM in CI.
+      ddl-auto: create
+    show-sql: false
+
+  # Disable mail sending in tests
+  mail:
+    host: localhost
+    port: 1025
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  # Configure Redis for tests
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+
+  # Disable async task processing
+  task:
+    execution:
+      pool:
+        core-size: 1
+    scheduling:
+      pool:
+        size: 1
+
+# Application configuration for tests
+app:
+  redis:
+    enabled: false # Tests should run without Redis by default, @DynamicPropertySource can override for integration tests

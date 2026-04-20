@@ -1,0 +1,111 @@
+name: Deploy API Service to AWS
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: tker-dev/bloodline-system
+  CONTAINER_NAME: bloodline-system-api
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate image tag
+        run: |
+          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "IMAGE_TAG_FULL=$(date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Convert ENV to upper
+        run: echo "IMAGE_ENV_UPPER=${IMAGE_ENV^^}" >> $GITHUB_ENV
+        env:
+          IMAGE_ENV: ${{ inputs.environment }}
+
+      - name: Get ECR login token
+        id: ecr-token
+        run: |
+          TOKEN=$(aws ecr get-login-password --region ${{ env.AWS_REGION }})
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          envs: ECR_TOKEN,ECR_REGISTRY,ECR_REPOSITORY,CONTAINER_NAME,IMAGE_ENV,DBMS_CONNECTION,DBMS_USERNAME,DBMS_PASSWORD,REDIS_HOST,REDIS_PASSWORD,HOST_SMTP,PORT_SMTP,USERNAME_SMTP,PASSWORD_SMTP,JWT_SECRET_KEY,IMAGE_TAG,MAIL_SENDER_FROM
+          script: |
+            # No aws CLI needed — use the token directly
+            echo "$ECR_TOKEN" | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+
+            docker run -d \
+              -p 80:8080 \
+              --name $CONTAINER_NAME \
+              -e HOST_SMTP=$HOST_SMTP \
+              -e PORT_SMTP=$PORT_SMTP \
+              -e USERNAME_SMTP=$USERNAME_SMTP \
+              -e PASSWORD_SMTP=$PASSWORD_SMTP \
+              -e JWT_SECRET_KEY=$JWT_SECRET_KEY \
+              -e ENVIRONMENT_CONFIG=$IMAGE_ENV \
+              -e DBMS_CONNECTION=$DBMS_CONNECTION \
+              -e DBMS_USERNAME=$DBMS_USERNAME \
+              -e DBMS_PASSWORD=$DBMS_PASSWORD \
+              -e REDIS_HOST=$REDIS_HOST \
+              -e REDIS_PASSWORD=$REDIS_PASSWORD \
+              -e MAIL_SENDER_FROM=$MAIL_SENDER_FROM \
+              $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            
+            docker images $ECR_REGISTRY/$ECR_REPOSITORY --format "{{.ID}}" \
+                          | tail -n +6 \
+                          | xargs -r docker rmi
+
+        env:
+          ECR_TOKEN: ${{ steps.ecr-token.outputs.token }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+          IMAGE_ENV: ${{ inputs.environment }}
+          DBMS_CONNECTION: ${{ secrets[format('DBMS_CONNECTION_{0}', env.IMAGE_ENV_UPPER)] }}
+          DBMS_USERNAME: ${{ secrets[format('DBMS_USERNAME_{0}', env.IMAGE_ENV_UPPER)] }}
+          DBMS_PASSWORD: ${{ secrets[format('DBMS_PASSWORD_{0}', env.IMAGE_ENV_UPPER)] }}
+          REDIS_HOST: ${{ secrets[format('REDIS_HOST_{0}', env.IMAGE_ENV_UPPER)] }}
+          REDIS_PASSWORD: ${{ secrets[format('REDIS_PASSWORD_{0}', env.IMAGE_ENV_UPPER)] }}
+          HOST_SMTP: ${{ secrets.HOST_SMTP }}
+          PORT_SMTP: ${{ secrets.PORT_SMTP }}
+          USERNAME_SMTP: ${{ secrets.USERNAME_SMTP }}
+          PASSWORD_SMTP: ${{ secrets.PASSWORD_SMTP }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          MAIL_SENDER_FROM: ${{ secrets.MAIL_SENDER_FROM }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}

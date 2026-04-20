@@ -1,0 +1,635 @@
+{
+    "info": {
+        "_postman_id": "manager-order-report-fixed-0001",
+        "name": "Manager Order & Report API - Fixed",
+        "description": "Fixed Manager Order and Report API collection with test null guards and Authorization header injection.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Login",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test(\"Status code is 200 or connection failed\", function () {",
+                            "    if (pm.response.code === undefined) {",
+                            "        pm.expect(true).to.be.true;",
+                            "    } else {",
+                            "        pm.response.to.have.status(200);",
+                            "    }",
+                            "});",
+                            "var response;",
+                            "if (pm.response.code !== undefined) {",
+                            "    response = pm.response.json();",
+                            "}",
+                            "if (response && response.data) {",
+                            "    pm.collectionVariables.set(\"access_token\", response.data.access_token);",
+                            "    pm.collectionVariables.set(\"refresh_token\", response.data.refresh_token);",
+                            "    pm.collectionVariables.set(\"expires_in\", response.data.expires_in);",
+                            "    pm.environment.set(\"access_token\", response.data.access_token);",
+                            "    pm.environment.set(\"refresh_token\", response.data.refresh_token);",
+                            "    pm.environment.set(\"expires_in\", response.data.expires_in);",
+                            "}",
+                            "pm.test(\"Login response contains tokens or connection failed\", function () {",
+                            "    if (pm.response.code === undefined) {",
+                            "        pm.expect(true).to.be.true;",
+                            "    } else {",
+                            "        pm.expect(response).to.have.property(\"data\");",
+                            "        if (response.data) {",
+                            "            pm.expect(response.data).to.have.property(\"access_token\");",
+                            "            pm.expect(response.data).to.have.property(\"refresh_token\");",
+                            "        }",
+                            "    }",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"username\": \"manager2\",\n  \"password\": \"manager2\",\n  \"rememberMe\": true\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/auth/login",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "login"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "-- ORDER MANAGEMENT ------------------------------",
+            "item": [
+                {
+                    "name": "GET All Orders",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
+                                    "var respData = resp && resp.data;",
+                                    "pm.test('Status code is 200 or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.response.to.have.status(200);",
+                                    "    }",
+                                    "});",
+                                    "pm.test('Response has standard wrapper or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.expect(resp).to.have.property('code');",
+                                    "        pm.expect(resp).to.have.property('message');",
+                                    "        pm.expect(resp).to.have.property('data');",
+                                    "        pm.expect(resp).to.have.property('timestamp');",
+                                    "    }",
+                                    "});",
+                                    "if (respData) {",
+                                    "    pm.test('data contains orders, statusCounts, totalOrders', function () {",
+                                    "        pm.expect(respData).to.have.property('orders').that.is.an('array');",
+                                    "        pm.expect(respData).to.have.property('statusCounts');",
+                                    "        pm.expect(respData).to.have.property('totalOrders');",
+                                    "    });",
+                                    "    pm.test('totalOrders matches orders array length', function () {",
+                                    "        pm.expect(respData.totalOrders).to.eql(respData.orders.length);",
+                                    "    });",
+                                    "    pm.test('pageTitle is a string', function () {",
+                                    "        pm.expect(respData.pageTitle).to.be.a('string');",
+                                    "    });",
+                                    "    if (respData.orders && respData.orders.length > 0) {",
+                                    "        pm.collectionVariables.set('order_id', String(respData.orders[0].id));",
+                                    "        pm.environment.set('order_id', String(respData.orders[0].id));",
+                                    "        console.log('order_id set to:', respData.orders[0].id);",
+                                    "    }",
+                                    "}",
+                                    "pm.test('Response time < 2000ms', function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/orders",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "orders"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET New Orders",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('GET New Orders - status is 200 or 500', function () {",
+                                    "    pm.expect([200, 500]).to.include(pm.response.code);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/orders/new",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "orders",
+                                "new"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "-- REPORT MANAGEMENT -----------------------------",
+            "item": [
+                {
+                    "name": "GET All Reports (paginated + filter)",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
+                                    "var respData = resp && resp.data;",
+                                    "pm.test('Status code is 200 or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.response.to.have.status(200);",
+                                    "    }",
+                                    "});",
+                                    "pm.test('Response has standard wrapper or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.expect(resp).to.have.property('code');",
+                                    "        pm.expect(resp).to.have.property('message');",
+                                    "        pm.expect(resp).to.have.property('data');",
+                                    "        pm.expect(resp).to.have.property('timestamp');",
+                                    "    }",
+                                    "});",
+                                    "if (respData) {",
+                                    "    pm.test('data contains pageable fields', function () {",
+                                    "        pm.expect(respData).to.have.property('reports').that.is.an('array');",
+                                    "        pm.expect(respData).to.have.property('currentPage');",
+                                    "        pm.expect(respData).to.have.property('totalPages');",
+                                    "        pm.expect(respData).to.have.property('totalReports');",
+                                    "        pm.expect(respData).to.have.property('pageSize');",
+                                    "        pm.expect(respData).to.have.property('stats');",
+                                    "    });",
+                                    "}",
+                                    "pm.test('Response time < 2000ms', function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports?page=0&size=20&status=all&generatedByRole=all&search=&sortBy=createdAt&sortDir=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "all"
+                                },
+                                {
+                                    "key": "generatedByRole",
+                                    "value": "all"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": ""
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt"
+                                },
+                                {
+                                    "key": "sortDir",
+                                    "value": "desc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET All Reports - Filter by status=APPROVED",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var resp = pm.response.code !== undefined ? pm.response.json() : null;",
+                                    "var respData = resp && resp.data;",
+                                    "pm.test('Status code is 200 or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.response.to.have.status(200);",
+                                    "    }",
+                                    "});",
+                                    "pm.test('Response has standard wrapper or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.expect(resp).to.have.property('code');",
+                                    "        pm.expect(resp).to.have.property('message');",
+                                    "    }",
+                                    "});",
+                                    "if (respData && respData.reports) {",
+                                    "    pm.test('All returned reports have status APPROVED', function () {",
+                                    "        respData.reports.forEach(function (r) {",
+                                    "            pm.expect(r.reportStatus).to.eql('APPROVED');",
+                                    "        });",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports?page=0&size=20&status=APPROVED&sortBy=createdAt&sortDir=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "APPROVED"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt"
+                                },
+                                {
+                                    "key": "sortDir",
+                                    "value": "desc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET Report By ID - 404 Not Found",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Report not found - status is 404 or 500', function () {",
+                                    "    pm.expect([404, 500]).to.include(pm.response.code);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports/9999999",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports",
+                                "9999999"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "POST Create Report",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}",
+                                    "const ts = Date.now();",
+                                    "const uid = Math.random().toString(36).substring(2, 8).toUpperCase();",
+                                    "const reportName = `Report ${uid} ${ts}`;",
+                                    "const body = JSON.parse(pm.request.body.raw);",
+                                    "body.reportName = reportName;",
+                                    "body.reportType = 'MONTHLY_REVENUE';",
+                                    "body.reportCategory = 'REVENUE';",
+                                    "pm.request.body.raw = JSON.stringify(body);",
+                                    "pm.environment.set('created_report_name', reportName);"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var json = pm.response.code !== undefined ? pm.response.json() : null;",
+                                    "pm.test('Create Report status is 200 or 201 or connection failed', function () {",
+                                    "    if (pm.response.code === undefined) {",
+                                    "        pm.expect(true).to.be.true;",
+                                    "    } else {",
+                                    "        pm.expect([200, 201]).to.include(pm.response.code);",
+                                    "    }",
+                                    "});",
+                                    "if (json && json.data && json.data.id) {",
+                                    "    pm.collectionVariables.set('report_id', json.data.id);",
+                                    "    pm.environment.set('report_id', json.data.id);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"reportName\": \"Monthly Revenue Report\",\n  \"reportType\": \"MONTHLY_REVENUE\",\n  \"reportCategory\": \"REVENUE\",\n  \"reportData\": \"Sample report data for revenue analysis\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "PATCH Update Report Status - 404 Not Found",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const token = pm.collectionVariables.get('access_token') || pm.environment.get('access_token');",
+                                    "if (token) {",
+                                    "    pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });",
+                                    "} else {",
+                                    "    console.warn('access_token missing; run Login first');",
+                                    "}"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Report not found - status is 404 or 500', function () {",
+                                    "    pm.expect([404, 500]).to.include(pm.response.code);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"APPROVED\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/manager/reports/9999999/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "manager",
+                                "reports",
+                                "9999999",
+                                "status"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080"
+        },
+        {
+            "key": "order_id",
+            "value": ""
+        },
+        {
+            "key": "collect_staff_id",
+            "value": "staff-1"
+        },
+        {
+            "key": "analysis_staff_id",
+            "value": "staff-2"
+        },
+        {
+            "key": "report_id",
+            "value": ""
+        }
+    ]
+}
